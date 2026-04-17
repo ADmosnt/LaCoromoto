@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { getProductos, deleteProducto, getGruposProductos } from '../api'
 import PageHeader from '../components/PageHeader'
 import Alert from '../components/Alert'
+import ProductoModal from '../components/ProductoModal'
 
 export default function Productos() {
   const [productos, setProductos] = useState([])
@@ -10,6 +10,8 @@ export default function Productos() {
   const [search, setSearch] = useState('')
   const [grupoId, setGrupoId] = useState('')
   const [error, setError] = useState('')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editId, setEditId] = useState(null)
 
   const load = () =>
     getProductos({ search, grupo_id: grupoId || undefined, activo: true })
@@ -19,6 +21,9 @@ export default function Productos() {
   useEffect(() => { getGruposProductos().then((r) => setGrupos(r.data)) }, [])
   useEffect(() => { load() }, [search, grupoId])
 
+  const openNew = () => { setEditId(null); setModalOpen(true) }
+  const openEdit = (id) => { setEditId(id); setModalOpen(true) }
+
   const handleDelete = async (id, desc) => {
     if (!confirm(`¿Desactivar "${desc}"?`)) return
     await deleteProducto(id)
@@ -27,17 +32,25 @@ export default function Productos() {
 
   return (
     <div>
-      <PageHeader title="Productos" action={{ to: '/productos/nuevo', label: '+ Nuevo producto' }} />
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <h2 className="text-xl font-bold text-gray-800">Productos</h2>
+        <button
+          onClick={openNew}
+          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+        >
+          + Nuevo producto
+        </button>
+      </div>
       <Alert type="error" message={error} />
 
       <div className="bg-white rounded-lg shadow">
-        <div className="p-4 border-b flex gap-3">
+        <div className="p-4 border-b flex flex-wrap gap-3">
           <input
             type="text"
             placeholder="Buscar por descripción o código..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm w-72 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <select
             value={grupoId}
@@ -75,7 +88,7 @@ export default function Productos() {
                     ))}
                   </td>
                   <td className="px-4 py-3 text-center space-x-2">
-                    <Link to={`/productos/${p.id}/editar`} className="text-blue-600 hover:underline text-xs">Editar</Link>
+                    <button onClick={() => openEdit(p.id)} className="text-blue-600 hover:underline text-xs">Editar</button>
                     <button onClick={() => handleDelete(p.id, p.descripcion)} className="text-red-500 hover:underline text-xs">Desactivar</button>
                   </td>
                 </tr>
@@ -89,6 +102,13 @@ export default function Productos() {
           </table>
         </div>
       </div>
+
+      <ProductoModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        productoId={editId}
+        onSaved={load}
+      />
     </div>
   )
 }

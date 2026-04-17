@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { getClientes, deleteCliente } from '../api'
 import PageHeader from '../components/PageHeader'
 import Alert from '../components/Alert'
+import ClienteModal from '../components/ClienteModal'
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([])
   const [search, setSearch] = useState('')
   const [error, setError] = useState('')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editId, setEditId] = useState(null)
 
   const load = () =>
     getClientes({ search, activo: true })
@@ -15,6 +17,10 @@ export default function Clientes() {
       .catch(() => setError('Error al cargar clientes'))
 
   useEffect(() => { load() }, [search])
+
+  const openNew = () => { setEditId(null); setModalOpen(true) }
+  const openEdit = (id) => { setEditId(id); setModalOpen(true) }
+  const closeModal = () => setModalOpen(false)
 
   const handleDelete = async (id, nombre) => {
     if (!confirm(`¿Desactivar a "${nombre}"?`)) return
@@ -24,7 +30,15 @@ export default function Clientes() {
 
   return (
     <div>
-      <PageHeader title="Clientes" action={{ to: '/clientes/nuevo', label: '+ Nuevo cliente' }} />
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <h2 className="text-xl font-bold text-gray-800">Clientes</h2>
+        <button
+          onClick={openNew}
+          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+        >
+          + Nuevo cliente
+        </button>
+      </div>
       <Alert type="error" message={error} />
 
       <div className="bg-white rounded-lg shadow">
@@ -60,16 +74,10 @@ export default function Clientes() {
                   <td className="px-4 py-3 text-gray-600">{c.vendedor}</td>
                   <td className="px-4 py-3 text-gray-600">{c.telefonos?.join(', ')}</td>
                   <td className="px-4 py-3 text-center space-x-2">
-                    <Link
-                      to={`/clientes/${c.id}/editar`}
-                      className="text-blue-600 hover:underline text-xs"
-                    >
+                    <button onClick={() => openEdit(c.id)} className="text-blue-600 hover:underline text-xs">
                       Editar
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(c.id, c.razon_social)}
-                      className="text-red-500 hover:underline text-xs"
-                    >
+                    </button>
+                    <button onClick={() => handleDelete(c.id, c.razon_social)} className="text-red-500 hover:underline text-xs">
                       Desactivar
                     </button>
                   </td>
@@ -86,6 +94,13 @@ export default function Clientes() {
           </table>
         </div>
       </div>
+
+      <ClienteModal
+        open={modalOpen}
+        onClose={closeModal}
+        clienteId={editId}
+        onSaved={load}
+      />
     </div>
   )
 }

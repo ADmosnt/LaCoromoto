@@ -58,13 +58,14 @@ def generar_pdf_orden(orden, config) -> bytes:
 
     # ── Client section ────────────────────────────────────────────────────────
     def row(label, value):
-        if not value:
+        if value is None or str(value).strip() == '':
             return
+        pdf.set_x(L)
         pdf.set_font('Helvetica', 'B', 9)
         pdf.set_text_color(30, 30, 30)
-        pdf.cell(30, 5, label + ':', ln=False)
+        pdf.cell(30, 5, label + ':')
         pdf.set_font('Helvetica', '', 9)
-        pdf.multi_cell(0, 5, str(value))
+        pdf.multi_cell(W - 30, 5, str(value))
 
     row('CLIENTE', orden.cliente.razon_social)
     row('RIF', orden.cliente.rif)
