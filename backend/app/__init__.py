@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -7,13 +7,19 @@ import os
 db = SQLAlchemy()
 migrate = Migrate()
 
+# Carpeta donde el Dockerfile de Railway copia el build de React
+REACT_BUILD = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'react_build')
+
 
 def create_app():
     app = Flask(__name__)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-        'DATABASE_URL', 'postgresql://appuser:dev@localhost:5432/consignacion'
-    )
+    # Railway entrega "postgres://..." pero SQLAlchemy requiere "postgresql://..."
+    db_url = os.environ.get('DATABASE_URL', 'postgresql://appuser:dev@localhost:5432/consignacion')
+    if db_url.startswith('postgres://'):
+        db_url = db_url.replace('postgres://', 'postgresql://', 1)
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
 
@@ -46,6 +52,16 @@ def create_app():
     with app.app_context():
         db.create_all()
         _seed_config(db)
+
+    # Serve React build when running as monolith (Railway deploy)
+    if os.path.isdir(REACT_BUILD):
+        @app.route('/', defaults={'path': ''})
+        @app.route('/<path:path>')
+        def serve_react(path):
+            full = os.path.join(REACT_BUILD, path)
+            if path and os.path.isfile(full):
+                return send_from_directory(REACT_BUILD, path)
+            return send_from_directory(REACT_BUILD, 'index.html')
 
     return app
 
