@@ -49,9 +49,16 @@ def create_app():
     app.register_blueprint(devoluciones_bp, url_prefix='/api/devoluciones')
     app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
 
-    with app.app_context():
-        db.create_all()
-        _seed_config(db)
+    # Defer DB init to first request so the app starts even if Postgres
+    # isn't ready yet (e.g. Railway cold start, wrong DATABASE_URL, etc.)
+    _ready = {'done': False}
+
+    @app.before_request
+    def _init_db():
+        if not _ready['done']:
+            db.create_all()
+            _seed_config(db)
+            _ready['done'] = True
 
     # Serve React build when running as monolith (Railway deploy)
     if os.path.isdir(REACT_BUILD):
