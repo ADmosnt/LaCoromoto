@@ -1,0 +1,94 @@
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { getProductos, deleteProducto, getGruposProductos } from '../api'
+import PageHeader from '../components/PageHeader'
+import Alert from '../components/Alert'
+
+export default function Productos() {
+  const [productos, setProductos] = useState([])
+  const [grupos, setGrupos] = useState([])
+  const [search, setSearch] = useState('')
+  const [grupoId, setGrupoId] = useState('')
+  const [error, setError] = useState('')
+
+  const load = () =>
+    getProductos({ search, grupo_id: grupoId || undefined, activo: true })
+      .then((r) => setProductos(r.data))
+      .catch(() => setError('Error al cargar productos'))
+
+  useEffect(() => { getGruposProductos().then((r) => setGrupos(r.data)) }, [])
+  useEffect(() => { load() }, [search, grupoId])
+
+  const handleDelete = async (id, desc) => {
+    if (!confirm(`¿Desactivar "${desc}"?`)) return
+    await deleteProducto(id)
+    load()
+  }
+
+  return (
+    <div>
+      <PageHeader title="Productos" action={{ to: '/productos/nuevo', label: '+ Nuevo producto' }} />
+      <Alert type="error" message={error} />
+
+      <div className="bg-white rounded-lg shadow">
+        <div className="p-4 border-b flex gap-3">
+          <input
+            type="text"
+            placeholder="Buscar por descripción o código..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm w-72 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <select
+            value={grupoId}
+            onChange={(e) => setGrupoId(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Todos los grupos</option>
+            {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
+          </select>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+              <tr>
+                <th className="px-4 py-3 text-left">Código</th>
+                <th className="px-4 py-3 text-left">Descripción</th>
+                <th className="px-4 py-3 text-left">Grupo</th>
+                <th className="px-4 py-3 text-center">Uds/Bulto</th>
+                <th className="px-4 py-3 text-left">Precios (USD)</th>
+                <th className="px-4 py-3 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {productos.map((p) => (
+                <tr key={p.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-mono text-xs">{p.codigo}</td>
+                  <td className="px-4 py-3 font-medium">{p.descripcion}</td>
+                  <td className="px-4 py-3 text-gray-600">{p.grupo}</td>
+                  <td className="px-4 py-3 text-center">{p.unidades_por_bulto}</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">
+                    {p.precios?.map((pr) => (
+                      <span key={pr.lista_id} className="inline-block mr-2">
+                        {pr.lista}: ${Number(pr.precio_usd).toFixed(2)}
+                      </span>
+                    ))}
+                  </td>
+                  <td className="px-4 py-3 text-center space-x-2">
+                    <Link to={`/productos/${p.id}/editar`} className="text-blue-600 hover:underline text-xs">Editar</Link>
+                    <button onClick={() => handleDelete(p.id, p.descripcion)} className="text-red-500 hover:underline text-xs">Desactivar</button>
+                  </td>
+                </tr>
+              ))}
+              {productos.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">No hay productos registrados</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+}
