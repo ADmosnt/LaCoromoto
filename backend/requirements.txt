@@ -8,6 +8,4 @@ python-dotenv==1.0.1
 requests==2.32.3
 beautifulsoup4==4.12.3
 lxml==5.2.2
-weasyprint==62.3
-jinja2==3.1.4
-num2words==0.5.13
+fpdf2==2.7.9
