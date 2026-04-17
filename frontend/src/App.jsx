@@ -8,11 +8,15 @@ import ProductoForm from './pages/ProductoForm'
 import Ordenes from './pages/Ordenes'
 import OrdenForm from './pages/OrdenForm'
 import OrdenDetalle from './pages/OrdenDetalle'
+import Historial from './pages/Historial'
 import ReportesVenta from './pages/ReportesVenta'
 import ReporteVentaForm from './pages/ReporteVentaForm'
+import ReporteVentaDetalle from './pages/ReporteVentaDetalle'
 import Devoluciones from './pages/Devoluciones'
 import DevolucionForm from './pages/DevolucionForm'
 import Stock from './pages/Stock'
+import InventarioCentral from './pages/InventarioCentral'
+import EntradaInventarioForm from './pages/EntradaInventarioForm'
 import Configuracion from './pages/Configuracion'
 
 export default function App() {
@@ -31,11 +35,15 @@ export default function App() {
           <Route path="ordenes" element={<Ordenes />} />
           <Route path="ordenes/nueva" element={<OrdenForm />} />
           <Route path="ordenes/:id" element={<OrdenDetalle />} />
+          <Route path="historial" element={<Historial />} />
           <Route path="reportes-venta" element={<ReportesVenta />} />
           <Route path="reportes-venta/nuevo" element={<ReporteVentaForm />} />
+          <Route path="reportes-venta/:id" element={<ReporteVentaDetalle />} />
           <Route path="devoluciones" element={<Devoluciones />} />
           <Route path="devoluciones/nueva" element={<DevolucionForm />} />
           <Route path="stock" element={<Stock />} />
+          <Route path="inventario" element={<InventarioCentral />} />
+          <Route path="inventario/entrada" element={<EntradaInventarioForm />} />
           <Route path="configuracion" element={<Configuracion />} />
         </Route>
       </Routes>

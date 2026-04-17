@@ -58,8 +58,14 @@ export const deleteProducto = (id) => api.delete(`/productos/${id}`)
 export const getOrdenes = (params) => api.get('/ordenes', { params })
 export const getOrden = (id) => api.get(`/ordenes/${id}`)
 export const createOrden = (data) => api.post('/ordenes', data)
+export const anularOrden = (id) => api.put(`/ordenes/${id}/anular`)
 export const downloadOrdenPDF = (id) =>
   api.get(`/ordenes/${id}/pdf`, { responseType: 'blob' })
+
+// Inventario Central
+export const getInventario = () => api.get('/inventario')
+export const getEntradas = (params) => api.get('/inventario/entradas', { params })
+export const createEntrada = (data) => api.post('/inventario/entradas', data)
 
 // Reportes de Venta
 export const getReportesVenta = (params) => api.get('/reportes-venta', { params })

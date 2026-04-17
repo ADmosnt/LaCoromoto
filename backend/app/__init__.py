@@ -38,6 +38,7 @@ def create_app():
     from app.routes.reportes_venta import bp as reportes_bp
     from app.routes.devoluciones import bp as devoluciones_bp
     from app.routes.dashboard import bp as dashboard_bp
+    from app.routes.inventario import bp as inventario_bp
 
     app.register_blueprint(config_bp, url_prefix='/api/config')
     app.register_blueprint(maestras_bp, url_prefix='/api')
@@ -48,6 +49,7 @@ def create_app():
     app.register_blueprint(reportes_bp, url_prefix='/api/reportes-venta')
     app.register_blueprint(devoluciones_bp, url_prefix='/api/devoluciones')
     app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
+    app.register_blueprint(inventario_bp, url_prefix='/api/inventario')
 
     # Defer DB init to first request so the app starts even if Postgres
     # isn't ready yet (e.g. Railway cold start, wrong DATABASE_URL, etc.)
@@ -57,6 +59,7 @@ def create_app():
     def _init_db():
         if not _ready['done']:
             db.create_all()
+            _run_migrations()
             _seed_config(db)
             _ready['done'] = True
 
@@ -71,6 +74,15 @@ def create_app():
             return send_from_directory(REACT_BUILD, 'index.html')
 
     return app
+
+
+def _run_migrations():
+    from sqlalchemy import text
+    with db.engine.connect() as conn:
+        conn.execute(text(
+            "ALTER TABLE ordenes_despacho ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'activa'"
+        ))
+        conn.commit()
 
 
 def _seed_config(db):

@@ -12,6 +12,7 @@ export default function ReporteVentaForm() {
   const [tasa, setTasa] = useState(null)
   const [tasaManual, setTasaManual] = useState('')
   const [rows, setRows] = useState([])
+  const [productoAdd, setProductoAdd] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -21,14 +22,35 @@ export default function ReporteVentaForm() {
   }, [])
 
   useEffect(() => {
-    if (!clienteId) { setStockCliente([]); setRows([]); return }
+    if (!clienteId) { setStockCliente([]); setRows([]); setProductoAdd(''); return }
     getClienteStock(clienteId).then((r) => {
       setStockCliente(r.data)
-      setRows(r.data.map((s) => ({ producto_id: s.producto_id, descripcion: s.descripcion, disponible: s.cantidad_unidades, cantidad_unidades: '', precio_usd_momento: '' })))
+      setRows([])
+      setProductoAdd('')
     })
   }, [clienteId])
 
   const tasaValor = Number(tasaManual || tasa?.valor || 0)
+
+  const stockDisponible = stockCliente.filter(
+    (s) => s.cantidad_unidades > 0 && !rows.find((r) => r.producto_id === s.producto_id)
+  )
+
+  const addProducto = () => {
+    if (!productoAdd) return
+    const s = stockCliente.find((x) => String(x.producto_id) === String(productoAdd))
+    if (!s) return
+    setRows([...rows, {
+      producto_id: s.producto_id,
+      descripcion: s.descripcion,
+      disponible: s.cantidad_unidades,
+      cantidad_unidades: '',
+      precio_usd_momento: '',
+    }])
+    setProductoAdd('')
+  }
+
+  const removeRow = (i) => setRows(rows.filter((_, idx) => idx !== i))
 
   const setRow = (i, field, val) => {
     const rs = [...rows]
@@ -43,8 +65,15 @@ export default function ReporteVentaForm() {
   const submit = async (e) => {
     e.preventDefault()
     setError('')
-    const detalles = rows.filter((r) => r.cantidad_unidades > 0 && r.precio_usd_momento > 0)
+    const detalles = rows.filter((r) => Number(r.cantidad_unidades) > 0 && Number(r.precio_usd_momento) > 0)
     if (!detalles.length) { setError('Ingrese al menos un producto vendido'); return }
+
+    const overstock = detalles.find((r) => Number(r.cantidad_unidades) > r.disponible)
+    if (overstock) {
+      setError(`Cantidad de "${overstock.descripcion}" supera el disponible (${overstock.disponible} uds)`)
+      return
+    }
+
     setLoading(true)
     try {
       await createReporteVenta({
@@ -106,61 +135,98 @@ export default function ReporteVentaForm() {
 
         {clienteId && (
           <div className="bg-white rounded-lg shadow p-5">
-            <h3 className="font-semibold text-gray-700 mb-3">Productos vendidos (stock en consignación)</h3>
-            {rows.length === 0 ? (
+            <h3 className="font-semibold text-gray-700 mb-3">Productos vendidos</h3>
+
+            {stockCliente.length === 0 ? (
               <p className="text-gray-400 text-sm">Este cliente no tiene stock en consignación.</p>
             ) : (
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
-                  <tr>
-                    <th className="px-3 py-2 text-left">Producto</th>
-                    <th className="px-3 py-2 text-center">Disponible</th>
-                    <th className="px-3 py-2 text-center">Cant. vendida</th>
-                    <th className="px-3 py-2 text-right">Precio USD</th>
-                    <th className="px-3 py-2 text-right">Total USD</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {rows.map((row, i) => (
-                    <tr key={i}>
-                      <td className="px-3 py-2 font-medium">{row.descripcion}</td>
-                      <td className="px-3 py-2 text-center text-gray-500">{row.disponible}</td>
-                      <td className="px-3 py-2">
-                        <input
-                          type="number" min={0} max={row.disponible}
-                          className={`w-24 text-center ${inp}`}
-                          value={row.cantidad_unidades}
-                          onChange={(e) => setRow(i, 'cantidad_unidades', e.target.value)}
-                        />
-                      </td>
-                      <td className="px-3 py-2">
-                        <input
-                          type="number" step="0.01" min={0}
-                          className={`w-28 text-right ${inp}`}
-                          value={row.precio_usd_momento}
-                          onChange={(e) => setRow(i, 'precio_usd_momento', e.target.value)}
-                        />
-                      </td>
-                      <td className="px-3 py-2 text-right font-medium">
-                        ${((Number(row.cantidad_unidades) || 0) * (Number(row.precio_usd_momento) || 0)).toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <>
+                {rows.length > 0 && (
+                  <table className="w-full text-sm mb-4">
+                    <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Producto</th>
+                        <th className="px-3 py-2 text-center">Disponible</th>
+                        <th className="px-3 py-2 text-center">Cant. vendida</th>
+                        <th className="px-3 py-2 text-right">Precio USD</th>
+                        <th className="px-3 py-2 text-right">Total USD</th>
+                        <th className="px-3 py-2"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {rows.map((row, i) => (
+                        <tr key={i}>
+                          <td className="px-3 py-2 font-medium">{row.descripcion}</td>
+                          <td className="px-3 py-2 text-center text-gray-500">{row.disponible}</td>
+                          <td className="px-3 py-2">
+                            <input
+                              type="number" min={1} max={row.disponible}
+                              className={`w-24 text-center ${inp}`}
+                              value={row.cantidad_unidades}
+                              onChange={(e) => setRow(i, 'cantidad_unidades', e.target.value)}
+                            />
+                          </td>
+                          <td className="px-3 py-2">
+                            <input
+                              type="number" step="0.01" min={0}
+                              className={`w-28 text-right ${inp}`}
+                              value={row.precio_usd_momento}
+                              onChange={(e) => setRow(i, 'precio_usd_momento', e.target.value)}
+                            />
+                          </td>
+                          <td className="px-3 py-2 text-right font-medium">
+                            ${((Number(row.cantidad_unidades) || 0) * (Number(row.precio_usd_momento) || 0)).toFixed(2)}
+                          </td>
+                          <td className="px-3 py-2">
+                            <button type="button" onClick={() => removeRow(i)} className="text-red-400 hover:text-red-600">✕</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+
+                {stockDisponible.length > 0 && (
+                  <div className="flex gap-2 items-center">
+                    <select
+                      className={`flex-1 ${inp}`}
+                      value={productoAdd}
+                      onChange={(e) => setProductoAdd(e.target.value)}
+                    >
+                      <option value="">Agregar producto...</option>
+                      {stockDisponible.map((s) => (
+                        <option key={s.producto_id} value={s.producto_id}>
+                          {s.descripcion} — {s.cantidad_unidades} uds disponibles
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={addProducto}
+                      disabled={!productoAdd}
+                      className="px-3 py-2 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 disabled:opacity-40"
+                    >
+                      Agregar
+                    </button>
+                  </div>
+                )}
+
+                {rows.length > 0 && (
+                  <div className="mt-4 flex justify-end border-t pt-4 gap-8 text-sm">
+                    <div className="text-right">
+                      <p className="text-gray-500">Total USD</p>
+                      <p className="text-xl font-bold">${totalUsd.toFixed(2)}</p>
+                    </div>
+                    {tasaValor > 0 && (
+                      <div className="text-right">
+                        <p className="text-gray-500">Total Bs.</p>
+                        <p className="text-xl font-bold">Bs. {(totalUsd * tasaValor).toFixed(2)}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             )}
-            <div className="mt-4 flex justify-end border-t pt-4 gap-8 text-sm">
-              <div className="text-right">
-                <p className="text-gray-500">Total USD</p>
-                <p className="text-xl font-bold">${totalUsd.toFixed(2)}</p>
-              </div>
-              {tasaValor > 0 && (
-                <div className="text-right">
-                  <p className="text-gray-500">Total Bs.</p>
-                  <p className="text-xl font-bold">Bs. {(totalUsd * tasaValor).toFixed(2)}</p>
-                </div>
-              )}
-            </div>
           </div>
         )}
 

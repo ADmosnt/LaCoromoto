@@ -182,6 +182,7 @@ class OrdenDespacho(db.Model):
     total_usd = db.Column(db.Numeric(15, 2), nullable=False, default=0)
     total_bs = db.Column(db.Numeric(15, 2), nullable=False, default=0)
     nota = db.Column(db.Text)
+    status = db.Column(db.String(20), default='activa')
     creado_en = db.Column(db.DateTime(timezone=True), default=datetime.datetime.utcnow)
 
     cliente = db.relationship('Cliente', backref='ordenes')
@@ -204,6 +205,7 @@ class OrdenDespacho(db.Model):
             'total_usd': float(self.total_usd),
             'total_bs': float(self.total_bs),
             'nota': self.nota,
+            'status': self.status,
             'creado_en': self.creado_en.isoformat() if self.creado_en else None,
         }
         if include_detalles:
@@ -366,4 +368,55 @@ class ReporteVentaDetalle(db.Model):
             'cantidad_unidades': self.cantidad_unidades,
             'precio_usd_momento': float(self.precio_usd_momento),
             'total_usd': float(self.cantidad_unidades * self.precio_usd_momento),
+        }
+
+
+class InventarioCentral(db.Model):
+    __tablename__ = 'inventario_central'
+    id = db.Column(db.Integer, primary_key=True)
+    producto_id = db.Column(db.Integer, db.ForeignKey('productos.id'), nullable=False, unique=True)
+    cantidad_unidades = db.Column(db.Integer, nullable=False, default=0)
+
+    producto = db.relationship('Producto')
+
+    def to_dict(self):
+        p = self.producto
+        upb = p.unidades_por_bulto if p else 1
+        return {
+            'id': self.id,
+            'producto_id': self.producto_id,
+            'codigo': p.codigo if p else None,
+            'descripcion': p.descripcion if p else None,
+            'grupo': p.grupo.nombre if p and p.grupo else None,
+            'unidades_por_bulto': upb,
+            'cantidad_unidades': self.cantidad_unidades,
+            'bultos': self.cantidad_unidades // upb,
+            'unidades_sueltas': self.cantidad_unidades % upb,
+        }
+
+
+class EntradaInventario(db.Model):
+    __tablename__ = 'entradas_inventario'
+    id = db.Column(db.Integer, primary_key=True)
+    producto_id = db.Column(db.Integer, db.ForeignKey('productos.id'), nullable=False)
+    cantidad_unidades = db.Column(db.Integer, nullable=False)
+    fecha = db.Column(db.Date, nullable=False, default=datetime.date.today)
+    nota = db.Column(db.Text)
+    creado_en = db.Column(db.DateTime(timezone=True), default=datetime.datetime.utcnow)
+
+    producto = db.relationship('Producto')
+
+    def to_dict(self):
+        p = self.producto
+        upb = p.unidades_por_bulto if p else 1
+        return {
+            'id': self.id,
+            'producto_id': self.producto_id,
+            'codigo': p.codigo if p else None,
+            'descripcion': p.descripcion if p else None,
+            'unidades_por_bulto': upb,
+            'cantidad_unidades': self.cantidad_unidades,
+            'bultos': self.cantidad_unidades // upb,
+            'fecha': self.fecha.isoformat(),
+            'nota': self.nota,
         }

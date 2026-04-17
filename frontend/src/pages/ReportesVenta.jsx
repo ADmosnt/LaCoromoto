@@ -86,6 +86,7 @@ export default function ReportesVenta() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center space-x-2">
+                    <Link to={`/reportes-venta/${r.id}`} className="text-blue-600 hover:underline text-xs">Ver</Link>
                     {r.status === 'pendiente' && (
                       <button onClick={() => handleConfirmar(r.id)} className="text-green-600 hover:underline text-xs">
                         Confirmar
