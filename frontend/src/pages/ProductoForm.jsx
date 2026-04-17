@@ -84,7 +84,7 @@ export default function ProductoForm() {
       <Alert type="error" message={error} />
 
       <form onSubmit={submit} className="bg-white rounded-lg shadow p-6 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={lbl}>Código *</label>
             <input className={inp} value={form.codigo} onChange={(e) => set('codigo', e.target.value)} required disabled={isEdit} />

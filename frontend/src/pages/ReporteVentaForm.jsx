@@ -106,8 +106,8 @@ export default function ReporteVentaForm() {
 
       <form onSubmit={submit} className="space-y-4">
         <div className="bg-white rounded-lg shadow p-5">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
               <select className={`w-full ${inp}`} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
                 <option value="">Seleccionar cliente...</option>
@@ -142,7 +142,7 @@ export default function ReporteVentaForm() {
             ) : (
               <>
                 {rows.length > 0 && (
-                  <table className="w-full text-sm mb-4">
+                  <div className="overflow-x-auto mb-4"><table className="w-full text-sm mb-0">
                     <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
                       <tr>
                         <th className="px-3 py-2 text-left">Producto</th>
@@ -183,7 +183,7 @@ export default function ReporteVentaForm() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </table></div>
                 )}
 
                 {stockDisponible.length > 0 && (

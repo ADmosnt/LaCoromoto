@@ -37,7 +37,7 @@ export default function InventarioCentral() {
       </div>
 
       {tab === 'stock' && (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-hidden"><div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
               <tr>
@@ -81,11 +81,12 @@ export default function InventarioCentral() {
               </tfoot>
             )}
           </table>
+          </div>
         </div>
       )}
 
       {tab === 'entradas' && (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-hidden"><div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
               <tr>
@@ -115,6 +116,7 @@ export default function InventarioCentral() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

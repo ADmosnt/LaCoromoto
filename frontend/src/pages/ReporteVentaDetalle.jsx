@@ -72,6 +72,7 @@ export default function ReporteVentaDetalle() {
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden mb-4">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-800 text-white text-xs uppercase">
             <tr>
@@ -94,6 +95,7 @@ export default function ReporteVentaDetalle() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow p-4 flex justify-end gap-8 text-sm">

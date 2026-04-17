@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 
 export default function PageHeader({ title, action }) {
   return (
-    <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
       <h2 className="text-xl font-bold text-gray-800">{title}</h2>
       {action && (
         <Link

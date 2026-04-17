@@ -122,7 +122,7 @@ export default function Configuracion() {
       <h2 className="text-xl font-bold text-gray-800 mb-6">Configuración</h2>
       {msg.text && <Alert type={msg.type} message={msg.text} />}
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Empresa */}
         <div className="bg-white rounded-lg shadow p-5">
           <h3 className="font-semibold text-gray-700 mb-4">Datos de la empresa</h3>
@@ -189,7 +189,7 @@ export default function Configuracion() {
         </div>
 
         {/* Catálogos */}
-        <div className="col-span-2 grid grid-cols-2 gap-4">
+        <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <CatalogSection title="Zonas" items={zonas}
             onCreate={async (d) => { await createZona(d); getZonas().then((r) => setZonas(r.data)) }}
             onUpdate={async (id, d) => { await updateZona(id, d); getZonas().then((r) => setZonas(r.data)) }}

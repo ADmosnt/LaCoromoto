@@ -97,7 +97,7 @@ export default function ClienteForm() {
       <Alert type="error" message={error} />
 
       <form onSubmit={submit} className="bg-white rounded-lg shadow p-6 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={lbl}>Código *</label>
             <input className={inp} value={form.codigo} onChange={(e) => set('codigo', e.target.value)} required disabled={isEdit} />
@@ -118,7 +118,7 @@ export default function ClienteForm() {
           <textarea className={inp} rows={2} value={form.direccion ?? ''} onChange={(e) => set('direccion', e.target.value)} />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={lbl}>Zona</label>
             <select className={inp} value={form.zona_id} onChange={(e) => set('zona_id', e.target.value)}>
@@ -135,7 +135,7 @@ export default function ClienteForm() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className={lbl}>Contacto</label>
             <input className={inp} value={form.contacto ?? ''} onChange={(e) => set('contacto', e.target.value)} />

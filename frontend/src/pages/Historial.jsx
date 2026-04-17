@@ -116,6 +116,7 @@ export default function Historial() {
               </span>
             </div>
             <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
                   <tr>
@@ -154,6 +155,7 @@ export default function Historial() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         )

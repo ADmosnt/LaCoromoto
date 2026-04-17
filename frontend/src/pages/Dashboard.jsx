@@ -23,7 +23,7 @@ export default function Dashboard() {
       <h2 className="text-xl font-bold text-gray-800 mb-6">Dashboard</h2>
 
       {data?.tasa_hoy && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center justify-between">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center justify-between flex-wrap gap-3">
           <div>
             <p className="text-sm text-blue-600 font-medium">Tasa BCV hoy ({data.tasa_hoy.fecha})</p>
             <p className="text-2xl font-bold text-blue-800">Bs. {Number(data.tasa_hoy.valor).toFixed(4)}</p>
@@ -45,6 +45,7 @@ export default function Dashboard() {
             <h3 className="font-semibold text-gray-700">Últimas órdenes de despacho</h3>
             <Link to="/ordenes" className="text-sm text-blue-600 hover:underline">Ver todas</Link>
           </div>
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
               <tr>
@@ -69,6 +70,7 @@ export default function Dashboard() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

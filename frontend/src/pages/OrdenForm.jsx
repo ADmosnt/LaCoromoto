@@ -103,8 +103,8 @@ export default function OrdenForm() {
       <form onSubmit={submit} className="space-y-4">
         <div className="bg-white rounded-lg shadow p-5">
           <h3 className="font-semibold text-gray-700 mb-3">Datos generales</h3>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
               <select className={inp} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
                 <option value="">Seleccionar cliente...</option>
@@ -116,7 +116,7 @@ export default function OrdenForm() {
               <input type="date" className={inp} value={fecha} onChange={(e) => setFecha(e.target.value)} />
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-4 mt-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tasa BCV (Bs.) {tasa && <span className="text-xs text-gray-400 ml-1">BCV: {Number(tasa.valor).toFixed(4)}</span>}
@@ -131,7 +131,7 @@ export default function OrdenForm() {
                 onChange={(e) => setTasaManual(e.target.value)}
               />
             </div>
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Nota</label>
               <input className={inp} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Observaciones opcionales" />
             </div>

@@ -71,16 +71,17 @@ export default function OrdenDetalle() {
       )}
 
       <div className="bg-white rounded-lg shadow p-5 mb-4">
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div><span className="text-gray-500">Cliente:</span> <span className="font-medium ml-2">{orden.cliente}</span></div>
           <div><span className="text-gray-500">Fecha:</span> <span className="ml-2">{orden.fecha_emision}</span></div>
           <div><span className="text-gray-500">RIF cliente:</span> <span className="ml-2">{orden.cliente_rif}</span></div>
           <div><span className="text-gray-500">Tasa BCV:</span> <span className="ml-2">Bs. {Number(orden.tasa_valor).toFixed(4)}</span></div>
-          {orden.nota && <div className="col-span-2"><span className="text-gray-500">Nota:</span> <span className="ml-2">{orden.nota}</span></div>}
+          {orden.nota && <div className="sm:col-span-2"><span className="text-gray-500">Nota:</span> <span className="ml-2">{orden.nota}</span></div>}
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden mb-4">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-800 text-white text-xs uppercase">
             <tr>
@@ -110,6 +111,7 @@ export default function OrdenDetalle() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow p-4 flex justify-end gap-8 text-sm">

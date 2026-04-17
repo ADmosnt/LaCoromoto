@@ -81,7 +81,7 @@ export default function DevolucionForm() {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
               <input type="date" className={`w-full ${inp}`} value={fecha} onChange={(e) => setFecha(e.target.value)} />
@@ -109,6 +109,7 @@ export default function DevolucionForm() {
             {rows.length === 0 ? (
               <p className="text-gray-400 text-sm">Este cliente no tiene stock en consignación.</p>
             ) : (
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
                   <tr>
@@ -134,6 +135,7 @@ export default function DevolucionForm() {
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </div>
         )}
