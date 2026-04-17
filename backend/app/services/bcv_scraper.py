@@ -2,6 +2,10 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import logging
+import urllib3
+
+# El BCV usa un certificado que no está en el bundle de Railway/Docker
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +22,7 @@ HEADERS = {
 def obtener_tasa_bcv() -> float | None:
     """Scrape BCV website for today's USD/VES rate. Returns float or None."""
     try:
-        resp = requests.get(BCV_URL, headers=HEADERS, timeout=15)
+        resp = requests.get(BCV_URL, headers=HEADERS, timeout=15, verify=False)
         resp.raise_for_status()
         soup = BeautifulSoup(resp.text, 'lxml')
 
