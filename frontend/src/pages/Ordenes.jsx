@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { getOrdenes, getOrden, getClientes, downloadOrdenPDF, anularOrden } from '../api'
 import Alert from '../components/Alert'
+import OrdenModal from '../components/OrdenModal'
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -141,6 +141,7 @@ export default function Ordenes() {
   const [fechaHasta, setFechaHasta] = useState('')
   const [error, setError] = useState('')
   const [expanded, setExpanded] = useState(null)
+  const [modalOpen, setModalOpen] = useState(false)
 
   const load = () =>
     getOrdenes({
@@ -165,12 +166,12 @@ export default function Ordenes() {
     <div>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h2 className="text-xl font-bold text-gray-800">Órdenes de Despacho</h2>
-        <Link
-          to="/ordenes/nueva"
+        <button
+          onClick={() => setModalOpen(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
         >
           + Nueva orden
-        </Link>
+        </button>
       </div>
 
       <Alert type="error" message={error} />
@@ -257,6 +258,12 @@ export default function Ordenes() {
           </div>
         </div>
       )}
+
+      <OrdenModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSaved={load}
+      />
     </div>
   )
 }

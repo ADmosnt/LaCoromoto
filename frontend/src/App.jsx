@@ -4,7 +4,6 @@ import Dashboard from './pages/Dashboard'
 import Clientes from './pages/Clientes'
 import Productos from './pages/Productos'
 import Ordenes from './pages/Ordenes'
-import OrdenForm from './pages/OrdenForm'
 import OrdenDetalle from './pages/OrdenDetalle'
 import ReportesVenta from './pages/ReportesVenta'
 import ReporteVentaForm from './pages/ReporteVentaForm'
@@ -26,7 +25,6 @@ export default function App() {
           <Route path="clientes" element={<Clientes />} />
           <Route path="productos" element={<Productos />} />
           <Route path="ordenes" element={<Ordenes />} />
-          <Route path="ordenes/nueva" element={<OrdenForm />} />
           <Route path="ordenes/:id" element={<OrdenDetalle />} />
           <Route path="reportes-venta" element={<ReportesVenta />} />
           <Route path="reportes-venta/nuevo" element={<ReporteVentaForm />} />

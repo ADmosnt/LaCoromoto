@@ -10,7 +10,10 @@ export function Dialog({ open, onOpenChange, children }) {
   )
 }
 
-export function DialogContent({ children, title, className, wide = false }) {
+const sizeClass = { md: 'md:max-w-2xl', lg: 'md:max-w-3xl', xl: 'md:max-w-4xl' }
+
+export function DialogContent({ children, title, className, wide = false, size = 'md' }) {
+  const maxW = wide ? sizeClass.lg : (sizeClass[size] ?? sizeClass.md)
   return (
     <RadixDialog.Portal>
       <RadixDialog.Overlay
@@ -27,7 +30,7 @@ export function DialogContent({ children, title, className, wide = false }) {
           // Desktop: centered modal
           'md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2',
           'md:rounded-xl md:w-full md:max-h-[90vh]',
-          wide ? 'md:max-w-3xl' : 'md:max-w-2xl',
+          maxW,
           // Mobile slide animation
           'data-[state=open]:animate-in data-[state=closed]:animate-out duration-300',
           'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
