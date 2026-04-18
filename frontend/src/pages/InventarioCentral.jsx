@@ -1,26 +1,33 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { getInventario, getEntradas } from '../api'
-import PageHeader from '../components/PageHeader'
+import EntradaInventarioModal from '../components/EntradaInventarioModal'
 
 export default function InventarioCentral() {
   const [inventario, setInventario] = useState([])
   const [entradas, setEntradas] = useState([])
   const [tab, setTab] = useState('stock')
+  const [modalOpen, setModalOpen] = useState(false)
 
-  useEffect(() => {
+  const load = () => {
     getInventario().then((r) => setInventario(r.data))
     getEntradas().then((r) => setEntradas(r.data))
-  }, [])
+  }
+
+  useEffect(() => { load() }, [])
 
   const totalUds = inventario.reduce((s, i) => s + i.cantidad_unidades, 0)
 
   return (
     <div>
-      <PageHeader
-        title="Inventario Central (Almacén)"
-        action={{ to: '/inventario/entrada', label: '+ Registrar entrada' }}
-      />
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <h2 className="text-xl font-bold text-gray-800">Inventario Central (Almacén)</h2>
+        <button
+          onClick={() => setModalOpen(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+        >
+          + Registrar entrada
+        </button>
+      </div>
 
       <div className="flex gap-2 mb-4">
         {['stock', 'entradas'].map((t) => (
@@ -67,7 +74,10 @@ export default function InventarioCentral() {
               {inventario.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
-                    No hay productos en inventario. <Link to="/inventario/entrada" className="text-blue-600 hover:underline">Registrar primera entrada.</Link>
+                    No hay productos en inventario.{' '}
+                    <button onClick={() => setModalOpen(true)} className="text-blue-600 hover:underline">
+                      Registrar primera entrada.
+                    </button>
                   </td>
                 </tr>
               )}
@@ -119,6 +129,12 @@ export default function InventarioCentral() {
           </div>
         </div>
       )}
+
+      <EntradaInventarioModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSaved={load}
+      />
     </div>
   )
 }

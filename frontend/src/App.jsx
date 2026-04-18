@@ -12,7 +12,6 @@ import Devoluciones from './pages/Devoluciones'
 import DevolucionForm from './pages/DevolucionForm'
 import Stock from './pages/Stock'
 import InventarioCentral from './pages/InventarioCentral'
-import EntradaInventarioForm from './pages/EntradaInventarioForm'
 import Configuracion from './pages/Configuracion'
 
 export default function App() {
@@ -33,7 +32,6 @@ export default function App() {
           <Route path="devoluciones/nueva" element={<DevolucionForm />} />
           <Route path="stock" element={<Stock />} />
           <Route path="inventario" element={<InventarioCentral />} />
-          <Route path="inventario/entrada" element={<EntradaInventarioForm />} />
           <Route path="configuracion" element={<Configuracion />} />
         </Route>
       </Routes>
