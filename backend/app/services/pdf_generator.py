@@ -119,6 +119,8 @@ def generar_pdf_orden(orden, config) -> bytes:
         shade = not shade
 
     # ── Footer (totals pinned to bottom of current page) ──────────────────────
+    # Disable auto page break so set_y + cells don't trigger a new page.
+    pdf.set_auto_page_break(auto=False)
     footer_y = PAGE_H - MARGIN - FOOTER_H
     pdf.set_y(footer_y)
 
