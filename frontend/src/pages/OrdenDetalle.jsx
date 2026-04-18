@@ -89,13 +89,14 @@ export default function OrdenDetalle() {
               <th className="px-4 py-3 text-left">Descripción</th>
               <th className="px-4 py-3 text-center">Cantidad</th>
               <th className="px-4 py-3 text-center">Bultos</th>
-              <th className="px-4 py-3 text-right">Precio USD</th>
+              <th className="px-4 py-3 text-right">Precio/Bulto</th>
               <th className="px-4 py-3 text-right">Total USD</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {orden.detalles?.map((d) => {
               const upb = d.unidades_por_bulto || 1
+              const precioBulto = Number(d.precio_usd_momento) * upb
               return (
                 <tr key={d.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-mono text-xs">{d.codigo}</td>
@@ -104,7 +105,7 @@ export default function OrdenDetalle() {
                   <td className="px-4 py-3 text-center text-gray-500 text-xs">
                     {Math.floor(d.cantidad_unidades / upb)}B + {d.cantidad_unidades % upb}u
                   </td>
-                  <td className="px-4 py-3 text-right">${Number(d.precio_usd_momento).toFixed(2)}</td>
+                  <td className="px-4 py-3 text-right">${precioBulto.toFixed(2)}</td>
                   <td className="px-4 py-3 text-right font-medium">${Number(d.total_usd).toFixed(2)}</td>
                 </tr>
               )

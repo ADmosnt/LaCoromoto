@@ -6,7 +6,6 @@ import Productos from './pages/Productos'
 import Ordenes from './pages/Ordenes'
 import OrdenForm from './pages/OrdenForm'
 import OrdenDetalle from './pages/OrdenDetalle'
-import Historial from './pages/Historial'
 import ReportesVenta from './pages/ReportesVenta'
 import ReporteVentaForm from './pages/ReporteVentaForm'
 import ReporteVentaDetalle from './pages/ReporteVentaDetalle'
@@ -29,7 +28,6 @@ export default function App() {
           <Route path="ordenes" element={<Ordenes />} />
           <Route path="ordenes/nueva" element={<OrdenForm />} />
           <Route path="ordenes/:id" element={<OrdenDetalle />} />
-          <Route path="historial" element={<Historial />} />
           <Route path="reportes-venta" element={<ReportesVenta />} />
           <Route path="reportes-venta/nuevo" element={<ReporteVentaForm />} />
           <Route path="reportes-venta/:id" element={<ReporteVentaDetalle />} />

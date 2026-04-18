@@ -31,15 +31,21 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
 
   const set = (field, val) => setForm((f) => ({ ...f, [field]: val }))
 
-  const setPrecio = (listaId, valor) => {
+  const setPrecio = (listaId, valorBulto) => {
+    const upb = form.unidades_por_bulto || 1
+    const precioUsd = valorBulto === '' ? '' : String(Number(valorBulto) / upb)
     const precios = [...form.precios]
     const idx = precios.findIndex((p) => p.lista_id === listaId)
-    if (idx >= 0) precios[idx] = { ...precios[idx], precio_usd: valor }
-    else precios.push({ lista_id: listaId, precio_usd: valor })
+    if (idx >= 0) precios[idx] = { ...precios[idx], precio_usd: precioUsd }
+    else precios.push({ lista_id: listaId, precio_usd: precioUsd })
     set('precios', precios)
   }
 
-  const getPrecio = (listaId) => form.precios.find((p) => p.lista_id === listaId)?.precio_usd ?? ''
+  const getPrecio = (listaId) => {
+    const usd = form.precios.find((p) => p.lista_id === listaId)?.precio_usd ?? ''
+    if (usd === '') return ''
+    return (Number(usd) * (form.unidades_por_bulto || 1)).toFixed(2)
+  }
 
   const submit = async (e) => {
     e.preventDefault()
@@ -97,7 +103,7 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
 
           {listas.length > 0 && (
             <div>
-              <label className={lbl}>Precios por lista (USD)</label>
+              <label className={lbl}>Precios por bulto (USD)</label>
               <div className="space-y-2">
                 {listas.map((l) => (
                   <div key={l.id} className="flex items-center gap-3">

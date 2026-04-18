@@ -148,7 +148,7 @@ export default function OrdenForm() {
                   <th className="px-3 py-2 text-center">Uds/Bulto</th>
                   <th className="px-3 py-2 text-center">Cantidad (uds)</th>
                   <th className="px-3 py-2 text-center">Bultos</th>
-                  <th className="px-3 py-2 text-right">Precio USD</th>
+                  <th className="px-3 py-2 text-right">Precio/Bulto USD</th>
                   <th className="px-3 py-2 text-right">Total USD</th>
                   <th className="px-3 py-2"></th>
                 </tr>
@@ -190,8 +190,11 @@ export default function OrdenForm() {
                             step="0.01"
                             min={0}
                             className="border border-gray-300 rounded px-2 py-1.5 text-sm w-28 text-right"
-                            value={row.precio_usd_momento}
-                            onChange={(e) => setRow(i, 'precio_usd_momento', e.target.value)}
+                            value={row.precio_usd_momento === '' ? '' : (Number(row.precio_usd_momento) * upb).toFixed(2)}
+                            onChange={(e) => {
+                              const val = e.target.value
+                              setRow(i, 'precio_usd_momento', val === '' ? '' : String(Number(val) / upb))
+                            }}
                           />
                           {row.precios?.length > 0 && (
                             <select
@@ -201,7 +204,9 @@ export default function OrdenForm() {
                             >
                               <option value="" disabled>Lista de precios</option>
                               {row.precios.map((p) => (
-                                <option key={p.lista_id} value={p.precio_usd}>{p.lista}: ${p.precio_usd}</option>
+                                <option key={p.lista_id} value={p.precio_usd}>
+                                  {p.lista}: ${(Number(p.precio_usd) * (row.unidades_por_bulto || 1)).toFixed(2)}/bulto
+                                </option>
                               ))}
                             </select>
                           )}
