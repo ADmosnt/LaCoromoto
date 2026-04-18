@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { getDevoluciones, getClientes } from '../api'
-import PageHeader from '../components/PageHeader'
 import Alert from '../components/Alert'
+import DevolucionModal from '../components/DevolucionModal'
 
 export default function Devoluciones() {
   const [devoluciones, setDevoluciones] = useState([])
   const [clientes, setClientes] = useState([])
   const [clienteId, setClienteId] = useState('')
   const [error, setError] = useState('')
+  const [modalOpen, setModalOpen] = useState(false)
 
   const load = () =>
     getDevoluciones({ cliente_id: clienteId || undefined })
@@ -20,7 +20,16 @@ export default function Devoluciones() {
 
   return (
     <div>
-      <PageHeader title="Devoluciones" action={{ to: '/devoluciones/nueva', label: '+ Nueva devolución' }} />
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <h2 className="text-xl font-bold text-gray-800">Devoluciones</h2>
+        <button
+          onClick={() => setModalOpen(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+        >
+          + Nueva devolución
+        </button>
+      </div>
+
       <Alert type="error" message={error} />
 
       <div className="bg-white rounded-lg shadow">
@@ -28,7 +37,7 @@ export default function Devoluciones() {
           <select
             value={clienteId}
             onChange={(e) => setClienteId(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Todos los clientes</option>
             {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
@@ -64,6 +73,12 @@ export default function Devoluciones() {
           </table>
         </div>
       </div>
+
+      <DevolucionModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSaved={load}
+      />
     </div>
   )
 }

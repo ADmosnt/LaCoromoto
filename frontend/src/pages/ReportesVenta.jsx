@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getReportesVenta, confirmarReporteVenta, getClientes } from '../api'
-import PageHeader from '../components/PageHeader'
 import Alert from '../components/Alert'
 
 const statusBadge = {
@@ -36,7 +35,7 @@ export default function ReportesVenta() {
 
   return (
     <div>
-      <PageHeader title="Reportes de Venta" action={{ to: '/reportes-venta/nuevo', label: '+ Nuevo reporte' }} />
+      <h2 className="text-xl font-bold text-gray-800 mb-6">Reportes de Venta</h2>
       <Alert type="error" message={error} />
 
       <div className="bg-white rounded-lg shadow">

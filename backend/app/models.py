@@ -210,6 +210,11 @@ class OrdenDespacho(db.Model):
         }
         if include_detalles:
             d['detalles'] = [det.to_dict() for det in self.detalles]
+            active_rep = next(
+                (r for r in self.reportes if r.status in ('pendiente', 'confirmado')),
+                None
+            ) if hasattr(self, 'reportes') else None
+            d['reporte_id'] = active_rep.id if active_rep else None
         return d
 
 
@@ -319,6 +324,7 @@ class ReporteVenta(db.Model):
     __tablename__ = 'reportes_venta'
     id = db.Column(db.Integer, primary_key=True)
     cliente_id = db.Column(db.Integer, db.ForeignKey('clientes.id'), nullable=False)
+    orden_id = db.Column(db.Integer, db.ForeignKey('ordenes_despacho.id'), nullable=True)
     fecha = db.Column(db.Date, nullable=False, default=datetime.date.today)
     tasa_bcv_id = db.Column(db.Integer, db.ForeignKey('tasas_bcv.id'), nullable=False)
     total_usd = db.Column(db.Numeric(15, 2), nullable=False, default=0)
@@ -327,6 +333,7 @@ class ReporteVenta(db.Model):
     creado_en = db.Column(db.DateTime(timezone=True), default=datetime.datetime.utcnow)
 
     cliente = db.relationship('Cliente', backref='reportes_venta')
+    orden = db.relationship('OrdenDespacho', backref='reportes', foreign_keys=[orden_id])
     tasa = db.relationship('TasaBCV')
     detalles = db.relationship('ReporteVentaDetalle', backref='reporte', cascade='all, delete-orphan')
 
@@ -334,6 +341,7 @@ class ReporteVenta(db.Model):
         d = {
             'id': self.id,
             'cliente_id': self.cliente_id,
+            'orden_id': self.orden_id,
             'cliente': self.cliente.razon_social if self.cliente else None,
             'fecha': self.fecha.isoformat(),
             'tasa_bcv_id': self.tasa_bcv_id,

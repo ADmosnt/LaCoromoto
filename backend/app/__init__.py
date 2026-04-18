@@ -82,6 +82,9 @@ def _run_migrations():
         conn.execute(text(
             "ALTER TABLE ordenes_despacho ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'activa'"
         ))
+        conn.execute(text(
+            "ALTER TABLE reportes_venta ADD COLUMN IF NOT EXISTS orden_id INTEGER REFERENCES ordenes_despacho(id)"
+        ))
         conn.commit()
 
 

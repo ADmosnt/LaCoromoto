@@ -3,7 +3,8 @@ from decimal import Decimal
 import datetime
 from app import db
 from app.models import (ReporteVenta, ReporteVentaDetalle,
-                         StockConsignacion, TasaBCV, Cliente, Producto)
+                         StockConsignacion, TasaBCV, Cliente, Producto,
+                         OrdenDespacho)
 
 bp = Blueprint('reportes_venta', __name__)
 
@@ -44,7 +45,22 @@ def create_reporte():
 
     cliente = Cliente.query.get_or_404(data['cliente_id'])
 
+    # Validate and optionally link to an order
+    orden = None
+    orden_id = data.get('orden_id')
+    if orden_id:
+        orden = OrdenDespacho.query.get_or_404(orden_id)
+        if orden.status != 'activa':
+            return jsonify({'error': f'La orden está en estado "{orden.status}" y no acepta reportes'}), 400
+        existing = ReporteVenta.query.filter_by(orden_id=orden_id).filter(
+            ReporteVenta.status.in_(['pendiente', 'confirmado'])
+        ).first()
+        if existing:
+            return jsonify({'error': 'Esta orden ya tiene un reporte registrado'}), 400
+
     fecha = datetime.date.fromisoformat(data.get('fecha', datetime.date.today().isoformat()))
+
+    # Resolve tasa
     tasa = TasaBCV.query.filter_by(fecha=fecha).first()
     if not tasa:
         tasa_id = data.get('tasa_bcv_id')
@@ -54,6 +70,10 @@ def create_reporte():
             tasa = TasaBCV.query.order_by(TasaBCV.fecha.desc()).first()
         if not tasa:
             return jsonify({'error': 'No hay tasa BCV disponible'}), 400
+
+    # Allow manual tasa_valor override (rate at time of payment, not dispatch)
+    tasa_valor_manual = data.get('tasa_valor')
+    tasa_valor = Decimal(str(tasa_valor_manual)) if tasa_valor_manual else tasa.valor
 
     # Validate stock before creating
     for item in data['detalles']:
@@ -71,6 +91,7 @@ def create_reporte():
 
     reporte = ReporteVenta(
         cliente_id=cliente.id,
+        orden_id=orden_id,
         fecha=fecha,
         tasa_bcv_id=tasa.id,
         status='pendiente',
@@ -92,7 +113,11 @@ def create_reporte():
         total_usd += precio * cantidad
 
     reporte.total_usd = total_usd
-    reporte.total_bs = total_usd * tasa.valor
+    reporte.total_bs = total_usd * tasa_valor
+
+    if orden:
+        orden.status = 'pendiente'
+
     db.session.commit()
     return jsonify(reporte.to_dict(include_detalles=True)), 201
 
@@ -114,5 +139,11 @@ def confirmar_reporte(id):
         stock.cantidad_unidades -= det.cantidad_unidades
 
     reporte.status = 'confirmado'
+
+    if reporte.orden_id:
+        orden = OrdenDespacho.query.get(reporte.orden_id)
+        if orden and orden.status == 'pendiente':
+            orden.status = 'confirmado'
+
     db.session.commit()
     return jsonify(reporte.to_dict(include_detalles=True))
