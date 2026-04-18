@@ -2,6 +2,33 @@ from app import db
 import datetime
 
 
+class Usuario(db.Model):
+    __tablename__ = 'usuarios'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+    rol = db.Column(db.String(20), nullable=False, default='admin')
+    cliente_id = db.Column(db.Integer, db.ForeignKey('clientes.id'), nullable=True)
+    activo = db.Column(db.Boolean, default=True)
+
+    def set_password(self, pw):
+        from werkzeug.security import generate_password_hash
+        self.password_hash = generate_password_hash(pw)
+
+    def check_password(self, pw):
+        from werkzeug.security import check_password_hash
+        return check_password_hash(self.password_hash, pw)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'rol': self.rol,
+            'cliente_id': self.cliente_id,
+            'activo': self.activo,
+        }
+
+
 class ConfigEmpresa(db.Model):
     __tablename__ = 'config_empresa'
     id = db.Column(db.Integer, primary_key=True)

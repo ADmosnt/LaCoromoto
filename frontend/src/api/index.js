@@ -2,6 +2,12 @@ import axios from 'axios'
 
 const api = axios.create({ baseURL: '/api' })
 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token')
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
 // Config empresa
 export const getConfig = () => api.get('/config')
 export const updateConfig = (data) => api.put('/config', data)
@@ -77,3 +83,13 @@ export const confirmarReporteVenta = (id) => api.put(`/reportes-venta/${id}/conf
 export const getDevoluciones = (params) => api.get('/devoluciones', { params })
 export const getDevolucion = (id) => api.get(`/devoluciones/${id}`)
 export const createDevolucion = (data) => api.post('/devoluciones', data)
+
+// Auth
+export const authLogin = (data) => api.post('/auth/login', data)
+export const getMe = () => api.get('/auth/me')
+
+// Usuarios (admin)
+export const getUsuarios = () => api.get('/usuarios')
+export const createUsuario = (data) => api.post('/usuarios', data)
+export const updateUsuario = (id, data) => api.put(`/usuarios/${id}`, data)
+export const deleteUsuario = (id) => api.delete(`/usuarios/${id}`)

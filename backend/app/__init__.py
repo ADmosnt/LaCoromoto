@@ -39,6 +39,8 @@ def create_app():
     from app.routes.devoluciones import bp as devoluciones_bp
     from app.routes.dashboard import bp as dashboard_bp
     from app.routes.inventario import bp as inventario_bp
+    from app.routes.auth import bp as auth_bp
+    from app.routes.usuarios import bp as usuarios_bp
 
     app.register_blueprint(config_bp, url_prefix='/api/config')
     app.register_blueprint(maestras_bp, url_prefix='/api')
@@ -50,6 +52,8 @@ def create_app():
     app.register_blueprint(devoluciones_bp, url_prefix='/api/devoluciones')
     app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
     app.register_blueprint(inventario_bp, url_prefix='/api/inventario')
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(usuarios_bp, url_prefix='/api/usuarios')
 
     # Defer DB init to first request so the app starts even if Postgres
     # isn't ready yet (e.g. Railway cold start, wrong DATABASE_URL, etc.)
@@ -61,6 +65,7 @@ def create_app():
             db.create_all()
             _run_migrations()
             _seed_config(db)
+            _seed_admin(db)
             _ready['done'] = True
 
     # Serve React build when running as monolith (Railway deploy)
@@ -97,4 +102,13 @@ def _seed_config(db):
             direccion='Dirección de la empresa',
             ciudad='Ciudad'
         ))
+        db.session.commit()
+
+
+def _seed_admin(db):
+    from app.models import Usuario
+    if not Usuario.query.filter_by(rol='admin').first():
+        u = Usuario(username='admin', rol='admin')
+        u.set_password('admin123')
+        db.session.add(u)
         db.session.commit()

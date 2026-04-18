@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Outlet, NavLink } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
-const navItems = [
+const adminNav = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/clientes', label: 'Clientes' },
   { to: '/productos', label: 'Productos' },
@@ -10,6 +11,10 @@ const navItems = [
   { to: '/reportes-venta', label: 'Reportes de Venta' },
   { to: '/devoluciones', label: 'Devoluciones' },
   { to: '/stock', label: 'Stock en Consignación' },
+]
+
+const clienteNav = [
+  { to: '/mis-ordenes', label: 'Mis Órdenes' },
 ]
 
 const navLinkClass = ({ isActive }) =>
@@ -21,19 +26,24 @@ const navLinkClass = ({ isActive }) =>
 
 export default function Layout() {
   const [open, setOpen] = useState(false)
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const close = () => setOpen(false)
+
+  const isAdmin = user?.rol === 'admin'
+  const navItems = isAdmin ? adminNav : clienteNav
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Mobile overlay */}
       {open && (
-        <div
-          className="fixed inset-0 bg-black/50 z-20 md:hidden"
-          onClick={close}
-        />
+        <div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={close} />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`
           fixed inset-y-0 left-0 z-30 w-56 bg-gray-900 text-white flex flex-col flex-shrink-0
@@ -46,12 +56,7 @@ export default function Layout() {
           <h1 className="text-base font-bold leading-tight">
             Sistema de<br />Consignación
           </h1>
-          <button
-            className="md:hidden text-gray-400 hover:text-white text-lg leading-none"
-            onClick={close}
-          >
-            ✕
-          </button>
+          <button className="md:hidden text-gray-400 hover:text-white text-lg leading-none" onClick={close}>✕</button>
         </div>
 
         <nav className="flex-1 overflow-y-auto py-2">
@@ -63,21 +68,28 @@ export default function Layout() {
         </nav>
 
         <div className="border-t border-gray-700">
-          <NavLink to="/configuracion" className={navLinkClass} onClick={close}>
-            Configuración
-          </NavLink>
+          {isAdmin && (
+            <>
+              <NavLink to="/usuarios" className={navLinkClass} onClick={close}>Usuarios</NavLink>
+              <NavLink to="/configuracion" className={navLinkClass} onClick={close}>Configuración</NavLink>
+            </>
+          )}
+          <div className="px-4 py-3 flex items-center justify-between">
+            <span className="text-xs text-gray-400 truncate">{user?.username}</span>
+            <button
+              onClick={handleLogout}
+              className="text-xs text-gray-400 hover:text-white ml-2 flex-shrink-0"
+              title="Cerrar sesión"
+            >
+              Salir
+            </button>
+          </div>
         </div>
       </aside>
 
-      {/* Content area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile top bar */}
         <header className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 flex-shrink-0">
-          <button
-            onClick={() => setOpen(true)}
-            className="text-gray-600 hover:text-gray-900 text-xl leading-none"
-            aria-label="Abrir menú"
-          >
+          <button onClick={() => setOpen(true)} className="text-gray-600 hover:text-gray-900 text-xl leading-none" aria-label="Abrir menú">
             ☰
           </button>
           <span className="font-semibold text-gray-800 text-sm">Sistema de Consignación</span>
