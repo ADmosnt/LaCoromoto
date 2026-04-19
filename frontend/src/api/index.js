@@ -13,7 +13,7 @@ export const getConfig = () => api.get('/config')
 export const updateConfig = (data) => api.put('/config', data)
 
 // Dashboard
-export const getDashboard = () => api.get('/dashboard')
+export const getDashboard = (params) => api.get('/dashboard', { params })
 
 // Tasas BCV
 export const getTasas = () => api.get('/tasas')

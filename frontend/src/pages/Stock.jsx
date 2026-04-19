@@ -66,56 +66,62 @@ export default function Stock() {
             </thead>
             <tbody>
               {stock.map((s) => (
-                <tr key={s.id} className="border-b border-gray-100 last:border-b-0">
+                <tr key={`${s.id}-wrap`} className="border-b border-gray-100 last:border-b-0">
                   <td colSpan={7} className="p-0">
-                    <div
-                      className={`flex items-center gap-2 px-4 py-3 hover:bg-gray-50 ${s.ordenes?.length > 0 ? 'cursor-pointer select-none' : ''}`}
-                      onClick={() => s.ordenes?.length > 0 && setExpanded(expanded === s.id ? null : s.id)}
-                    >
-                      <span className="text-gray-400 text-xs w-3 flex-shrink-0">
-                        {s.ordenes?.length > 0 ? (expanded === s.id ? '▼' : '▶') : ' '}
-                      </span>
-                      <span className="font-mono text-xs text-gray-500 w-20">{s.codigo}</span>
-                      <span className="font-medium flex-1">{s.descripcion}</span>
-                      <span className="text-center text-gray-500 w-16">{s.unidades_por_bulto}</span>
-                      <span className="text-center font-medium w-16">{s.bultos}</span>
-                      <span className="text-center text-gray-600 w-20">{s.unidades_sueltas}</span>
-                      <span className="text-center font-bold w-24">{s.cantidad_unidades}</span>
-                    </div>
-                    {expanded === s.id && s.ordenes?.length > 0 && (
-                      <div className="bg-blue-50 border-t border-blue-100 px-8 py-2">
-                        <p className="text-xs text-gray-500 mb-1 font-medium uppercase">Órdenes de origen</p>
-                        <table className="text-xs w-full max-w-md">
-                          <thead className="text-gray-500">
-                            <tr>
-                              <th className="py-1 text-left pr-4">N° Orden</th>
-                              <th className="py-1 text-left pr-4">Fecha</th>
-                              <th className="py-1 text-center pr-4">Cant. despachada</th>
-                              <th className="py-1 text-left">Estado</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-blue-100">
-                            {s.ordenes.map((o) => {
-                              const upb = s.unidades_por_bulto || 1
-                              return (
-                                <tr key={o.id}>
-                                  <td className="py-1.5 pr-4 font-mono font-medium text-blue-700">{o.numero_orden}</td>
-                                  <td className="py-1.5 pr-4 text-gray-600">{o.fecha_emision}</td>
-                                  <td className="py-1.5 pr-4 text-center">
-                                    {Math.floor(o.cantidad_unidades / upb)}B+{o.cantidad_unidades % upb}u
-                                  </td>
-                                  <td className="py-1.5">
-                                    <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${statusBadge[o.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                                      {o.status}
-                                    </span>
-                                  </td>
-                                </tr>
-                              )
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
+                    <table className="w-full">
+                      <tbody>
+                        <tr
+                          className={`hover:bg-gray-50 ${s.ordenes?.length > 0 ? 'cursor-pointer select-none' : ''}`}
+                          onClick={() => s.ordenes?.length > 0 && setExpanded(expanded === s.id ? null : s.id)}
+                        >
+                          <td className="px-4 py-3 w-6 text-gray-400 text-xs">
+                            {s.ordenes?.length > 0 ? (expanded === s.id ? '▼' : '▶') : ''}
+                          </td>
+                          <td className="px-4 py-3 font-mono text-xs text-gray-500">{s.codigo}</td>
+                          <td className="px-4 py-3 font-medium">{s.descripcion}</td>
+                          <td className="px-4 py-3 text-center text-gray-500">{s.unidades_por_bulto}</td>
+                          <td className="px-4 py-3 text-center font-medium">{s.bultos}</td>
+                          <td className="px-4 py-3 text-center text-gray-600">{s.unidades_sueltas}</td>
+                          <td className="px-4 py-3 text-center font-bold">{s.cantidad_unidades}</td>
+                        </tr>
+                        {expanded === s.id && s.ordenes?.length > 0 && (
+                          <tr>
+                            <td colSpan={7} className="px-8 py-2 bg-blue-50 border-t border-blue-100">
+                              <p className="text-xs text-gray-500 mb-1 font-medium uppercase">Órdenes de origen</p>
+                              <table className="text-xs w-full max-w-md">
+                                <thead className="text-gray-500">
+                                  <tr>
+                                    <th className="py-1 text-left pr-4">N° Orden</th>
+                                    <th className="py-1 text-left pr-4">Fecha</th>
+                                    <th className="py-1 text-center pr-4">Cant. despachada</th>
+                                    <th className="py-1 text-left">Estado</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-blue-100">
+                                  {s.ordenes.map((o) => {
+                                    const upb = s.unidades_por_bulto || 1
+                                    return (
+                                      <tr key={o.id}>
+                                        <td className="py-1.5 pr-4 font-mono font-medium text-blue-700">{o.numero_orden}</td>
+                                        <td className="py-1.5 pr-4 text-gray-600">{o.fecha_emision}</td>
+                                        <td className="py-1.5 pr-4 text-center">
+                                          {Math.floor(o.cantidad_unidades / upb)}B+{o.cantidad_unidades % upb}u
+                                        </td>
+                                        <td className="py-1.5">
+                                          <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${statusBadge[o.status] ?? 'bg-gray-100 text-gray-600'}`}>
+                                            {o.status}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    )
+                                  })}
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
                   </td>
                 </tr>
               ))}

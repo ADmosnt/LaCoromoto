@@ -151,7 +151,7 @@ export default function Configuracion() {
         <div className="bg-white rounded-lg shadow p-5">
           <h3 className="font-semibold text-gray-700 mb-4">Tasa BCV</h3>
           <div className="space-y-3 mb-4">
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <input type="date" className="border border-gray-300 rounded px-2 py-1.5 text-sm"
                 value={tasaFecha} onChange={(e) => setTasaFecha(e.target.value)} />
               <input type="number" step="0.0001" min={0} placeholder="Bs. por USD"

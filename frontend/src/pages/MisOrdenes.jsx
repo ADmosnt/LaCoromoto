@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getOrdenes, getOrden, downloadOrdenPDF, confirmarReporteVenta } from '../api'
+import { getOrdenes, getOrden, downloadOrdenPDF } from '../api'
 import { useAuth } from '../context/AuthContext'
 import Alert from '../components/Alert'
 import ReporteVentaModal from '../components/ReporteVentaModal'
@@ -34,12 +34,13 @@ function PanelDetalle({ ordenId, onRefresh }) {
   const [detail, setDetail] = useState(null)
   const [err, setErr] = useState('')
   const [reporteOpen, setReporteOpen] = useState(false)
-  const [confirmando, setConfirmando] = useState(false)
 
-  useEffect(() => {
+  const fetchDetail = () => {
     setDetail(null); setErr('')
     getOrden(ordenId).then((r) => setDetail(r.data)).catch(() => setErr('Error al cargar detalle'))
-  }, [ordenId])
+  }
+
+  useEffect(() => { fetchDetail() }, [ordenId])
 
   const handlePDF = async () => {
     try {
@@ -53,28 +54,23 @@ function PanelDetalle({ ordenId, onRefresh }) {
     } catch { setErr('Error al generar PDF') }
   }
 
-  const handleConfirmar = async () => {
-    if (!confirm('¿Confirmar la venta?')) return
-    setConfirmando(true)
-    try {
-      await confirmarReporteVenta(detail.reporte_id)
-      onRefresh()
-    } catch (e) {
-      setErr(e.response?.data?.error ?? 'Error al confirmar')
-    } finally { setConfirmando(false) }
-  }
-
   if (err) return <div className="bg-gray-50 border-t px-4 py-3 text-sm text-red-500">{err}</div>
   if (!detail) return <div className="bg-gray-50 border-t px-4 py-3 text-sm text-gray-400">Cargando...</div>
 
   const isActiva = detail.status === 'activa'
   const isPendiente = detail.status === 'pendiente'
+  const isConfirmado = detail.status === 'confirmado'
 
   return (
     <div className="bg-gray-50 border-t border-gray-200 px-4 py-3">
       {isPendiente && (
         <div className="mb-2 text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded px-2 py-1">
-          Reporte enviado — pendiente de confirmación.
+          Reporte enviado — pendiente de confirmación por el administrador.
+        </div>
+      )}
+      {isConfirmado && (
+        <div className="mb-2 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1">
+          Venta confirmada.
         </div>
       )}
       <div className="overflow-x-auto mb-3">
@@ -82,6 +78,7 @@ function PanelDetalle({ ordenId, onRefresh }) {
           <thead className="bg-gray-200 text-gray-600 uppercase">
             <tr>
               <th className="px-3 py-2 text-left">Descripción</th>
+              <th className="px-3 py-2 text-center">Uds/Bulto</th>
               <th className="px-3 py-2 text-center">Cant.</th>
               <th className="px-3 py-2 text-right">Precio/Bulto</th>
               <th className="px-3 py-2 text-right">Total USD</th>
@@ -93,7 +90,10 @@ function PanelDetalle({ ordenId, onRefresh }) {
               return (
                 <tr key={d.id}>
                   <td className="px-3 py-2">{d.descripcion}</td>
-                  <td className="px-3 py-2 text-center">{d.cantidad_unidades} uds</td>
+                  <td className="px-3 py-2 text-center text-gray-500">{upb}</td>
+                  <td className="px-3 py-2 text-center">
+                    {Math.floor(d.cantidad_unidades / upb)}B+{d.cantidad_unidades % upb}u
+                  </td>
                   <td className="px-3 py-2 text-right">${(Number(d.precio_usd_momento) * upb).toFixed(2)}</td>
                   <td className="px-3 py-2 text-right font-medium">${Number(d.total_usd).toFixed(2)}</td>
                 </tr>
@@ -111,16 +111,11 @@ function PanelDetalle({ ordenId, onRefresh }) {
             Registrar Reporte de Venta
           </button>
         )}
-        {isPendiente && (
-          <button onClick={handleConfirmar} disabled={confirmando} className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded disabled:opacity-50">
-            {confirmando ? 'Confirmando...' : 'Confirmar Venta'}
-          </button>
-        )}
       </div>
       <ReporteVentaModal
         open={reporteOpen}
         onClose={() => setReporteOpen(false)}
-        onSaved={() => { onRefresh(); setReporteOpen(false) }}
+        onSaved={() => { fetchDetail(); onRefresh() }}
         orden={detail}
       />
     </div>

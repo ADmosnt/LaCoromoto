@@ -72,45 +72,51 @@ export default function Devoluciones() {
             </thead>
             <tbody>
               {devoluciones.map((d) => (
-                <tr key={d.id} className="border-b border-gray-100 last:border-b-0">
+                <tr key={`${d.id}-wrap`} className="border-b border-gray-100 last:border-b-0">
                   <td colSpan={6} className="p-0">
-                    <div
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer select-none"
-                      onClick={() => toggle(d.id)}
-                    >
-                      <span className="text-gray-400 text-xs w-3 flex-shrink-0">{expanded === d.id ? '▼' : '▶'}</span>
-                      <span className="text-gray-500 w-10">#{d.id}</span>
-                      <span className="font-medium flex-1 min-w-0 truncate">{d.cliente}</span>
-                      <span className="text-gray-500 text-xs flex-shrink-0">{d.fecha}</span>
-                      <span className="font-mono text-xs text-gray-400 flex-shrink-0">{d.numero_orden_origen ?? '—'}</span>
-                      <span className="text-gray-500 text-xs italic flex-shrink-0 max-w-xs truncate">{d.nota ?? ''}</span>
-                    </div>
-                    {expanded === d.id && (
-                      <div className="bg-orange-50 border-t border-orange-100 px-6 py-3">
-                        {!details[d.id] ? (
-                          <span className="text-xs text-gray-400">Cargando...</span>
-                        ) : (
-                          <table className="text-xs w-full max-w-lg">
-                            <thead className="text-gray-500 uppercase">
-                              <tr>
-                                <th className="py-1 text-left pr-6">Código</th>
-                                <th className="py-1 text-left pr-6">Descripción</th>
-                                <th className="py-1 text-center">Uds devueltas</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-orange-100">
-                              {details[d.id].detalles?.map((det) => (
-                                <tr key={det.id}>
-                                  <td className="py-1.5 pr-6 font-mono">{det.codigo}</td>
-                                  <td className="py-1.5 pr-6 font-medium">{det.descripcion}</td>
-                                  <td className="py-1.5 text-center font-semibold text-orange-700">{det.cantidad_unidades} uds</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                    <table className="w-full">
+                      <tbody>
+                        <tr
+                          className="hover:bg-gray-50 cursor-pointer select-none"
+                          onClick={() => toggle(d.id)}
+                        >
+                          <td className="px-4 py-3 w-6 text-gray-400 text-xs">{expanded === d.id ? '▼' : '▶'}</td>
+                          <td className="px-4 py-3 w-16 text-gray-500">#{d.id}</td>
+                          <td className="px-4 py-3 font-medium">{d.cliente}</td>
+                          <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{d.fecha}</td>
+                          <td className="px-4 py-3 font-mono text-xs text-gray-400 whitespace-nowrap">{d.numero_orden_origen ?? '—'}</td>
+                          <td className="px-4 py-3 text-gray-500 text-xs italic">{d.nota ?? '—'}</td>
+                        </tr>
+                        {expanded === d.id && (
+                          <tr>
+                            <td colSpan={6} className="px-6 py-3 bg-orange-50 border-t border-orange-100">
+                              {!details[d.id] ? (
+                                <span className="text-xs text-gray-400">Cargando...</span>
+                              ) : (
+                                <table className="text-xs">
+                                  <thead className="text-gray-500 uppercase">
+                                    <tr>
+                                      <th className="py-1 pr-6 text-left">Código</th>
+                                      <th className="py-1 pr-6 text-left">Descripción</th>
+                                      <th className="py-1 text-center">Uds devueltas</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-orange-100">
+                                    {details[d.id].detalles?.map((det) => (
+                                      <tr key={det.id}>
+                                        <td className="py-1.5 pr-6 font-mono">{det.codigo}</td>
+                                        <td className="py-1.5 pr-6 font-medium">{det.descripcion}</td>
+                                        <td className="py-1.5 text-center font-semibold text-orange-700">{det.cantidad_unidades} uds</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              )}
+                            </td>
+                          </tr>
                         )}
-                      </div>
-                    )}
+                      </tbody>
+                    </table>
                   </td>
                 </tr>
               ))}
