@@ -64,6 +64,42 @@ export default function Dashboard() {
         </div>
       )}
 
+      {data?.ultimos_reportes?.length > 0 && (
+        <div className="bg-white rounded-lg shadow mb-6">
+          <div className="px-5 py-4 border-b">
+            <h3 className="font-semibold text-gray-700">Actividad reciente — Reportes de Venta</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+                <tr>
+                  <th className="px-5 py-3 text-left">Cliente</th>
+                  <th className="px-5 py-3 text-left">Fecha cobro</th>
+                  <th className="px-5 py-3 text-left">Orden</th>
+                  <th className="px-5 py-3 text-right">Total USD</th>
+                  <th className="px-5 py-3 text-center">Estado</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {data.ultimos_reportes.map((r) => (
+                  <tr key={r.id} className="hover:bg-gray-50">
+                    <td className="px-5 py-3 font-medium">{r.cliente}</td>
+                    <td className="px-5 py-3">{r.fecha}</td>
+                    <td className="px-5 py-3 font-mono text-xs text-gray-500">{r.orden_id ? `#${r.orden_id}` : '—'}</td>
+                    <td className="px-5 py-3 text-right">${Number(r.total_usd).toFixed(2)}</td>
+                    <td className="px-5 py-3 text-center">
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${r.status === 'confirmado' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                        {r.status === 'confirmado' ? 'Confirmado' : 'Pendiente'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {data?.ultimas_ordenes?.length > 0 && (
         <div className="bg-white rounded-lg shadow">
           <div className="px-5 py-4 border-b flex items-center justify-between">

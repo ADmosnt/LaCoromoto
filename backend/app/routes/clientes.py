@@ -106,6 +106,39 @@ def delete_cliente(id):
 @bp.route('/<int:id>/stock', methods=['GET'])
 def get_cliente_stock(id):
     Cliente.query.get_or_404(id)
-    from app.models import StockConsignacion
+    from app.models import StockConsignacion, OrdenDespacho, OrdenDespachoDetalle
+    from sqlalchemy import and_
     stock = StockConsignacion.query.filter_by(cliente_id=id).all()
-    return jsonify([s.to_dict() for s in stock if s.cantidad_unidades > 0])
+    result = []
+    for s in stock:
+        if s.cantidad_unidades <= 0:
+            continue
+        d = s.to_dict()
+        ordenes_q = db.session.query(
+            OrdenDespacho.id,
+            OrdenDespacho.numero_orden,
+            OrdenDespacho.fecha_emision,
+            OrdenDespacho.status,
+            OrdenDespachoDetalle.cantidad_unidades.label('uds_orden'),
+        ).join(
+            OrdenDespachoDetalle,
+            and_(
+                OrdenDespachoDetalle.orden_id == OrdenDespacho.id,
+                OrdenDespachoDetalle.producto_id == s.producto_id,
+            )
+        ).filter(
+            OrdenDespacho.cliente_id == id,
+            OrdenDespacho.status.in_(['activa', 'pendiente']),
+        ).all()
+        d['ordenes'] = [
+            {
+                'id': o.id,
+                'numero_orden': o.numero_orden,
+                'fecha_emision': o.fecha_emision.isoformat(),
+                'status': o.status,
+                'cantidad_unidades': o.uds_orden,
+            }
+            for o in ordenes_q
+        ]
+        result.append(d)
+    return jsonify(result)

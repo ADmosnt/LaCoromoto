@@ -49,6 +49,10 @@ def get_dashboard():
         OrdenDespacho.fecha_emision.desc()
     ).limit(5).all()
 
+    ultimos_reportes = ReporteVenta.query.order_by(
+        ReporteVenta.creado_en.desc()
+    ).limit(8).all()
+
     # ── Monthly chart data (last 6 months) ────────────────────────────────────
     meses = _last_n_months(6)
     inicio_rango = datetime.date.fromisoformat(meses[0] + '-01')
@@ -91,5 +95,6 @@ def get_dashboard():
         'total_ventas_mes': round(vent_map.get(hoy.strftime('%Y-%m'), 0), 2),
         'tasa_hoy': tasa_hoy.to_dict() if tasa_hoy else None,
         'ultimas_ordenes': [o.to_dict() for o in ultimas_ordenes],
+        'ultimos_reportes': [r.to_dict() for r in ultimos_reportes],
         'mensual': mensual,
     })

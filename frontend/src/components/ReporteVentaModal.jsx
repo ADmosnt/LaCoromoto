@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Dialog, DialogContent } from './ui/Dialog'
 import { createReporteVenta, getTasaHoy } from '../api'
+import { useAuth } from '../context/AuthContext'
 import Alert from './Alert'
 
 export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
+  const { user } = useAuth()
+  const isCliente = user?.rol === 'cliente'
+
   const [rows, setRows] = useState([])
   const [fecha, setFecha] = useState('')
   const [tasaManual, setTasaManual] = useState('')
@@ -61,7 +65,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
       return
     }
 
-    if (!tasaManual || Number(tasaManual) <= 0) {
+    if (!isCliente && (!tasaManual || Number(tasaManual) <= 0)) {
       setError('Ingrese la tasa de cambio al momento del cobro')
       return
     }
@@ -72,7 +76,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
         cliente_id: orden.cliente_id,
         orden_id: orden.id,
         fecha,
-        tasa_valor: Number(tasaManual),
+        tasa_valor: Number(tasaManual) || undefined,
         detalles: detalles.map((r) => ({
           producto_id: Number(r.producto_id),
           cantidad_unidades: r.cantidad_unidades,
@@ -99,22 +103,24 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
         <Alert type="error" message={error} />
         <form onSubmit={submit} className="space-y-4">
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className={`grid grid-cols-1 gap-4 ${isCliente ? '' : 'sm:grid-cols-2'}`}>
             <div>
               <label className={lbl}>Fecha de cobro</label>
               <input type="date" className={`${inp} w-full`} value={fecha} onChange={(e) => setFecha(e.target.value)} required />
             </div>
-            <div>
-              <label className={lbl}>Tasa BCV al cobro (Bs/$)</label>
-              <input
-                type="number" min="0" step="0.0001"
-                className={`${inp} w-full`}
-                value={tasaManual}
-                onChange={(e) => setTasaManual(e.target.value)}
-                placeholder="Ej: 45.50"
-                required
-              />
-            </div>
+            {!isCliente && (
+              <div>
+                <label className={lbl}>Tasa BCV al cobro (Bs/$)</label>
+                <input
+                  type="number" min="0" step="0.0001"
+                  className={`${inp} w-full`}
+                  value={tasaManual}
+                  onChange={(e) => setTasaManual(e.target.value)}
+                  placeholder="Ej: 45.50"
+                  required
+                />
+              </div>
+            )}
           </div>
 
           <div>
@@ -124,12 +130,13 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                 <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
                   <tr>
                     <th className="px-3 py-2 text-left">Producto</th>
+                    <th className="px-3 py-2 text-center">Uds/Bulto</th>
                     <th className="px-3 py-2 text-center">Despachado</th>
                     <th className="px-3 py-2 text-center">Bultos</th>
                     <th className="px-3 py-2 text-center">Uds. sueltas</th>
                     <th className="px-3 py-2 text-center">Total uds</th>
-                    <th className="px-3 py-2 text-right">Precio/Bulto $</th>
-                    <th className="px-3 py-2 text-right">Total $</th>
+                    {!isCliente && <th className="px-3 py-2 text-right">Precio/Bulto $</th>}
+                    {!isCliente && <th className="px-3 py-2 text-right">Total $</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -143,6 +150,9 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                         <td className="px-3 py-2 font-medium">
                           <div>{row.descripcion}</div>
                           <div className="text-xs text-gray-400 font-mono">{row.codigo}</div>
+                        </td>
+                        <td className="px-3 py-2 text-center text-gray-500 text-xs font-medium">
+                          {upb}
                         </td>
                         <td className="px-3 py-2 text-center text-gray-500 text-xs">
                           {Math.floor(row.despacho_uds / upb)}B+{row.despacho_uds % upb}u
@@ -166,17 +176,21 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                         <td className={`px-3 py-2 text-center text-xs font-medium ${excede ? 'text-red-600' : 'text-gray-700'}`}>
                           {total > 0 ? `${total} uds` : '—'}
                         </td>
-                        <td className="px-3 py-2 text-right">
-                          <input
-                            type="number" min={0} step="0.01"
-                            className={`${inp} w-24 text-right`}
-                            value={row.precio_bulto}
-                            onChange={(e) => setRowField(i, 'precio_bulto', e.target.value)}
-                          />
-                        </td>
-                        <td className="px-3 py-2 text-right font-medium text-xs">
-                          {total > 0 ? `$${totalUsd.toFixed(2)}` : '—'}
-                        </td>
+                        {!isCliente && (
+                          <td className="px-3 py-2 text-right">
+                            <input
+                              type="number" min={0} step="0.01"
+                              className={`${inp} w-24 text-right`}
+                              value={row.precio_bulto}
+                              onChange={(e) => setRowField(i, 'precio_bulto', e.target.value)}
+                            />
+                          </td>
+                        )}
+                        {!isCliente && (
+                          <td className="px-3 py-2 text-right font-medium text-xs">
+                            {total > 0 ? `$${totalUsd.toFixed(2)}` : '—'}
+                          </td>
+                        )}
                       </tr>
                     )
                   })}

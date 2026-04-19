@@ -79,6 +79,7 @@ function OrdenDetailPanel({ ordenId, onAnulada, onReporteCreated }) {
     setConfirmando(true)
     try {
       await confirmarReporteVenta(detail.reporte_id)
+      fetchDetail()
       onReporteCreated()
     } catch (err) {
       setPanelError(err.response?.data?.error ?? 'Error al confirmar')
@@ -114,37 +115,76 @@ function OrdenDetailPanel({ ordenId, onAnulada, onReporteCreated }) {
         </div>
       )}
       <div className="overflow-x-auto mb-3">
-        <table className="w-full text-xs">
-          <thead className="bg-gray-200 text-gray-600 uppercase">
-            <tr>
-              <th className="px-3 py-2 text-left">Código</th>
-              <th className="px-3 py-2 text-left">Descripción</th>
-              <th className="px-3 py-2 text-center">Cant.</th>
-              <th className="px-3 py-2 text-center">Bultos</th>
-              <th className="px-3 py-2 text-right">Precio/Bulto</th>
-              <th className="px-3 py-2 text-right">Total USD</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {detail.detalles?.map((d) => {
-              const upb = d.unidades_por_bulto || 1
-              const precioBulto = Number(d.precio_usd_momento) * upb
-              return (
-                <tr key={d.id} className="hover:bg-gray-100">
-                  <td className="px-3 py-2 font-mono">{d.codigo}</td>
-                  <td className="px-3 py-2">{d.descripcion}</td>
-                  <td className="px-3 py-2 text-center">{d.cantidad_unidades}</td>
-                  <td className="px-3 py-2 text-center text-gray-500">
-                    {Math.floor(d.cantidad_unidades / upb)}B + {d.cantidad_unidades % upb}u
-                  </td>
-                  <td className="px-3 py-2 text-right">${precioBulto.toFixed(2)}</td>
-                  <td className="px-3 py-2 text-right font-medium">${Number(d.total_usd).toFixed(2)}</td>
+        {(() => {
+          const devueltoMap = {}
+          for (const dev of detail.devoluciones ?? []) {
+            for (const det of dev.detalles ?? []) {
+              devueltoMap[det.producto_id] = (devueltoMap[det.producto_id] || 0) + det.cantidad_unidades
+            }
+          }
+          const hayDevolucion = Object.keys(devueltoMap).length > 0
+          return (
+            <table className="w-full text-xs">
+              <thead className="bg-gray-200 text-gray-600 uppercase">
+                <tr>
+                  <th className="px-3 py-2 text-left">Código</th>
+                  <th className="px-3 py-2 text-left">Descripción</th>
+                  <th className="px-3 py-2 text-center">Despachado</th>
+                  {hayDevolucion && <th className="px-3 py-2 text-center text-orange-700">Devuelto</th>}
+                  {hayDevolucion && <th className="px-3 py-2 text-center">Neto</th>}
+                  <th className="px-3 py-2 text-right">Precio/Bulto</th>
+                  <th className="px-3 py-2 text-right">Total USD</th>
                 </tr>
-              )
-            })}
-          </tbody>
-        </table>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {detail.detalles?.map((d) => {
+                  const upb = d.unidades_por_bulto || 1
+                  const precioBulto = Number(d.precio_usd_momento) * upb
+                  const devuelto = devueltoMap[d.producto_id] || 0
+                  const neto = d.cantidad_unidades - devuelto
+                  return (
+                    <tr key={d.id} className="hover:bg-gray-100">
+                      <td className="px-3 py-2 font-mono">{d.codigo}</td>
+                      <td className="px-3 py-2">{d.descripcion}</td>
+                      <td className="px-3 py-2 text-center text-gray-500">
+                        {Math.floor(d.cantidad_unidades / upb)}B+{d.cantidad_unidades % upb}u
+                      </td>
+                      {hayDevolucion && (
+                        <td className="px-3 py-2 text-center text-orange-600">
+                          {devuelto > 0 ? `-${devuelto} uds` : '—'}
+                        </td>
+                      )}
+                      {hayDevolucion && (
+                        <td className="px-3 py-2 text-center font-medium">
+                          {Math.floor(neto / upb)}B+{neto % upb}u
+                        </td>
+                      )}
+                      <td className="px-3 py-2 text-right">${precioBulto.toFixed(2)}</td>
+                      <td className="px-3 py-2 text-right font-medium">${Number(d.total_usd).toFixed(2)}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          )
+        })()}
       </div>
+      {detail.devoluciones?.length > 0 && (
+        <div className="mb-3">
+          <p className="text-xs font-semibold text-gray-600 mb-1">Devoluciones vinculadas</p>
+          {detail.devoluciones.map((dev) => (
+            <div key={dev.id} className="text-xs bg-orange-50 border border-orange-200 rounded px-3 py-2 mb-1">
+              <span className="font-medium">{dev.fecha}</span>
+              {dev.nota && <span className="ml-2 italic text-gray-600">"{dev.nota}"</span>}
+              <ul className="mt-1 ml-2 text-gray-700 space-y-0.5">
+                {dev.detalles?.map((det) => (
+                  <li key={det.id}>{det.descripcion}: <strong>{det.cantidad_unidades} uds</strong> devueltas</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex gap-2 flex-wrap">
           <button
@@ -189,7 +229,7 @@ function OrdenDetailPanel({ ordenId, onAnulada, onReporteCreated }) {
       <ReporteVentaModal
         open={reporteModalOpen}
         onClose={() => setReporteModalOpen(false)}
-        onSaved={() => { onReporteCreated(); setReporteModalOpen(false) }}
+        onSaved={() => { fetchDetail(); onReporteCreated() }}
         orden={detail}
       />
     </div>

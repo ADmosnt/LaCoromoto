@@ -8,7 +8,6 @@ const adminNav = [
   { to: '/productos', label: 'Productos' },
   { to: '/inventario', label: 'Inventario Central' },
   { to: '/ordenes', label: 'Órdenes / Historial' },
-  { to: '/reportes-venta', label: 'Reportes de Venta' },
   { to: '/devoluciones', label: 'Devoluciones' },
   { to: '/stock', label: 'Stock en Consignación' },
 ]

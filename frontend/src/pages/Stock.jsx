@@ -1,21 +1,27 @@
 import { useEffect, useState } from 'react'
 import { getClientes, getClienteStock } from '../api'
-import PageHeader from '../components/PageHeader'
+
+const statusBadge = {
+  activa: 'bg-green-100 text-green-700',
+  pendiente: 'bg-yellow-100 text-yellow-700',
+}
 
 export default function Stock() {
   const [clientes, setClientes] = useState([])
   const [clienteId, setClienteId] = useState('')
   const [stock, setStock] = useState([])
   const [cliente, setCliente] = useState(null)
+  const [expanded, setExpanded] = useState(null)
 
   useEffect(() => {
     getClientes({ activo: true }).then((r) => setClientes(r.data))
   }, [])
 
   useEffect(() => {
-    if (!clienteId) { setStock([]); setCliente(null); return }
+    if (!clienteId) { setStock([]); setCliente(null); setExpanded(null); return }
     const c = clientes.find((c) => String(c.id) === clienteId)
     setCliente(c)
+    setExpanded(null)
     getClienteStock(clienteId).then((r) => setStock(r.data))
   }, [clienteId, clientes])
 
@@ -23,7 +29,7 @@ export default function Stock() {
 
   return (
     <div>
-      <PageHeader title="Stock en Consignación" />
+      <h2 className="text-xl font-bold text-gray-800 mb-6">Stock en Consignación</h2>
 
       <div className="bg-white rounded-lg shadow">
         <div className="p-4 border-b">
@@ -49,6 +55,7 @@ export default function Stock() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
               <tr>
+                <th className="px-4 py-3 w-6"></th>
                 <th className="px-4 py-3 text-left">Código</th>
                 <th className="px-4 py-3 text-left">Descripción</th>
                 <th className="px-4 py-3 text-center">Uds/Bulto</th>
@@ -57,27 +64,71 @@ export default function Stock() {
                 <th className="px-4 py-3 text-center">Total unidades</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody>
               {stock.map((s) => (
-                <tr key={s.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-mono text-xs">{s.codigo}</td>
-                  <td className="px-4 py-3 font-medium">{s.descripcion}</td>
-                  <td className="px-4 py-3 text-center">{s.unidades_por_bulto}</td>
-                  <td className="px-4 py-3 text-center font-medium">{s.bultos}</td>
-                  <td className="px-4 py-3 text-center text-gray-600">{s.unidades_sueltas}</td>
-                  <td className="px-4 py-3 text-center font-bold">{s.cantidad_unidades}</td>
+                <tr key={s.id} className="border-b border-gray-100 last:border-b-0">
+                  <td colSpan={7} className="p-0">
+                    <div
+                      className={`flex items-center gap-2 px-4 py-3 hover:bg-gray-50 ${s.ordenes?.length > 0 ? 'cursor-pointer select-none' : ''}`}
+                      onClick={() => s.ordenes?.length > 0 && setExpanded(expanded === s.id ? null : s.id)}
+                    >
+                      <span className="text-gray-400 text-xs w-3 flex-shrink-0">
+                        {s.ordenes?.length > 0 ? (expanded === s.id ? '▼' : '▶') : ' '}
+                      </span>
+                      <span className="font-mono text-xs text-gray-500 w-20">{s.codigo}</span>
+                      <span className="font-medium flex-1">{s.descripcion}</span>
+                      <span className="text-center text-gray-500 w-16">{s.unidades_por_bulto}</span>
+                      <span className="text-center font-medium w-16">{s.bultos}</span>
+                      <span className="text-center text-gray-600 w-20">{s.unidades_sueltas}</span>
+                      <span className="text-center font-bold w-24">{s.cantidad_unidades}</span>
+                    </div>
+                    {expanded === s.id && s.ordenes?.length > 0 && (
+                      <div className="bg-blue-50 border-t border-blue-100 px-8 py-2">
+                        <p className="text-xs text-gray-500 mb-1 font-medium uppercase">Órdenes de origen</p>
+                        <table className="text-xs w-full max-w-md">
+                          <thead className="text-gray-500">
+                            <tr>
+                              <th className="py-1 text-left pr-4">N° Orden</th>
+                              <th className="py-1 text-left pr-4">Fecha</th>
+                              <th className="py-1 text-center pr-4">Cant. despachada</th>
+                              <th className="py-1 text-left">Estado</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-blue-100">
+                            {s.ordenes.map((o) => {
+                              const upb = s.unidades_por_bulto || 1
+                              return (
+                                <tr key={o.id}>
+                                  <td className="py-1.5 pr-4 font-mono font-medium text-blue-700">{o.numero_orden}</td>
+                                  <td className="py-1.5 pr-4 text-gray-600">{o.fecha_emision}</td>
+                                  <td className="py-1.5 pr-4 text-center">
+                                    {Math.floor(o.cantidad_unidades / upb)}B+{o.cantidad_unidades % upb}u
+                                  </td>
+                                  <td className="py-1.5">
+                                    <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${statusBadge[o.status] ?? 'bg-gray-100 text-gray-600'}`}>
+                                      {o.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </td>
                 </tr>
               ))}
               {clienteId && stock.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
                     Este cliente no tiene stock en consignación
                   </td>
                 </tr>
               )}
               {!clienteId && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
                     Seleccione un cliente para ver su stock
                   </td>
                 </tr>
@@ -86,7 +137,7 @@ export default function Stock() {
             {stock.length > 0 && (
               <tfoot className="bg-gray-50 border-t-2 border-gray-300">
                 <tr>
-                  <td colSpan={5} className="px-4 py-3 text-right font-semibold">Total unidades en consignación:</td>
+                  <td colSpan={6} className="px-4 py-3 text-right font-semibold">Total unidades en consignación:</td>
                   <td className="px-4 py-3 text-center font-bold text-blue-700">{totalUds}</td>
                 </tr>
               </tfoot>

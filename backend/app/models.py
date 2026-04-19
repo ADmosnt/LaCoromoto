@@ -242,6 +242,16 @@ class OrdenDespacho(db.Model):
                 None
             ) if hasattr(self, 'reportes') else None
             d['reporte_id'] = active_rep.id if active_rep else None
+            devs = Devolucion.query.filter_by(orden_origen_id=self.id).all()
+            d['devoluciones'] = [
+                {
+                    'id': dev.id,
+                    'fecha': dev.fecha.isoformat(),
+                    'nota': dev.nota,
+                    'detalles': [det.to_dict() for det in dev.detalles],
+                }
+                for dev in devs
+            ]
         return d
 
 
