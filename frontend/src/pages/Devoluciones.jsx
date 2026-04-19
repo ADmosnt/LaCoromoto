@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Fragment } from 'react'
 import { getDevoluciones, getDevolucion, getClientes } from '../api'
 import Alert from '../components/Alert'
 import DevolucionModal from '../components/DevolucionModal'
@@ -72,53 +72,47 @@ export default function Devoluciones() {
             </thead>
             <tbody>
               {devoluciones.map((d) => (
-                <tr key={`${d.id}-wrap`} className="border-b border-gray-100 last:border-b-0">
-                  <td colSpan={6} className="p-0">
-                    <table className="w-full">
-                      <tbody>
-                        <tr
-                          className="hover:bg-gray-50 cursor-pointer select-none"
-                          onClick={() => toggle(d.id)}
-                        >
-                          <td className="px-4 py-3 w-6 text-gray-400 text-xs">{expanded === d.id ? '▼' : '▶'}</td>
-                          <td className="px-4 py-3 w-16 text-gray-500">#{d.id}</td>
-                          <td className="px-4 py-3 font-medium">{d.cliente}</td>
-                          <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{d.fecha}</td>
-                          <td className="px-4 py-3 font-mono text-xs text-gray-400 whitespace-nowrap">{d.numero_orden_origen ?? '—'}</td>
-                          <td className="px-4 py-3 text-gray-500 text-xs italic">{d.nota ?? '—'}</td>
-                        </tr>
-                        {expanded === d.id && (
-                          <tr>
-                            <td colSpan={6} className="px-6 py-3 bg-orange-50 border-t border-orange-100">
-                              {!details[d.id] ? (
-                                <span className="text-xs text-gray-400">Cargando...</span>
-                              ) : (
-                                <table className="text-xs">
-                                  <thead className="text-gray-500 uppercase">
-                                    <tr>
-                                      <th className="py-1 pr-6 text-left">Código</th>
-                                      <th className="py-1 pr-6 text-left">Descripción</th>
-                                      <th className="py-1 text-center">Uds devueltas</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-orange-100">
-                                    {details[d.id].detalles?.map((det) => (
-                                      <tr key={det.id}>
-                                        <td className="py-1.5 pr-6 font-mono">{det.codigo}</td>
-                                        <td className="py-1.5 pr-6 font-medium">{det.descripcion}</td>
-                                        <td className="py-1.5 text-center font-semibold text-orange-700">{det.cantidad_unidades} uds</td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              )}
-                            </td>
-                          </tr>
+                <Fragment key={d.id}>
+                  <tr
+                    className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer select-none"
+                    onClick={() => toggle(d.id)}
+                  >
+                    <td className="px-4 py-3 w-6 text-gray-400 text-xs">{expanded === d.id ? '▼' : '▶'}</td>
+                    <td className="px-4 py-3 w-16 text-gray-500">#{d.id}</td>
+                    <td className="px-4 py-3 font-medium">{d.cliente}</td>
+                    <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{d.fecha}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-gray-400 whitespace-nowrap">{d.numero_orden_origen ?? '—'}</td>
+                    <td className="px-4 py-3 text-gray-500 text-xs italic">{d.nota ?? '—'}</td>
+                  </tr>
+                  {expanded === d.id && (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-3 bg-orange-50 border-b border-orange-100">
+                        {!details[d.id] ? (
+                          <span className="text-xs text-gray-400">Cargando...</span>
+                        ) : (
+                          <table className="text-xs">
+                            <thead className="text-gray-500 uppercase">
+                              <tr>
+                                <th className="py-1 pr-6 text-left">Código</th>
+                                <th className="py-1 pr-6 text-left">Descripción</th>
+                                <th className="py-1 text-center">Uds devueltas</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-orange-100">
+                              {details[d.id].detalles?.map((det) => (
+                                <tr key={det.id}>
+                                  <td className="py-1.5 pr-6 font-mono">{det.codigo}</td>
+                                  <td className="py-1.5 pr-6 font-medium">{det.descripcion}</td>
+                                  <td className="py-1.5 text-center font-semibold text-orange-700">{det.cantidad_unidades} uds</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         )}
-                      </tbody>
-                    </table>
-                  </td>
-                </tr>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
               {devoluciones.length === 0 && (
                 <tr>

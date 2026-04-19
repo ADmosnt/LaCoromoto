@@ -151,13 +151,13 @@ export default function Configuracion() {
         <div className="bg-white rounded-lg shadow p-5">
           <h3 className="font-semibold text-gray-700 mb-4">Tasa BCV</h3>
           <div className="space-y-3 mb-4">
-            <div className="flex gap-2 items-center">
-              <input type="date" className="border border-gray-300 rounded px-2 py-1.5 text-sm"
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+              <input type="date" className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full sm:w-auto"
                 value={tasaFecha} onChange={(e) => setTasaFecha(e.target.value)} />
               <input type="number" step="0.0001" min={0} placeholder="Bs. por USD"
-                className="border border-gray-300 rounded px-2 py-1.5 text-sm w-36"
+                className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full sm:flex-1"
                 value={tasaValor} onChange={(e) => setTasaValor(e.target.value)} />
-              <button onClick={saveTasaHandler} className="bg-blue-600 text-white text-sm px-3 py-1.5 rounded hover:bg-blue-700">
+              <button onClick={saveTasaHandler} className="bg-blue-600 text-white text-sm px-4 py-1.5 rounded hover:bg-blue-700 w-full sm:w-auto shrink-0">
                 Guardar
               </button>
             </div>
