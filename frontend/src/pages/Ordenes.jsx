@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { getOrdenes, getOrden, getClientes, downloadOrdenPDF, anularOrden, confirmarReporteVenta } from '../api'
 import OrdenModal from '../components/OrdenModal'
 import ReporteVentaModal from '../components/ReporteVentaModal'
+import { HelpTooltip } from '../components/ui/Tooltip'
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -196,29 +197,38 @@ function OrdenDetailPanel({ ordenId, onAnulada, onReporteCreated }) {
             Descargar PDF
           </button>
           {isActiva && (
-            <button
-              onClick={() => setReporteModalOpen(true)}
-              className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded"
-            >
-              Registrar Reporte de Venta
-            </button>
+            <span className="inline-flex items-center gap-1">
+              <button
+                onClick={() => setReporteModalOpen(true)}
+                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded"
+              >
+                Registrar Reporte de Venta
+              </button>
+              <HelpTooltip text="Registra cuántas unidades fueron vendidas y cobradas. Queda pendiente de confirmación hasta que el administrador lo apruebe." side="top" />
+            </span>
           )}
           {isPendiente && (
-            <button
-              onClick={handleConfirmar}
-              disabled={confirmando}
-              className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded disabled:opacity-50"
-            >
-              {confirmando ? 'Confirmando...' : 'Confirmar Venta'}
-            </button>
+            <span className="inline-flex items-center gap-1">
+              <button
+                onClick={handleConfirmar}
+                disabled={confirmando}
+                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded disabled:opacity-50"
+              >
+                {confirmando ? 'Confirmando...' : 'Confirmar Venta'}
+              </button>
+              <HelpTooltip text="Confirma el reporte de venta pendiente. Esto descuenta permanentemente las unidades vendidas del stock en consignación del cliente." side="top" />
+            </span>
           )}
           {isActiva && (
-            <button
-              onClick={handleAnular}
-              className="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded"
-            >
-              Anular Orden
-            </button>
+            <span className="inline-flex items-center gap-1">
+              <button
+                onClick={handleAnular}
+                className="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded"
+              >
+                Anular Orden
+              </button>
+              <HelpTooltip text="Cancela esta orden y devuelve todas las unidades despachadas al inventario central. Esta acción no se puede deshacer." side="top" />
+            </span>
           )}
         </div>
         <div className="text-xs text-gray-500 text-right">

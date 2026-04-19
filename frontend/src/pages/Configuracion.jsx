@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { HelpTooltip } from '../components/ui/Tooltip'
 import {
   getConfig, updateConfig,
   getTasas, saveTasa, scrapeTasa,
@@ -152,7 +153,10 @@ export default function Configuracion() {
 
         {/* Tasas BCV */}
         <div className="bg-white rounded-lg shadow p-5">
-          <h3 className="font-semibold text-gray-700 mb-4">Tasa BCV</h3>
+          <h3 className="font-semibold text-gray-700 mb-4 flex items-center">
+            Tasa BCV
+            <HelpTooltip text="El sistema usa automáticamente la tasa más reciente para calcular los totales en bolívares. Si no hay tasa registrada para el día de hoy, usa la última disponible." side="right" />
+          </h3>
           <div className="space-y-3 mb-4">
             <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
               <input type="date" className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full sm:w-auto"

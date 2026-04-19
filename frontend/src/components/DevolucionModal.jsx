@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
+import { HelpTooltip } from './ui/Tooltip'
 import { createDevolucion, getClientes, getOrdenes, getOrden } from '../api'
 import Alert from './Alert'
 
@@ -105,7 +106,12 @@ export default function DevolucionModal({ open, onClose, onSaved }) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent title="Nueva Devolución" size="lg">
+      <DialogContent title={
+        <span className="inline-flex items-center gap-1">
+          Nueva Devolución
+          <HelpTooltip text="Registra la devolución de productos que el cliente tenía en consignación. Las unidades devueltas se retiran del stock del cliente pero NO se reincorporan al inventario central." side="bottom" />
+        </span>
+      } size="lg">
         <Alert type="error" message={error} />
         <form onSubmit={submit} className="space-y-4">
 

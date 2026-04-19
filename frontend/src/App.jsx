@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
+import { TooltipProvider } from './components/ui/Tooltip'
 import { AuthProvider } from './context/AuthContext'
 import RequireAuth from './components/RequireAuth'
 import Layout from './components/Layout'
@@ -22,6 +23,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Toaster position="top-right" richColors closeButton />
+      <TooltipProvider>
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -52,6 +54,7 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
+      </TooltipProvider>
     </BrowserRouter>
   )
 }

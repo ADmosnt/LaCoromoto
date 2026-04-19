@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
+import { HelpTooltip } from './ui/Tooltip'
 import { createReporteVenta, getTasaHoy } from '../api'
 import { useAuth } from '../context/AuthContext'
 import Alert from './Alert'
@@ -101,7 +102,12 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent title={`Reporte de Venta — Orden ${orden.numero_orden}`} size="xl">
+      <DialogContent title={
+        <span className="inline-flex items-center gap-1">
+          Reporte de Venta — Orden {orden.numero_orden}
+          <HelpTooltip text="Registra cuántas unidades de esta orden fueron efectivamente vendidas y cobradas. El reporte queda 'pendiente' hasta que sea confirmado por el administrador." side="bottom" />
+        </span>
+      } size="xl">
         <Alert type="error" message={error} />
         <form onSubmit={submit} className="space-y-4">
 
@@ -112,7 +118,10 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
             </div>
             {!isCliente && (
               <div>
-                <label className={lbl}>Tasa BCV al cobro (Bs/$)</label>
+                <label className={`${lbl} flex items-center`}>
+                Tasa BCV al cobro (Bs/$)
+                <HelpTooltip text="Tipo de cambio del BCV al momento en que el cliente realizó el pago. Puede diferir de la tasa del despacho original." />
+              </label>
                 <input
                   type="number" min="0" step="0.0001"
                   className={`${inp} w-full`}
