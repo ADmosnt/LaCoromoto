@@ -1,11 +1,13 @@
 from flask import Blueprint, jsonify, request
 from app import db
 from app.models import Cliente, ClienteTelefono, ListaPrecio
+from app.auth import require_role
 
 bp = Blueprint('clientes', __name__)
 
 
 @bp.route('', methods=['GET'])
+@require_role('admin')
 def list_clientes():
     q = Cliente.query
     search = request.args.get('search', '')
@@ -25,12 +27,14 @@ def list_clientes():
 
 
 @bp.route('/<int:id>', methods=['GET'])
+@require_role('admin')
 def get_cliente(id):
     c = Cliente.query.get_or_404(id)
     return jsonify(c.to_dict())
 
 
 @bp.route('', methods=['POST'])
+@require_role('admin')
 def create_cliente():
     data = request.get_json()
     if not data.get('codigo') or not data.get('razon_social'):
@@ -69,6 +73,7 @@ def create_cliente():
 
 
 @bp.route('/<int:id>', methods=['PUT'])
+@require_role('admin')
 def update_cliente(id):
     c = Cliente.query.get_or_404(id)
     data = request.get_json()
@@ -96,6 +101,7 @@ def update_cliente(id):
 
 
 @bp.route('/<int:id>', methods=['DELETE'])
+@require_role('admin')
 def delete_cliente(id):
     c = Cliente.query.get_or_404(id)
     c.activo = False
@@ -104,6 +110,7 @@ def delete_cliente(id):
 
 
 @bp.route('/<int:id>/stock', methods=['GET'])
+@require_role('admin')
 def get_cliente_stock(id):
     Cliente.query.get_or_404(id)
     from app.models import StockConsignacion, OrdenDespacho, OrdenDespachoDetalle

@@ -16,12 +16,16 @@ export default function DevolucionModal({ open, onClose, onSaved }) {
   useEffect(() => {
     if (!open) return
     setError(''); setClienteId(''); setOrdenId(''); setRows([]); setNota(''); setOrdenes([])
-    getClientes({ activo: true }).then((r) => setClientes(r.data))
+    getClientes({ activo: true })
+      .then((r) => setClientes(r.data))
+      .catch(() => setError('Error al cargar clientes'))
   }, [open])
 
   useEffect(() => {
     if (!clienteId) { setOrdenes([]); setOrdenId(''); setRows([]); return }
-    getOrdenes({ cliente_id: clienteId, status: 'activa' }).then((r) => setOrdenes(r.data))
+    getOrdenes({ cliente_id: clienteId, status: 'activa' })
+      .then((r) => setOrdenes(r.data))
+      .catch(() => setError('Error al cargar órdenes'))
     setOrdenId('')
     setRows([])
   }, [clienteId])

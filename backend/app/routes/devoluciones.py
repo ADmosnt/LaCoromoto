@@ -2,11 +2,13 @@ from flask import Blueprint, jsonify, request
 import datetime
 from app import db
 from app.models import Devolucion, DevolucionDetalle, StockConsignacion, Cliente, Producto
+from app.auth import require_role
 
 bp = Blueprint('devoluciones', __name__)
 
 
 @bp.route('', methods=['GET'])
+@require_role('admin')
 def list_devoluciones():
     q = Devolucion.query
     cliente_id = request.args.get('cliente_id')
@@ -23,12 +25,14 @@ def list_devoluciones():
 
 
 @bp.route('/<int:id>', methods=['GET'])
+@require_role('admin')
 def get_devolucion(id):
     d = Devolucion.query.get_or_404(id)
     return jsonify(d.to_dict(include_detalles=True))
 
 
 @bp.route('', methods=['POST'])
+@require_role('admin')
 def create_devolucion():
     data = request.get_json()
 
@@ -38,20 +42,6 @@ def create_devolucion():
         return jsonify({'error': 'La devolución debe tener al menos un producto'}), 400
 
     cliente = Cliente.query.get_or_404(data['cliente_id'])
-
-    # Validate stock
-    for item in data['detalles']:
-        stock = StockConsignacion.query.filter_by(
-            cliente_id=cliente.id, producto_id=item['producto_id']
-        ).first()
-        cantidad = int(item['cantidad_unidades'])
-        if not stock or stock.cantidad_unidades < cantidad:
-            producto = Producto.query.get(item['producto_id'])
-            nombre = producto.descripcion if producto else f"ID {item['producto_id']}"
-            disponible = stock.cantidad_unidades if stock else 0
-            return jsonify({
-                'error': f"No se pueden devolver más unidades de las que tiene '{nombre}'. Disponible: {disponible}"
-            }), 400
 
     fecha = datetime.date.fromisoformat(data.get('fecha', datetime.date.today().isoformat()))
     devolucion = Devolucion(
@@ -64,15 +54,26 @@ def create_devolucion():
     db.session.flush()
 
     for item in data['detalles']:
-        cantidad = int(item['cantidad_unidades'])
+        cantidad = int(item.get('cantidad_unidades', 0))
+        if cantidad <= 0:
+            return jsonify({'error': 'La cantidad debe ser mayor a 0'}), 400
+
+        producto = Producto.query.get_or_404(item['producto_id'])
+        stock = StockConsignacion.query.filter_by(
+            cliente_id=cliente.id, producto_id=producto.id
+        ).with_for_update().first()
+        disponible = stock.cantidad_unidades if stock else 0
+        if disponible < cantidad:
+            return jsonify({
+                'error': f"No se pueden devolver más unidades de las que tiene '{producto.descripcion}'. "
+                         f"Disponible: {disponible}"
+            }), 400
+
         db.session.add(DevolucionDetalle(
             devolucion_id=devolucion.id,
-            producto_id=item['producto_id'],
+            producto_id=producto.id,
             cantidad_unidades=cantidad,
         ))
-        stock = StockConsignacion.query.filter_by(
-            cliente_id=cliente.id, producto_id=item['producto_id']
-        ).first()
         stock.cantidad_unidades -= cantidad
 
     db.session.commit()

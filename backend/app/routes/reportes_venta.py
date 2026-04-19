@@ -5,11 +5,14 @@ from app import db
 from app.models import (ReporteVenta, ReporteVentaDetalle,
                          StockConsignacion, TasaBCV, Cliente, Producto,
                          OrdenDespacho)
+from app.utils import resolv_tasa
+from app.auth import require_role, get_current_user
 
 bp = Blueprint('reportes_venta', __name__)
 
 
 @bp.route('', methods=['GET'])
+@require_role('admin')
 def list_reportes():
     q = ReporteVenta.query
     cliente_id = request.args.get('cliente_id')
@@ -29,13 +32,16 @@ def list_reportes():
 
 
 @bp.route('/<int:id>', methods=['GET'])
+@require_role('admin')
 def get_reporte(id):
     r = ReporteVenta.query.get_or_404(id)
     return jsonify(r.to_dict(include_detalles=True))
 
 
 @bp.route('', methods=['POST'])
+@require_role('admin', 'cliente')
 def create_reporte():
+    current_user = get_current_user()
     data = request.get_json()
 
     if not data.get('cliente_id'):
@@ -43,13 +49,18 @@ def create_reporte():
     if not data.get('detalles'):
         return jsonify({'error': 'El reporte debe tener al menos un producto'}), 400
 
+    # Clients can only report for their own linked client
+    if current_user.rol == 'cliente' and int(data['cliente_id']) != current_user.cliente_id:
+        return jsonify({'error': 'Sin permiso'}), 403
+
     cliente = Cliente.query.get_or_404(data['cliente_id'])
 
-    # Validate and optionally link to an order
     orden = None
     orden_id = data.get('orden_id')
     if orden_id:
         orden = OrdenDespacho.query.get_or_404(orden_id)
+        if current_user.rol == 'cliente' and orden.cliente_id != current_user.cliente_id:
+            return jsonify({'error': 'Sin permiso'}), 403
         if orden.status != 'activa':
             return jsonify({'error': f'La orden está en estado "{orden.status}" y no acepta reportes'}), 400
         existing = ReporteVenta.query.filter_by(orden_id=orden_id).filter(
@@ -59,35 +70,20 @@ def create_reporte():
             return jsonify({'error': 'Esta orden ya tiene un reporte registrado'}), 400
 
     fecha = datetime.date.fromisoformat(data.get('fecha', datetime.date.today().isoformat()))
-
-    # Resolve tasa
-    tasa = TasaBCV.query.filter_by(fecha=fecha).first()
+    tasa = resolv_tasa(TasaBCV, fecha, data.get('tasa_bcv_id'))
     if not tasa:
-        tasa_id = data.get('tasa_bcv_id')
-        if tasa_id:
-            tasa = TasaBCV.query.get(tasa_id)
-        if not tasa:
-            tasa = TasaBCV.query.order_by(TasaBCV.fecha.desc()).first()
-        if not tasa:
-            return jsonify({'error': 'No hay tasa BCV disponible'}), 400
+        return jsonify({'error': 'No hay tasa BCV disponible'}), 400
 
-    # Allow manual tasa_valor override (rate at time of payment, not dispatch)
     tasa_valor_manual = data.get('tasa_valor')
     tasa_valor = Decimal(str(tasa_valor_manual)) if tasa_valor_manual else tasa.valor
 
-    # Validate stock before creating
     for item in data['detalles']:
-        stock = StockConsignacion.query.filter_by(
-            cliente_id=cliente.id, producto_id=item['producto_id']
-        ).first()
-        cantidad = int(item['cantidad_unidades'])
-        if not stock or stock.cantidad_unidades < cantidad:
-            producto = Producto.query.get(item['producto_id'])
-            nombre = producto.descripcion if producto else f"ID {item['producto_id']}"
-            disponible = stock.cantidad_unidades if stock else 0
-            return jsonify({
-                'error': f"Stock insuficiente para '{nombre}'. Disponible: {disponible} unidades"
-            }), 400
+        cantidad = int(item.get('cantidad_unidades', 0))
+        precio = Decimal(str(item.get('precio_usd_momento', 0)))
+        if cantidad <= 0:
+            return jsonify({'error': 'La cantidad debe ser mayor a 0'}), 400
+        if precio < 0:
+            return jsonify({'error': 'El precio no puede ser negativo'}), 400
 
     reporte = ReporteVenta(
         cliente_id=cliente.id,
@@ -103,13 +99,12 @@ def create_reporte():
     for item in data['detalles']:
         precio = Decimal(str(item['precio_usd_momento']))
         cantidad = int(item['cantidad_unidades'])
-        det = ReporteVentaDetalle(
+        db.session.add(ReporteVentaDetalle(
             reporte_id=reporte.id,
             producto_id=item['producto_id'],
             cantidad_unidades=cantidad,
             precio_usd_momento=precio,
-        )
-        db.session.add(det)
+        ))
         total_usd += precio * cantidad
 
     reporte.total_usd = total_usd
@@ -123,6 +118,7 @@ def create_reporte():
 
 
 @bp.route('/<int:id>/confirmar', methods=['PUT'])
+@require_role('admin')
 def confirmar_reporte(id):
     reporte = ReporteVenta.query.get_or_404(id)
     if reporte.status == 'confirmado':
@@ -131,7 +127,7 @@ def confirmar_reporte(id):
     for det in reporte.detalles:
         stock = StockConsignacion.query.filter_by(
             cliente_id=reporte.cliente_id, producto_id=det.producto_id
-        ).first()
+        ).with_for_update().first()
         if not stock or stock.cantidad_unidades < det.cantidad_unidades:
             producto = Producto.query.get(det.producto_id)
             nombre = producto.descripcion if producto else f"ID {det.producto_id}"

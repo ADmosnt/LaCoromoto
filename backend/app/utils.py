@@ -68,6 +68,16 @@ def numero_a_letras(valor):
     return f"{_entero_a_letras(entero)} CON {decimales:02d}/100"
 
 
+def resolv_tasa(TasaBCV, fecha, tasa_id=None):
+    """Return BCV rate for date, fall back to explicit id, then most recent."""
+    tasa = TasaBCV.query.filter_by(fecha=fecha).first()
+    if not tasa and tasa_id:
+        tasa = TasaBCV.query.get(tasa_id)
+    if not tasa:
+        tasa = TasaBCV.query.order_by(TasaBCV.fecha.desc()).first()
+    return tasa
+
+
 def siguiente_numero_orden(db, OrdenDespacho):
     """Generate next order number as zero-padded 8-digit string."""
     from sqlalchemy import func

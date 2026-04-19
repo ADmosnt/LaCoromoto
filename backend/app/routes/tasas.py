@@ -3,17 +3,20 @@ import datetime
 from app import db
 from app.models import TasaBCV
 from app.services.bcv_scraper import obtener_tasa_bcv
+from app.auth import require_role
 
 bp = Blueprint('tasas', __name__)
 
 
 @bp.route('', methods=['GET'])
+@require_role('admin')
 def list_tasas():
     tasas = TasaBCV.query.order_by(TasaBCV.fecha.desc()).limit(30).all()
     return jsonify([t.to_dict() for t in tasas])
 
 
 @bp.route('/hoy', methods=['GET'])
+@require_role('admin', 'cliente')
 def get_tasa_hoy():
     hoy = datetime.date.today()
     tasa = TasaBCV.query.filter_by(fecha=hoy).first()
@@ -36,6 +39,7 @@ def get_tasa_hoy():
 
 
 @bp.route('', methods=['POST'])
+@require_role('admin')
 def create_tasa():
     data = request.get_json()
     if not data.get('valor'):
@@ -56,6 +60,7 @@ def create_tasa():
 
 
 @bp.route('/scrape', methods=['POST'])
+@require_role('admin')
 def scrape_tasa():
     valor = obtener_tasa_bcv()
     if not valor:

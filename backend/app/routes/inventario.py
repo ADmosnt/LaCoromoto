@@ -2,11 +2,13 @@ from flask import Blueprint, jsonify, request
 import datetime
 from app import db
 from app.models import InventarioCentral, EntradaInventario, Producto
+from app.auth import require_role
 
 bp = Blueprint('inventario', __name__)
 
 
 @bp.route('', methods=['GET'])
+@require_role('admin')
 def list_inventario():
     items = (
         InventarioCentral.query
@@ -19,6 +21,7 @@ def list_inventario():
 
 
 @bp.route('/entradas', methods=['GET'])
+@require_role('admin')
 def list_entradas():
     q = EntradaInventario.query
     producto_id = request.args.get('producto_id')
@@ -29,6 +32,7 @@ def list_entradas():
 
 
 @bp.route('/entradas', methods=['POST'])
+@require_role('admin')
 def create_entrada():
     data = request.get_json()
     if not data.get('producto_id') or not data.get('cantidad_unidades'):

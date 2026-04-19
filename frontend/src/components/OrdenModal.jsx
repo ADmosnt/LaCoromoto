@@ -29,10 +29,9 @@ export default function OrdenModal({ open, onClose, onSaved }) {
     setTasaManual('')
     setRows([emptyRow()])
     setFecha(new Date().toISOString().slice(0, 10))
-    Promise.all([getClientes({ activo: true }), getProductos({ activo: true })]).then(([c, p]) => {
-      setClientes(c.data)
-      setProductos(p.data)
-    })
+    Promise.all([getClientes({ activo: true }), getProductos({ activo: true })])
+      .then(([c, p]) => { setClientes(c.data); setProductos(p.data) })
+      .catch(() => setError('Error al cargar clientes y productos'))
     getTasaHoy().then((r) => setTasa(r.data)).catch(() => setTasa(null))
   }, [open])
 

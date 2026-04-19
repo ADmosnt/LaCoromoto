@@ -1,11 +1,13 @@
 from flask import Blueprint, jsonify, request
 from app import db
 from app.models import Producto, ProductoPrecio, ListaPrecio
+from app.auth import require_role
 
 bp = Blueprint('productos', __name__)
 
 
 @bp.route('', methods=['GET'])
+@require_role('admin')
 def list_productos():
     q = Producto.query
     search = request.args.get('search', '')
@@ -27,12 +29,14 @@ def list_productos():
 
 
 @bp.route('/<int:id>', methods=['GET'])
+@require_role('admin')
 def get_producto(id):
     p = Producto.query.get_or_404(id)
     return jsonify(p.to_dict())
 
 
 @bp.route('', methods=['POST'])
+@require_role('admin')
 def create_producto():
     data = request.get_json()
     if not data.get('codigo') or not data.get('descripcion'):
@@ -65,6 +69,7 @@ def create_producto():
 
 
 @bp.route('/<int:id>', methods=['PUT'])
+@require_role('admin')
 def update_producto(id):
     p = Producto.query.get_or_404(id)
     data = request.get_json()
@@ -87,6 +92,7 @@ def update_producto(id):
 
 
 @bp.route('/<int:id>', methods=['DELETE'])
+@require_role('admin')
 def delete_producto(id):
     p = Producto.query.get_or_404(id)
     p.activo = False

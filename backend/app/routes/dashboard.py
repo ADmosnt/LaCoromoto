@@ -4,6 +4,7 @@ import datetime
 from app import db
 from app.models import (OrdenDespacho, Cliente, Producto,
                          TasaBCV, ReporteVenta)
+from app.auth import require_role
 
 bp = Blueprint('dashboard', __name__)
 
@@ -211,6 +212,7 @@ def _chart_data(periodo):
 
 
 @bp.route('', methods=['GET'])
+@require_role('admin')
 def get_dashboard():
     hoy = datetime.date.today()
     mes_inicio = hoy.replace(day=1)
