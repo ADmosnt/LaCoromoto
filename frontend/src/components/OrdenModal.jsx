@@ -7,8 +7,14 @@ import Alert from './Alert'
 const emptyRow = () => ({
   producto_id: '', descripcion: '', codigo: '',
   unidades_por_bulto: 1, precio_usd_momento: '',
-  cantidad_unidades: '', precios: [],
+  bultos: '', sueltas: '',
+  precios: [],
 })
+
+const rowUnidades = (row) => {
+  const upb = row.unidades_por_bulto || 1
+  return (Number(row.bultos) || 0) * upb + (Number(row.sueltas) || 0)
+}
 
 export default function OrdenModal({ open, onClose, onSaved }) {
   const [clientes, setClientes] = useState([])
@@ -50,6 +56,8 @@ export default function OrdenModal({ open, onClose, onSaved }) {
         rs[i].precios = prod.precios
         rs[i].precio_usd_momento = prod.precios?.[0]?.precio_usd ?? ''
       }
+      rs[i].bultos = ''
+      rs[i].sueltas = ''
     }
     setRows(rs)
   }
@@ -58,7 +66,7 @@ export default function OrdenModal({ open, onClose, onSaved }) {
   const removeRow = (i) => setRows(rows.filter((_, idx) => idx !== i))
 
   const totalUsd = rows.reduce((sum, r) => {
-    return sum + (Number(r.cantidad_unidades) || 0) * (Number(r.precio_usd_momento) || 0)
+    return sum + rowUnidades(r) * (Number(r.precio_usd_momento) || 0)
   }, 0)
 
   const submit = async (e) => {
@@ -66,8 +74,8 @@ export default function OrdenModal({ open, onClose, onSaved }) {
     setError('')
     if (!clienteId) { setError('Seleccione un cliente'); return }
     if (!tasaValor) { setError('Ingrese la tasa BCV'); return }
-    const detalles = rows.filter((r) => r.producto_id && r.cantidad_unidades && r.precio_usd_momento)
-    if (!detalles.length) { setError('Agregue al menos un producto'); return }
+    const detalles = rows.filter((r) => r.producto_id && rowUnidades(r) > 0 && r.precio_usd_momento)
+    if (!detalles.length) { setError('Agregue al menos un producto con cantidad y precio'); return }
 
     setLoading(true)
     try {
@@ -78,7 +86,7 @@ export default function OrdenModal({ open, onClose, onSaved }) {
         tasa_valor: tasaValor,
         detalles: detalles.map((r) => ({
           producto_id: Number(r.producto_id),
-          cantidad_unidades: Number(r.cantidad_unidades),
+          cantidad_unidades: rowUnidades(r),
           precio_usd_momento: Number(r.precio_usd_momento),
         })),
       })
@@ -93,6 +101,7 @@ export default function OrdenModal({ open, onClose, onSaved }) {
   }
 
   const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  const inpNum = 'border border-gray-300 rounded px-2 py-1.5 text-sm w-full text-center focus:outline-none focus:ring-1 focus:ring-blue-500'
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -139,13 +148,14 @@ export default function OrdenModal({ open, onClose, onSaved }) {
           <div>
             <h3 className="font-semibold text-gray-700 mb-2 text-sm">Productos</h3>
             <div className="overflow-x-auto rounded-lg border border-gray-200">
-              <table className="w-full text-sm min-w-[600px]">
+              <table className="w-full text-sm min-w-[700px]">
                 <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
                   <tr>
                     <th className="px-3 py-2 text-left">Producto</th>
-                    <th className="px-3 py-2 text-center w-16">Uds/B</th>
-                    <th className="px-3 py-2 text-center w-24">Cantidad</th>
+                    <th className="px-3 py-2 text-center w-14">Uds/B</th>
                     <th className="px-3 py-2 text-center w-20">Bultos</th>
+                    <th className="px-3 py-2 text-center w-20">Sueltas</th>
+                    <th className="px-3 py-2 text-center w-20">Total uds</th>
                     <th className="px-3 py-2 text-right w-32">Precio/Bulto</th>
                     <th className="px-3 py-2 text-right w-24">Total USD</th>
                     <th className="px-3 py-2 w-6"></th>
@@ -153,9 +163,9 @@ export default function OrdenModal({ open, onClose, onSaved }) {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {rows.map((row, i) => {
-                    const cant = Number(row.cantidad_unidades) || 0
-                    const precio = Number(row.precio_usd_momento) || 0
                     const upb = row.unidades_por_bulto || 1
+                    const total = rowUnidades(row)
+                    const precio = Number(row.precio_usd_momento) || 0
                     return (
                       <tr key={i}>
                         <td className="px-3 py-2">
@@ -168,17 +178,25 @@ export default function OrdenModal({ open, onClose, onSaved }) {
                             {productos.map((p) => <option key={p.id} value={p.id}>{p.descripcion}</option>)}
                           </select>
                         </td>
-                        <td className="px-3 py-2 text-center text-gray-500 text-xs">{row.unidades_por_bulto}</td>
+                        <td className="px-3 py-2 text-center text-gray-500 text-xs font-medium">{upb}</td>
                         <td className="px-3 py-2">
                           <input
-                            type="number" min={1}
-                            className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full text-center"
-                            value={row.cantidad_unidades}
-                            onChange={(e) => setRow(i, 'cantidad_unidades', e.target.value)}
+                            type="number" min={0}
+                            className={inpNum}
+                            value={row.bultos}
+                            onChange={(e) => setRow(i, 'bultos', e.target.value)}
                           />
                         </td>
-                        <td className="px-3 py-2 text-center text-gray-500 text-xs">
-                          {cant > 0 ? `${Math.floor(cant / upb)}B + ${cant % upb}u` : '—'}
+                        <td className="px-3 py-2">
+                          <input
+                            type="number" min={0} max={upb - 1}
+                            className={inpNum}
+                            value={row.sueltas}
+                            onChange={(e) => setRow(i, 'sueltas', e.target.value)}
+                          />
+                        </td>
+                        <td className="px-3 py-2 text-center text-xs font-medium text-gray-700">
+                          {total > 0 ? total : '—'}
                         </td>
                         <td className="px-3 py-2">
                           <div className="flex flex-col items-end gap-1">
@@ -208,7 +226,7 @@ export default function OrdenModal({ open, onClose, onSaved }) {
                           </div>
                         </td>
                         <td className="px-3 py-2 text-right font-medium text-sm">
-                          ${(cant * precio).toFixed(2)}
+                          {total > 0 ? `$${(total * precio).toFixed(2)}` : '—'}
                         </td>
                         <td className="px-3 py-2">
                           {rows.length > 1 && (
