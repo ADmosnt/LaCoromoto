@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
 import { createOrden, getClientes, getProductos, getTasaHoy } from '../api'
 import Alert from './Alert'
@@ -81,6 +82,7 @@ export default function OrdenModal({ open, onClose, onSaved }) {
           precio_usd_momento: Number(r.precio_usd_momento),
         })),
       })
+      toast.success('Orden de despacho creada')
       onSaved()
       onClose()
     } catch (err) {

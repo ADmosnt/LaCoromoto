@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
 import {
   getCliente, createCliente, updateCliente,
@@ -52,6 +53,7 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
       const payload = { ...form, telefonos: form.telefonos.filter((t) => t.trim()), zona_id: form.zona_id || null, grupo_id: form.grupo_id || null }
       if (isEdit) await updateCliente(clienteId, payload)
       else await createCliente(payload)
+      toast.success(isEdit ? 'Cliente actualizado' : 'Cliente creado')
       onSaved()
       onClose()
     } catch (err) {

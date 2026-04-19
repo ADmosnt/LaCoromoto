@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
 import { createReporteVenta, getTasaHoy } from '../api'
 import { useAuth } from '../context/AuthContext'
@@ -83,6 +84,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
           precio_usd_momento: Number(r.precio_bulto) / (r.upb || 1),
         })),
       })
+      toast.success('Reporte de venta registrado')
       onSaved()
       onClose()
     } catch (err) {

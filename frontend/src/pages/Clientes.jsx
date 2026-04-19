@@ -1,20 +1,19 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { getClientes, deleteCliente } from '../api'
 import PageHeader from '../components/PageHeader'
-import Alert from '../components/Alert'
 import ClienteModal from '../components/ClienteModal'
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([])
   const [search, setSearch] = useState('')
-  const [error, setError] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [editId, setEditId] = useState(null)
 
   const load = () =>
     getClientes({ search, activo: true })
       .then((r) => setClientes(r.data))
-      .catch(() => setError('Error al cargar clientes'))
+      .catch(() => toast.error('Error al cargar clientes'))
 
   useEffect(() => { load() }, [search])
 
@@ -24,8 +23,13 @@ export default function Clientes() {
 
   const handleDelete = async (id, nombre) => {
     if (!confirm(`¿Desactivar a "${nombre}"?`)) return
-    await deleteCliente(id)
-    load()
+    try {
+      await deleteCliente(id)
+      toast.success(`"${nombre}" desactivado`)
+      load()
+    } catch (err) {
+      toast.error(err.response?.data?.error ?? 'Error al desactivar cliente')
+    }
   }
 
   return (
@@ -39,8 +43,6 @@ export default function Clientes() {
           + Nuevo cliente
         </button>
       </div>
-      <Alert type="error" message={error} />
-
       <div className="bg-white rounded-lg shadow">
         <div className="p-4 border-b">
           <input

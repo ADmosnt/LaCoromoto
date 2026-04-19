@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
 import { createDevolucion, getClientes, getOrdenes, getOrden } from '../api'
 import Alert from './Alert'
@@ -88,6 +89,7 @@ export default function DevolucionModal({ open, onClose, onSaved }) {
           cantidad_unidades: r.cantidad_unidades,
         })),
       })
+      toast.success('Devolución registrada')
       onSaved()
       onClose()
     } catch (err) {

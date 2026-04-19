@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import {
   getConfig, updateConfig,
   getTasas, saveTasa, scrapeTasa,
@@ -7,7 +8,6 @@ import {
   getGruposProductos, createGrupoProducto, updateGrupoProducto, deleteGrupoProducto,
   getListasPrecios, createListaPrecio, updateListaPrecio, deleteListaPrecio,
 } from '../api'
-import Alert from '../components/Alert'
 
 function CatalogSection({ title, items, onCreate, onUpdate, onDelete }) {
   const [input, setInput] = useState('')
@@ -72,7 +72,6 @@ export default function Configuracion() {
   const [gruposClientes, setGruposClientes] = useState([])
   const [gruposProductos, setGruposProductos] = useState([])
   const [listasPrecios, setListasPrecios] = useState([])
-  const [msg, setMsg] = useState({ type: '', text: '' })
   const [scraping, setScraping] = useState(false)
 
   const loadAll = () => {
@@ -87,18 +86,24 @@ export default function Configuracion() {
 
   const saveConfig = async (e) => {
     e.preventDefault()
-    await updateConfig(config)
-    setMsg({ type: 'success', text: 'Configuración guardada' })
-    setTimeout(() => setMsg({}), 3000)
+    try {
+      await updateConfig(config)
+      toast.success('Configuración guardada')
+    } catch {
+      toast.error('Error al guardar la configuración')
+    }
   }
 
   const saveTasaHandler = async () => {
     if (!tasaValor) return
-    await saveTasa({ fecha: tasaFecha, valor: Number(tasaValor) })
-    setTasaValor('')
-    getTasas().then((r) => setTasas(r.data))
-    setMsg({ type: 'success', text: 'Tasa guardada' })
-    setTimeout(() => setMsg({}), 3000)
+    try {
+      await saveTasa({ fecha: tasaFecha, valor: Number(tasaValor) })
+      setTasaValor('')
+      getTasas().then((r) => setTasas(r.data))
+      toast.success('Tasa guardada')
+    } catch {
+      toast.error('Error al guardar la tasa')
+    }
   }
 
   const handleScrape = async () => {
@@ -106,12 +111,11 @@ export default function Configuracion() {
     try {
       const r = await scrapeTasa()
       getTasas().then((d) => setTasas(d.data))
-      setMsg({ type: 'success', text: `Tasa obtenida del BCV: Bs. ${Number(r.data.valor).toFixed(4)}` })
+      toast.success(`Tasa obtenida del BCV: Bs. ${Number(r.data.valor).toFixed(4)}`)
     } catch {
-      setMsg({ type: 'error', text: 'No se pudo obtener la tasa del BCV. Ingrésela manualmente.' })
+      toast.error('No se pudo obtener la tasa del BCV. Ingrésela manualmente.')
     } finally {
       setScraping(false)
-      setTimeout(() => setMsg({}), 5000)
     }
   }
 
@@ -120,7 +124,6 @@ export default function Configuracion() {
   return (
     <div>
       <h2 className="text-xl font-bold text-gray-800 mb-6">Configuración</h2>
-      {msg.text && <Alert type={msg.type} message={msg.text} />}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Empresa */}

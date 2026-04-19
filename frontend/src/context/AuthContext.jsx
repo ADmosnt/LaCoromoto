@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react'
-import { getMe } from '../api'
+import { toast } from 'sonner'
+import { getMe, setUnauthorizedHandler } from '../api'
 
 const AuthCtx = createContext(null)
 export const useAuth = () => useContext(AuthCtx)
@@ -23,6 +24,14 @@ export function AuthProvider({ children }) {
     setUser(null)
     setSessionWarning(false)
   }, [])
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      if (!localStorage.getItem('token')) return
+      doLogout()
+      toast.error('Tu sesión expiró. Inicia sesión nuevamente.')
+    })
+  }, [doLogout])
 
   const resetTimer = useCallback(() => {
     clearTimers()

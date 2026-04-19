@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { getOrdenes, getOrden, getClientes, downloadOrdenPDF, anularOrden, confirmarReporteVenta } from '../api'
-import Alert from '../components/Alert'
 import OrdenModal from '../components/OrdenModal'
 import ReporteVentaModal from '../components/ReporteVentaModal'
 
@@ -38,14 +38,14 @@ const statusLabel = {
 
 function OrdenDetailPanel({ ordenId, onAnulada, onReporteCreated }) {
   const [detail, setDetail] = useState(null)
-  const [panelError, setPanelError] = useState('')
+  const [loadError, setLoadError] = useState(false)
   const [reporteModalOpen, setReporteModalOpen] = useState(false)
   const [confirmando, setConfirmando] = useState(false)
 
   const fetchDetail = () => {
     setDetail(null)
-    setPanelError('')
-    getOrden(ordenId).then((r) => setDetail(r.data)).catch(() => setPanelError('Error al cargar el detalle'))
+    setLoadError(false)
+    getOrden(ordenId).then((r) => setDetail(r.data)).catch(() => setLoadError(true))
   }
 
   useEffect(() => { fetchDetail() }, [ordenId])
@@ -60,7 +60,7 @@ function OrdenDetailPanel({ ordenId, onAnulada, onReporteCreated }) {
       a.click()
       URL.revokeObjectURL(url)
     } catch {
-      setPanelError('Error al generar el PDF')
+      toast.error('Error al generar el PDF')
     }
   }
 
@@ -68,9 +68,10 @@ function OrdenDetailPanel({ ordenId, onAnulada, onReporteCreated }) {
     if (!confirm(`¿Anular la orden #${detail.numero_orden}? Esta acción revertirá el stock en consignación.`)) return
     try {
       await anularOrden(ordenId)
+      toast.success(`Orden #${detail.numero_orden} anulada`)
       onAnulada()
     } catch (err) {
-      setPanelError(err.response?.data?.error ?? 'Error al anular')
+      toast.error(err.response?.data?.error ?? 'Error al anular la orden')
     }
   }
 
@@ -79,16 +80,17 @@ function OrdenDetailPanel({ ordenId, onAnulada, onReporteCreated }) {
     setConfirmando(true)
     try {
       await confirmarReporteVenta(detail.reporte_id)
+      toast.success('Venta confirmada. Stock descontado.')
       fetchDetail()
       onReporteCreated()
     } catch (err) {
-      setPanelError(err.response?.data?.error ?? 'Error al confirmar')
+      toast.error(err.response?.data?.error ?? 'Error al confirmar la venta')
     } finally {
       setConfirmando(false)
     }
   }
 
-  if (panelError) return <div className="bg-gray-50 border-t border-gray-200 px-4 py-3 text-sm text-red-500">{panelError}</div>
+  if (loadError) return <div className="bg-gray-50 border-t border-gray-200 px-4 py-3 text-sm text-red-500">Error al cargar el detalle</div>
   if (!detail) return <div className="bg-gray-50 border-t border-gray-200 px-4 py-3 text-sm text-gray-400">Cargando...</div>
 
   const { status } = detail
@@ -244,7 +246,6 @@ export default function Ordenes() {
   const [clienteId, setClienteId] = useState('')
   const [fechaDesde, setFechaDesde] = useState('')
   const [fechaHasta, setFechaHasta] = useState('')
-  const [error, setError] = useState('')
   const [expanded, setExpanded] = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
 
@@ -255,9 +256,9 @@ export default function Ordenes() {
       fecha_hasta: fechaHasta || undefined,
     })
       .then((r) => setOrdenes(r.data))
-      .catch(() => setError('Error al cargar órdenes'))
+      .catch(() => toast.error('Error al cargar órdenes'))
 
-  useEffect(() => { getClientes({ activo: true }).then((r) => setClientes(r.data)) }, [])
+  useEffect(() => { getClientes({ activo: true }).then((r) => setClientes(r.data)).catch(() => {}) }, [])
   useEffect(() => { load() }, [clienteId, fechaDesde, fechaHasta])
 
   const toggle = (id) => setExpanded((prev) => (prev === id ? null : id))
@@ -278,8 +279,6 @@ export default function Ordenes() {
           + Nueva orden
         </button>
       </div>
-
-      <Alert type="error" message={error} />
 
       <div className="bg-white rounded-lg shadow p-4 mb-4 flex flex-wrap gap-3 items-end">
         <div>

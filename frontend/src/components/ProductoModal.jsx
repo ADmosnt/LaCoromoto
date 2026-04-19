@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
 import {
   getProducto, createProducto, updateProducto,
@@ -59,6 +60,7 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
       }
       if (isEdit) await updateProducto(productoId, payload)
       else await createProducto(payload)
+      toast.success(isEdit ? 'Producto actualizado' : 'Producto creado')
       onSaved()
       onClose()
     } catch (err) {

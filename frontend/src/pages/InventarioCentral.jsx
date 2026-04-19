@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { getInventario, getEntradas } from '../api'
 import EntradaInventarioModal from '../components/EntradaInventarioModal'
 
@@ -9,8 +10,8 @@ export default function InventarioCentral() {
   const [modalOpen, setModalOpen] = useState(false)
 
   const load = () => {
-    getInventario().then((r) => setInventario(r.data))
-    getEntradas().then((r) => setEntradas(r.data))
+    getInventario().then((r) => setInventario(r.data)).catch(() => toast.error('Error al cargar inventario'))
+    getEntradas().then((r) => setEntradas(r.data)).catch(() => toast.error('Error al cargar entradas'))
   }
 
   useEffect(() => { load() }, [])

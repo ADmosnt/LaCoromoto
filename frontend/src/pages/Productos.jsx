@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { getProductos, deleteProducto, getGruposProductos } from '../api'
 import PageHeader from '../components/PageHeader'
-import Alert from '../components/Alert'
 import ProductoModal from '../components/ProductoModal'
 
 export default function Productos() {
@@ -9,14 +9,13 @@ export default function Productos() {
   const [grupos, setGrupos] = useState([])
   const [search, setSearch] = useState('')
   const [grupoId, setGrupoId] = useState('')
-  const [error, setError] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [editId, setEditId] = useState(null)
 
   const load = () =>
     getProductos({ search, grupo_id: grupoId || undefined, activo: true })
       .then((r) => setProductos(r.data))
-      .catch(() => setError('Error al cargar productos'))
+      .catch(() => toast.error('Error al cargar productos'))
 
   useEffect(() => { getGruposProductos().then((r) => setGrupos(r.data)) }, [])
   useEffect(() => { load() }, [search, grupoId])
@@ -26,8 +25,13 @@ export default function Productos() {
 
   const handleDelete = async (id, desc) => {
     if (!confirm(`¿Desactivar "${desc}"?`)) return
-    await deleteProducto(id)
-    load()
+    try {
+      await deleteProducto(id)
+      toast.success(`"${desc}" desactivado`)
+      load()
+    } catch (err) {
+      toast.error(err.response?.data?.error ?? 'Error al desactivar producto')
+    }
   }
 
   return (
@@ -41,8 +45,6 @@ export default function Productos() {
           + Nuevo producto
         </button>
       </div>
-      <Alert type="error" message={error} />
-
       <div className="bg-white rounded-lg shadow">
         <div className="p-4 border-b flex flex-wrap gap-3">
           <input

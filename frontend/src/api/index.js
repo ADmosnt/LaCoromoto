@@ -1,12 +1,30 @@
 import axios from 'axios'
+import { toast } from 'sonner'
 
 const api = axios.create({ baseURL: '/api' })
+
+let _unauthorizedHandler = null
+export const setUnauthorizedHandler = (fn) => { _unauthorizedHandler = fn }
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
+
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (!err.response) {
+      toast.error('Sin conexión. Verifica tu red e intenta de nuevo.')
+      return Promise.reject(err)
+    }
+    if (err.response.status === 401 && !err.config.url?.endsWith('/auth/login')) {
+      if (_unauthorizedHandler) _unauthorizedHandler()
+    }
+    return Promise.reject(err)
+  }
+)
 
 // Config empresa
 export const getConfig = () => api.get('/config')

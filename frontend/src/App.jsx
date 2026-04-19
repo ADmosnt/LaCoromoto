@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Toaster } from 'sonner'
 import { AuthProvider } from './context/AuthContext'
 import RequireAuth from './components/RequireAuth'
 import Layout from './components/Layout'
@@ -15,10 +16,12 @@ import InventarioCentral from './pages/InventarioCentral'
 import Configuracion from './pages/Configuracion'
 import Usuarios from './pages/Usuarios'
 import MisOrdenes from './pages/MisOrdenes'
+import NotFound from './pages/NotFound'
 
 export default function App() {
   return (
     <BrowserRouter>
+      <Toaster position="top-right" richColors closeButton />
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -46,7 +49,7 @@ export default function App() {
             {/* Client routes */}
             <Route path="mis-ordenes" element={<MisOrdenes />} />
           </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

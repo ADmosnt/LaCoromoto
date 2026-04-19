@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
 import { createEntrada, getProductos } from '../api'
 import Alert from './Alert'
@@ -41,6 +42,7 @@ export default function EntradaInventarioModal({ open, onClose, onSaved }) {
         fecha,
         nota: nota || undefined,
       })
+      toast.success('Entrada registrada al almacén')
       onSaved()
       onClose()
     } catch (err) {

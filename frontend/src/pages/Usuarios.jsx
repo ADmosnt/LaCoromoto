@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { getUsuarios, createUsuario, updateUsuario, deleteUsuario, getClientes } from '../api'
 import { Dialog, DialogContent } from '../components/ui/Dialog'
 import Alert from '../components/Alert'
@@ -27,6 +28,7 @@ function UsuarioModal({ open, onClose, onSaved, clientes }) {
         rol,
         cliente_id: rol === 'cliente' ? Number(clienteId) : null,
       })
+      toast.success(`Usuario "${username}" creado`)
       onSaved()
       onClose()
     } catch (err) {
@@ -86,24 +88,24 @@ export default function Usuarios() {
   const [usuarios, setUsuarios] = useState([])
   const [clientes, setClientes] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
-  const [error, setError] = useState('')
 
   const load = () =>
     getUsuarios()
       .then((r) => setUsuarios(r.data))
-      .catch(() => setError('Error al cargar usuarios'))
+      .catch(() => toast.error('Error al cargar usuarios'))
 
   useEffect(() => {
     load()
-    getClientes({ activo: true }).then((r) => setClientes(r.data))
+    getClientes({ activo: true }).then((r) => setClientes(r.data)).catch(() => {})
   }, [])
 
   const toggleActivo = async (u) => {
     try {
       await updateUsuario(u.id, { activo: !u.activo })
+      toast.success(u.activo ? `"${u.username}" desactivado` : `"${u.username}" activado`)
       load()
     } catch {
-      setError('Error al actualizar usuario')
+      toast.error('Error al actualizar usuario')
     }
   }
 
@@ -123,8 +125,6 @@ export default function Usuarios() {
           + Nuevo usuario
         </button>
       </div>
-
-      <Alert type="error" message={error} />
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="w-full text-sm">
