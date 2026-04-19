@@ -1,11 +1,13 @@
 from flask import Blueprint, jsonify, request
 from app.models import Usuario
 from app.auth import make_token, get_current_user
+from app import limiter
 
 bp = Blueprint('auth', __name__)
 
 
 @bp.route('/login', methods=['POST'])
+@limiter.limit('10 per minute; 50 per hour')
 def login():
     data = request.get_json() or {}
     user = Usuario.query.filter_by(username=data.get('username'), activo=True).first()

@@ -25,7 +25,7 @@ const navLinkClass = ({ isActive }) =>
 
 export default function Layout() {
   const [open, setOpen] = useState(false)
-  const { user, logout } = useAuth()
+  const { user, logout, sessionWarning, resetTimer } = useAuth()
   const navigate = useNavigate()
   const close = () => setOpen(false)
 
@@ -95,6 +95,17 @@ export default function Layout() {
         </header>
 
         <main className="flex-1 overflow-y-auto">
+          {sessionWarning && (
+            <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-2 flex items-center justify-between text-sm">
+              <span className="text-yellow-800">Tu sesión expirará en 1 minuto por inactividad.</span>
+              <button
+                onClick={resetTimer}
+                className="text-yellow-700 font-semibold hover:underline ml-4 flex-shrink-0"
+              >
+                Mantener sesión
+              </button>
+            </div>
+          )}
           <div className="p-4 md:p-6">
             <Outlet />
           </div>

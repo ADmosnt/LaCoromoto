@@ -2,10 +2,13 @@ from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import os
 
 db = SQLAlchemy()
 migrate = Migrate()
+limiter = Limiter(key_func=get_remote_address, default_limits=[])
 
 # Carpeta donde el Dockerfile de Railway copia el build de React
 REACT_BUILD = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'react_build')
@@ -25,7 +28,17 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
+    limiter.init_app(app)
     CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+    @app.after_request
+    def _security_headers(response):
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+        return response
 
     from app import models  # noqa: F401
 
