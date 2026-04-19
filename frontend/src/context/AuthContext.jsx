@@ -20,14 +20,14 @@ export function AuthProvider({ children }) {
   }
 
   const doLogout = useCallback(() => {
-    localStorage.removeItem('token')
+    sessionStorage.removeItem('token')
     setUser(null)
     setSessionWarning(false)
   }, [])
 
   useEffect(() => {
     setUnauthorizedHandler(() => {
-      if (!localStorage.getItem('token')) return
+      if (!sessionStorage.getItem('token')) return
       doLogout()
       toast.error('Tu sesión expiró. Inicia sesión nuevamente.')
     })
@@ -41,11 +41,11 @@ export function AuthProvider({ children }) {
   }, [doLogout])
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = sessionStorage.getItem('token')
     if (!token) { setUser(null); return }
     getMe()
       .then((r) => setUser(r.data))
-      .catch(() => { localStorage.removeItem('token'); setUser(null) })
+      .catch(() => { sessionStorage.removeItem('token'); setUser(null) })
   }, [])
 
   useEffect(() => {
@@ -60,14 +60,14 @@ export function AuthProvider({ children }) {
   }, [user, resetTimer])
 
   const login = (token, userData) => {
-    localStorage.setItem('token', token)
+    sessionStorage.setItem('token', token)
     setUser(userData)
   }
 
   const logout = () => {
     clearTimers()
     setSessionWarning(false)
-    localStorage.removeItem('token')
+    sessionStorage.removeItem('token')
     setUser(null)
   }
 
