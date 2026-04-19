@@ -67,6 +67,7 @@ export default function Devoluciones() {
                 <th className="px-4 py-3 text-left">Cliente</th>
                 <th className="px-4 py-3 text-left">Fecha</th>
                 <th className="px-4 py-3 text-left">Orden origen</th>
+                <th className="px-4 py-3 text-left">Destino</th>
                 <th className="px-4 py-3 text-left">Nota</th>
               </tr>
             </thead>
@@ -82,11 +83,18 @@ export default function Devoluciones() {
                     <td className="px-4 py-3 font-medium">{d.cliente}</td>
                     <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{d.fecha}</td>
                     <td className="px-4 py-3 font-mono text-xs text-gray-400 whitespace-nowrap">{d.numero_orden_origen ?? '—'}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {d.reingresar_almacen ? (
+                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Reingresada</span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">Merma</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-gray-500 text-xs italic">{d.nota ?? '—'}</td>
                   </tr>
                   {expanded === d.id && (
                     <tr>
-                      <td colSpan={6} className="px-6 py-3 bg-orange-50 border-b border-orange-100">
+                      <td colSpan={7} className="px-6 py-3 bg-orange-50 border-b border-orange-100">
                         {!details[d.id] ? (
                           <span className="text-xs text-gray-400">Cargando...</span>
                         ) : (
@@ -116,7 +124,7 @@ export default function Devoluciones() {
               ))}
               {devoluciones.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">No hay devoluciones registradas</td>
+                  <td colSpan={7} className="px-4 py-8 text-center text-gray-400">No hay devoluciones registradas</td>
                 </tr>
               )}
             </tbody>

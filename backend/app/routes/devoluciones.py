@@ -1,7 +1,10 @@
 from flask import Blueprint, jsonify, request
 import datetime
 from app import db
-from app.models import Devolucion, DevolucionDetalle, StockConsignacion, Cliente, Producto
+from app.models import (
+    Devolucion, DevolucionDetalle, StockConsignacion,
+    Cliente, Producto, InventarioCentral,
+)
 from app.auth import require_role
 
 bp = Blueprint('devoluciones', __name__)
@@ -44,11 +47,13 @@ def create_devolucion():
     cliente = Cliente.query.get_or_404(data['cliente_id'])
 
     fecha = datetime.date.fromisoformat(data.get('fecha', datetime.date.today().isoformat()))
+    reingresar = bool(data.get('reingresar_almacen', False))
     devolucion = Devolucion(
         cliente_id=cliente.id,
         orden_origen_id=data.get('orden_origen_id'),
         fecha=fecha,
         nota=data.get('nota'),
+        reingresar_almacen=reingresar,
     )
     db.session.add(devolucion)
     db.session.flush()
@@ -75,6 +80,18 @@ def create_devolucion():
             cantidad_unidades=cantidad,
         ))
         stock.cantidad_unidades -= cantidad
+
+        if reingresar:
+            inv = InventarioCentral.query.filter_by(
+                producto_id=producto.id
+            ).with_for_update().first()
+            if inv:
+                inv.cantidad_unidades += cantidad
+            else:
+                db.session.add(InventarioCentral(
+                    producto_id=producto.id,
+                    cantidad_unidades=cantidad,
+                ))
 
     db.session.commit()
     return jsonify(devolucion.to_dict(include_detalles=True)), 201

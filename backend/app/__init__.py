@@ -103,6 +103,9 @@ def _run_migrations():
         conn.execute(text(
             "ALTER TABLE reportes_venta ADD COLUMN IF NOT EXISTS orden_id INTEGER REFERENCES ordenes_despacho(id)"
         ))
+        conn.execute(text(
+            "ALTER TABLE devoluciones ADD COLUMN IF NOT EXISTS reingresar_almacen BOOLEAN NOT NULL DEFAULT FALSE"
+        ))
         conn.commit()
 
 

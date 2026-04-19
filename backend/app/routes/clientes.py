@@ -113,9 +113,11 @@ def delete_cliente(id):
 @require_role('admin')
 def get_cliente_stock(id):
     Cliente.query.get_or_404(id)
+    import datetime
     from app.models import StockConsignacion, OrdenDespacho, OrdenDespachoDetalle
     from sqlalchemy import and_
     stock = StockConsignacion.query.filter_by(cliente_id=id).all()
+    today = datetime.date.today()
     result = []
     for s in stock:
         if s.cantidad_unidades <= 0:
@@ -137,6 +139,7 @@ def get_cliente_stock(id):
             OrdenDespacho.cliente_id == id,
             OrdenDespacho.status.in_(['activa', 'pendiente']),
         ).all()
+        ordenes = sorted(ordenes_q, key=lambda o: o.fecha_emision)
         d['ordenes'] = [
             {
                 'id': o.id,
@@ -145,7 +148,13 @@ def get_cliente_stock(id):
                 'status': o.status,
                 'cantidad_unidades': o.uds_orden,
             }
-            for o in ordenes_q
+            for o in ordenes
         ]
+        if ordenes:
+            d['fecha_mas_antigua'] = ordenes[0].fecha_emision.isoformat()
+            d['dias_antiguedad'] = (today - ordenes[0].fecha_emision).days
+        else:
+            d['fecha_mas_antigua'] = None
+            d['dias_antiguedad'] = None
         result.append(d)
     return jsonify(result)

@@ -315,6 +315,7 @@ class Devolucion(db.Model):
     orden_origen_id = db.Column(db.Integer, db.ForeignKey('ordenes_despacho.id'))
     fecha = db.Column(db.Date, nullable=False, default=datetime.date.today)
     nota = db.Column(db.Text)
+    reingresar_almacen = db.Column(db.Boolean, nullable=False, default=False)
     creado_en = db.Column(db.DateTime(timezone=True), default=datetime.datetime.utcnow)
 
     cliente = db.relationship('Cliente', backref='devoluciones')
@@ -330,6 +331,7 @@ class Devolucion(db.Model):
             'numero_orden_origen': self.orden_origen.numero_orden if self.orden_origen else None,
             'fecha': self.fecha.isoformat(),
             'nota': self.nota,
+            'reingresar_almacen': self.reingresar_almacen,
             'creado_en': self.creado_en.isoformat() if self.creado_en else None,
         }
         if include_detalles:

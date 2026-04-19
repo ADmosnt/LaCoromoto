@@ -12,12 +12,13 @@ export default function DevolucionModal({ open, onClose, onSaved }) {
   const [ordenId, setOrdenId] = useState('')
   const [rows, setRows] = useState([])
   const [nota, setNota] = useState('')
+  const [reingresar, setReingresar] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (!open) return
-    setError(''); setClienteId(''); setOrdenId(''); setRows([]); setNota(''); setOrdenes([])
+    setError(''); setClienteId(''); setOrdenId(''); setRows([]); setNota(''); setReingresar(false); setOrdenes([])
     getClientes({ activo: true })
       .then((r) => setClientes(r.data))
       .catch(() => setError('Error al cargar clientes'))
@@ -85,6 +86,7 @@ export default function DevolucionModal({ open, onClose, onSaved }) {
         cliente_id: Number(clienteId),
         orden_origen_id: Number(ordenId),
         nota,
+        reingresar_almacen: reingresar,
         detalles: detalles.map((r) => ({
           producto_id: Number(r.producto_id),
           cantidad_unidades: r.cantidad_unidades,
@@ -109,7 +111,7 @@ export default function DevolucionModal({ open, onClose, onSaved }) {
       <DialogContent title={
         <span className="inline-flex items-center gap-1">
           Nueva Devolución
-          <HelpTooltip text="Registra la devolución de productos que el cliente tenía en consignación. Las unidades devueltas se retiran del stock del cliente pero NO se reincorporan al inventario central." side="bottom" />
+          <HelpTooltip text="Registra la devolución de productos que el cliente tenía en consignación. Las unidades se retiran del stock del cliente. Marca 'Reingresar al almacén' si la mercancía sirve para volver a despacharla." side="bottom" />
         </span>
       } size="lg">
         <Alert type="error" message={error} />
@@ -198,11 +200,34 @@ export default function DevolucionModal({ open, onClose, onSaved }) {
           )}
 
           {ordenId && (
-            <div>
-              <label className={lbl}>Nota / Motivo</label>
-              <input className={inp} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Ej: Producto en mal estado..." />
-              <p className="text-xs text-gray-400 mt-1">Las unidades devueltas son retiradas del stock en consignación y no se reincorporan al inventario central.</p>
-            </div>
+            <>
+              <div>
+                <label className={lbl}>Nota / Motivo</label>
+                <input className={inp} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Ej: Producto en mal estado..." />
+              </div>
+
+              <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    checked={reingresar}
+                    onChange={(e) => setReingresar(e.target.checked)}
+                  />
+                  <span className="text-sm">
+                    <span className="font-medium text-gray-800 inline-flex items-center gap-1">
+                      Reingresar mercancía al almacén central
+                      <HelpTooltip text="Activa esto cuando el producto devuelto está en buen estado y puede volver a venderse. Las unidades se sumarán al inventario central. Déjalo desactivado si la mercancía está dañada o vencida (se da de baja como merma)." />
+                    </span>
+                    <span className="block text-xs text-gray-500 mt-0.5">
+                      {reingresar
+                        ? 'Las unidades se sumarán al inventario central.'
+                        : 'Las unidades se descontarán del stock del cliente y se darán por perdidas (merma).'}
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </>
           )}
 
           <div className="flex justify-end gap-3 pt-2 border-t">
