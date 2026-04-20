@@ -169,7 +169,7 @@ class ProductoPrecio(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     producto_id = db.Column(db.Integer, db.ForeignKey('productos.id', ondelete='CASCADE'), nullable=False)
     lista_id = db.Column(db.Integer, db.ForeignKey('listas_precios.id', ondelete='CASCADE'), nullable=False)
-    precio_usd = db.Column(db.Numeric(15, 2), nullable=False)
+    precio_usd = db.Column(db.Numeric(15, 6), nullable=False)
 
     lista = db.relationship('ListaPrecio')
     __table_args__ = (db.UniqueConstraint('producto_id', 'lista_id'),)

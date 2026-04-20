@@ -118,7 +118,7 @@ export default function Productos() {
                   <td className="px-4 py-3 text-gray-600 text-xs">
                     {p.precios?.map((pr) => (
                       <span key={pr.lista_id} className="inline-block mr-2">
-                        {pr.lista}: ${Number(pr.precio_usd).toFixed(2)}
+                        {pr.lista}: ${(Number(pr.precio_usd) * (p.unidades_por_bulto || 1)).toFixed(2)}
                       </span>
                     ))}
                   </td>

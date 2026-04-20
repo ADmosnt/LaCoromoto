@@ -106,6 +106,9 @@ def _run_migrations():
         conn.execute(text(
             "ALTER TABLE devoluciones ADD COLUMN IF NOT EXISTS reingresar_almacen BOOLEAN NOT NULL DEFAULT FALSE"
         ))
+        conn.execute(text(
+            "ALTER TABLE productos_precios ALTER COLUMN precio_usd TYPE NUMERIC(15,6)"
+        ))
         conn.commit()
 
 
