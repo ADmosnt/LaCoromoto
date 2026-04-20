@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { getProductos, deleteProducto, getGruposProductos } from '../api'
 import PageHeader from '../components/PageHeader'
 import ProductoModal from '../components/ProductoModal'
+import ActualizacionPreciosModal from '../components/ActualizacionPreciosModal'
 
 export default function Productos() {
   const [productos, setProductos] = useState([])
@@ -11,6 +12,7 @@ export default function Productos() {
   const [grupoId, setGrupoId] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [editId, setEditId] = useState(null)
+  const [preciosModalOpen, setPreciosModalOpen] = useState(false)
 
   const load = () =>
     getProductos({ search, grupo_id: grupoId || undefined, activo: true })
@@ -38,12 +40,20 @@ export default function Productos() {
     <div>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h2 className="text-xl font-bold text-gray-800">Productos</h2>
-        <button
-          onClick={openNew}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
-        >
-          + Nuevo producto
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setPreciosModalOpen(true)}
+            className="border border-blue-400 text-blue-600 hover:bg-blue-50 text-sm font-medium px-4 py-2 rounded-md"
+          >
+            Actualizar precios masivo
+          </button>
+          <button
+            onClick={openNew}
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+          >
+            + Nuevo producto
+          </button>
+        </div>
       </div>
       <div className="bg-white rounded-lg shadow">
         <div className="p-4 border-b flex flex-wrap gap-3">
@@ -109,6 +119,11 @@ export default function Productos() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         productoId={editId}
+        onSaved={load}
+      />
+      <ActualizacionPreciosModal
+        open={preciosModalOpen}
+        onClose={() => setPreciosModalOpen(false)}
         onSaved={load}
       />
     </div>
