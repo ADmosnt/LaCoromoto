@@ -58,8 +58,11 @@ export default function GlobalSearch({ onNavigate }) {
     if (!item) return
     setOpen(false)
     setQuery('')
-    const path = item.kind === 'cliente' ? '/clientes' : '/productos'
-    navigate(`${path}?search=${encodeURIComponent(item.label)}`)
+    if (item.kind === 'cliente') {
+      navigate(`/clientes/${item.id}`)
+    } else {
+      navigate(`/productos?search=${encodeURIComponent(item.label)}`)
+    }
     onNavigate?.()
   }
 

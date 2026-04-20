@@ -70,6 +70,7 @@ export const createCliente = (data) => api.post('/clientes', data)
 export const updateCliente = (id, data) => api.put(`/clientes/${id}`, data)
 export const deleteCliente = (id) => api.delete(`/clientes/${id}`)
 export const getClienteStock = (id) => api.get(`/clientes/${id}/stock`)
+export const getGrupoConsolidado = (grupoId) => api.get(`/clientes/grupos/${grupoId}/consolidado`)
 
 // Productos
 export const getProductos = (params) => api.get('/productos', { params })

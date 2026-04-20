@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from app import db
-from app.models import Cliente, ClienteTelefono, ListaPrecio
+from app.models import Cliente, ClienteTelefono, ListaPrecio, GrupoCliente
 from app.auth import require_role
 
 bp = Blueprint('clientes', __name__)
@@ -158,3 +158,88 @@ def get_cliente_stock(id):
             d['dias_antiguedad'] = None
         result.append(d)
     return jsonify(result)
+
+
+@bp.route('/grupos/<int:grupo_id>/consolidado', methods=['GET'])
+@require_role('admin')
+def get_grupo_consolidado(grupo_id):
+    from app.models import StockConsignacion, Producto
+    from sqlalchemy import func
+
+    grupo = GrupoCliente.query.get_or_404(grupo_id)
+    clientes = Cliente.query.filter_by(grupo_id=grupo_id, activo=True).order_by(Cliente.razon_social).all()
+    cliente_ids = [c.id for c in clientes]
+
+    if not cliente_ids:
+        return jsonify({
+            'grupo': grupo.to_dict(),
+            'total_clientes': 0,
+            'clientes': [],
+            'stock_consolidado': [],
+        })
+
+    rows = (
+        db.session.query(
+            StockConsignacion.producto_id,
+            StockConsignacion.cliente_id,
+            StockConsignacion.cantidad_unidades,
+        )
+        .filter(
+            StockConsignacion.cliente_id.in_(cliente_ids),
+            StockConsignacion.cantidad_unidades > 0,
+        )
+        .all()
+    )
+
+    # Aggregate by product
+    from collections import defaultdict
+    prod_map = defaultdict(lambda: {'total': 0, 'clientes': []})
+    for r in rows:
+        prod_map[r.producto_id]['total'] += r.cantidad_unidades
+        prod_map[r.producto_id]['clientes'].append({
+            'cliente_id': r.cliente_id,
+            'cantidad_unidades': r.cantidad_unidades,
+        })
+
+    # Build result
+    consolidado = []
+    for prod_id, data in prod_map.items():
+        p = Producto.query.get(prod_id)
+        if not p:
+            continue
+        upb = p.unidades_por_bulto
+        total = data['total']
+        # Enrich per-client rows with name
+        clientes_stock = []
+        for cs in data['clientes']:
+            c = next((x for x in clientes if x.id == cs['cliente_id']), None)
+            if c:
+                clientes_stock.append({
+                    'cliente_id': cs['cliente_id'],
+                    'razon_social': c.razon_social,
+                    'codigo': c.codigo,
+                    'cantidad_unidades': cs['cantidad_unidades'],
+                    'bultos': cs['cantidad_unidades'] // upb,
+                    'sueltas': cs['cantidad_unidades'] % upb,
+                })
+        clientes_stock.sort(key=lambda x: x['razon_social'])
+        consolidado.append({
+            'producto_id': prod_id,
+            'codigo': p.codigo,
+            'descripcion': p.descripcion,
+            'unidades_por_bulto': upb,
+            'total_unidades': total,
+            'total_bultos': total // upb,
+            'total_sueltas': total % upb,
+            'clientes_con_stock': len(clientes_stock),
+            'por_cliente': clientes_stock,
+        })
+
+    consolidado.sort(key=lambda x: x['descripcion'])
+
+    return jsonify({
+        'grupo': grupo.to_dict(),
+        'total_clientes': len(clientes),
+        'clientes': [c.to_dict() for c in clientes],
+        'stock_consolidado': consolidado,
+    })

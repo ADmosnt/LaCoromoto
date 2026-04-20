@@ -7,6 +7,7 @@ import Layout from './components/Layout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Clientes from './pages/Clientes'
+import ClienteDetalle from './pages/ClienteDetalle'
 import Productos from './pages/Productos'
 import Ordenes from './pages/Ordenes'
 import ReportesVenta from './pages/ReportesVenta'
@@ -39,6 +40,7 @@ export default function App() {
             {/* Admin routes */}
             <Route path="dashboard" element={<RequireAuth role="admin"><Dashboard /></RequireAuth>} />
             <Route path="clientes" element={<RequireAuth role="admin"><Clientes /></RequireAuth>} />
+            <Route path="clientes/:id" element={<RequireAuth role="admin"><ClienteDetalle /></RequireAuth>} />
             <Route path="productos" element={<RequireAuth role="admin"><Productos /></RequireAuth>} />
             <Route path="ordenes" element={<RequireAuth role="admin"><Ordenes /></RequireAuth>} />
             <Route path="reportes-venta" element={<RequireAuth role="admin"><ReportesVenta /></RequireAuth>} />
