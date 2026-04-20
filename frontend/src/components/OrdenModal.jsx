@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
 import { HelpTooltip } from './ui/Tooltip'
-import { createOrden, getClientes, getProductos, getTasaHoy } from '../api'
+import { createOrden, getClientes, getProductos, getTasaHoy, getGruposProductos, getInventario } from '../api'
 import Alert from './Alert'
 
 const emptyRow = () => ({
+  grupo_filtro: '',
   producto_id: '', descripcion: '', codigo: '',
   unidades_por_bulto: 1, precio_usd_momento: '',
   bultos: '', sueltas: '',
@@ -20,6 +21,8 @@ const rowUnidades = (row) => {
 export default function OrdenModal({ open, onClose, onSaved }) {
   const [clientes, setClientes] = useState([])
   const [productos, setProductos] = useState([])
+  const [grupos, setGrupos] = useState([])
+  const [inventario, setInventario] = useState([])
   const [clienteId, setClienteId] = useState('')
   const [fecha, setFecha] = useState(new Date().toISOString().slice(0, 10))
   const [nota, setNota] = useState('')
@@ -37,17 +40,40 @@ export default function OrdenModal({ open, onClose, onSaved }) {
     setTasaManual('')
     setRows([emptyRow()])
     setFecha(new Date().toISOString().slice(0, 10))
-    Promise.all([getClientes({ activo: true }), getProductos({ activo: true })])
-      .then(([c, p]) => { setClientes(c.data); setProductos(p.data) })
-      .catch(() => setError('Error al cargar clientes y productos'))
+    Promise.all([
+      getClientes({ activo: true }),
+      getProductos({ activo: true }),
+      getGruposProductos(),
+      getInventario(),
+    ])
+      .then(([c, p, g, inv]) => {
+        setClientes(c.data)
+        setProductos(p.data)
+        setGrupos(g.data)
+        setInventario(inv.data)
+      })
+      .catch(() => setError('Error al cargar datos'))
     getTasaHoy().then((r) => setTasa(r.data)).catch(() => setTasa(null))
   }, [open])
+
+  const invMap = Object.fromEntries(inventario.map((inv) => [inv.producto_id, inv]))
 
   const tasaValor = Number(tasaManual || tasa?.valor || 0)
 
   const setRow = (i, field, val) => {
     const rs = [...rows]
     rs[i] = { ...rs[i], [field]: val }
+    if (field === 'grupo_filtro') {
+      // reset product when group changes
+      rs[i].producto_id = ''
+      rs[i].descripcion = ''
+      rs[i].codigo = ''
+      rs[i].unidades_por_bulto = 1
+      rs[i].precios = []
+      rs[i].precio_usd_momento = ''
+      rs[i].bultos = ''
+      rs[i].sueltas = ''
+    }
     if (field === 'producto_id') {
       const prod = productos.find((p) => String(p.id) === String(val))
       if (prod) {
@@ -150,11 +176,17 @@ export default function OrdenModal({ open, onClose, onSaved }) {
           <div>
             <h3 className="font-semibold text-gray-700 mb-2 text-sm">Productos</h3>
             <div className="overflow-x-auto rounded-lg border border-gray-200">
-              <table className="w-full text-sm min-w-[700px]">
+              <table className="w-full text-sm min-w-[820px]">
                 <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
                   <tr>
-                    <th className="px-3 py-2 text-left">Producto</th>
+                    <th className="px-3 py-2 text-left">Grupo / Producto</th>
                     <th className="px-3 py-2 text-center w-14">Uds/B</th>
+                    <th className="px-3 py-2 text-center w-20">
+                      <span className="inline-flex items-center justify-center gap-0.5">
+                        Stock
+                        <HelpTooltip text="Existencia actual en el almacén central, en bultos." side="top" />
+                      </span>
+                    </th>
                     <th className="px-3 py-2 text-center w-20">Bultos</th>
                     <th className="px-3 py-2 text-center w-20">
                       <span className="inline-flex items-center justify-center gap-0.5">
@@ -178,19 +210,52 @@ export default function OrdenModal({ open, onClose, onSaved }) {
                     const upb = row.unidades_por_bulto || 1
                     const total = rowUnidades(row)
                     const precio = Number(row.precio_usd_momento) || 0
+
+                    // Stock en almacén para este producto
+                    const invItem = row.producto_id ? invMap[Number(row.producto_id)] : null
+                    const stockUds = invItem?.cantidad_unidades ?? null
+                    const stockBultos = stockUds != null ? Math.floor(stockUds / upb) : null
+                    const stockSueltas = stockUds != null ? stockUds % upb : null
+                    const stockBajo = stockBultos != null && total > 0 && total > (stockUds ?? 0)
+
+                    // Productos filtrados por grupo de esta fila
+                    const productosFila = row.grupo_filtro
+                      ? productos.filter((p) => String(p.grupo_id) === row.grupo_filtro)
+                      : productos
+
                     return (
-                      <tr key={i}>
+                      <tr key={i} className={stockBajo ? 'bg-red-50' : ''}>
                         <td className="px-3 py-2">
+                          {/* Grupo filter */}
+                          <select
+                            className="border border-gray-200 rounded px-2 py-1 text-xs w-full mb-1 text-gray-500 bg-gray-50"
+                            value={row.grupo_filtro}
+                            onChange={(e) => setRow(i, 'grupo_filtro', e.target.value)}
+                          >
+                            <option value="">Todos los grupos</option>
+                            {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
+                          </select>
+                          {/* Product select */}
                           <select
                             className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full"
                             value={row.producto_id}
                             onChange={(e) => setRow(i, 'producto_id', e.target.value)}
                           >
-                            <option value="">Seleccionar...</option>
-                            {productos.map((p) => <option key={p.id} value={p.id}>{p.descripcion}</option>)}
+                            <option value="">Seleccionar producto...</option>
+                            {productosFila.map((p) => <option key={p.id} value={p.id}>{p.descripcion}</option>)}
                           </select>
                         </td>
                         <td className="px-3 py-2 text-center text-gray-500 text-xs font-medium">{upb}</td>
+                        <td className="px-3 py-2 text-center">
+                          {stockBultos == null ? (
+                            <span className="text-gray-300 text-xs">—</span>
+                          ) : (
+                            <span className={`text-xs font-semibold ${stockBajo ? 'text-red-600' : 'text-green-700'}`}>
+                              {stockBultos}b
+                              {stockSueltas > 0 && <span className="text-gray-400 font-normal">+{stockSueltas}u</span>}
+                            </span>
+                          )}
+                        </td>
                         <td className="px-3 py-2">
                           <input
                             type="number" min={0}

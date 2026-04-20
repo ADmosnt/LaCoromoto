@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
-import { createEntrada, getProductos } from '../api'
+import { createEntrada, getProductos, getGruposProductos } from '../api'
 import Alert from './Alert'
 
 export default function EntradaInventarioModal({ open, onClose, onSaved }) {
   const [productos, setProductos] = useState([])
+  const [grupos, setGrupos] = useState([])
+  const [grupoFiltro, setGrupoFiltro] = useState('')
   const [productoId, setProductoId] = useState('')
-  const [cantidad, setCantidad] = useState('')
+  const [bultos, setBultos] = useState('')
+  const [sueltas, setSueltas] = useState('')
   const [fecha, setFecha] = useState(new Date().toISOString().slice(0, 10))
   const [nota, setNota] = useState('')
   const [error, setError] = useState('')
@@ -16,29 +19,36 @@ export default function EntradaInventarioModal({ open, onClose, onSaved }) {
   useEffect(() => {
     if (!open) return
     setError('')
+    setGrupoFiltro('')
     setProductoId('')
-    setCantidad('')
+    setBultos('')
+    setSueltas('')
     setNota('')
     setFecha(new Date().toISOString().slice(0, 10))
-    getProductos({ activo: true }).then((r) => setProductos(r.data))
+    Promise.all([
+      getProductos({ activo: true }),
+      getGruposProductos(),
+    ]).then(([p, g]) => { setProductos(p.data); setGrupos(g.data) })
   }, [open])
 
   const producto = productos.find((p) => String(p.id) === String(productoId))
-  const cant = Number(cantidad) || 0
   const upb = producto?.unidades_por_bulto || 1
-  const bultos = Math.floor(cant / upb)
-  const sueltas = cant % upb
+  const totalUds = (Number(bultos) || 0) * upb + (Number(sueltas) || 0)
+
+  const productosFiltrados = grupoFiltro
+    ? productos.filter((p) => String(p.grupo_id) === grupoFiltro)
+    : productos
 
   const submit = async (e) => {
     e.preventDefault()
     setError('')
     if (!productoId) { setError('Seleccione un producto'); return }
-    if (!cantidad || Number(cantidad) <= 0) { setError('La cantidad debe ser mayor a 0'); return }
+    if (totalUds <= 0) { setError('Ingrese al menos un bulto o unidad'); return }
     setLoading(true)
     try {
       await createEntrada({
         producto_id: Number(productoId),
-        cantidad_unidades: Number(cantidad),
+        cantidad_unidades: totalUds,
         fecha,
         nota: nota || undefined,
       })
@@ -53,6 +63,7 @@ export default function EntradaInventarioModal({ open, onClose, onSaved }) {
   }
 
   const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  const inpNum = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500'
   const lbl = 'block text-sm font-medium text-gray-700 mb-1'
 
   return (
@@ -60,32 +71,65 @@ export default function EntradaInventarioModal({ open, onClose, onSaved }) {
       <DialogContent title="Registrar Entrada al Almacén">
         <Alert type="error" message={error} />
         <form onSubmit={submit} className="space-y-4">
-          <div>
-            <label className={lbl}>Producto *</label>
-            <select className={inp} value={productoId} onChange={(e) => setProductoId(e.target.value)} required>
-              <option value="">Seleccionar producto...</option>
-              {productos.map((p) => (
-                <option key={p.id} value={p.id}>{p.descripcion} ({p.codigo})</option>
-              ))}
-            </select>
-            {producto && (
-              <p className="text-xs text-gray-400 mt-1">
-                {producto.unidades_por_bulto} uds/bulto — Grupo: {producto.grupo ?? '—'}
-              </p>
-            )}
+
+          {/* Filtro de grupo */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={lbl}>Grupo de productos</label>
+              <select
+                className={inp}
+                value={grupoFiltro}
+                onChange={(e) => { setGrupoFiltro(e.target.value); setProductoId('') }}
+              >
+                <option value="">Todos los grupos</option>
+                {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={lbl}>Producto *</label>
+              <select
+                className={inp}
+                value={productoId}
+                onChange={(e) => { setProductoId(e.target.value); setBultos(''); setSueltas('') }}
+                required
+              >
+                <option value="">Seleccionar...</option>
+                {productosFiltrados.map((p) => (
+                  <option key={p.id} value={p.id}>{p.descripcion} ({p.codigo})</option>
+                ))}
+              </select>
+              {producto && (
+                <p className="text-xs text-gray-400 mt-1">
+                  {producto.unidades_por_bulto} uds/bulto
+                  {producto.grupo ? ` — ${producto.grupo}` : ''}
+                </p>
+              )}
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* Bultos + Sueltas + Fecha */}
+          <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className={lbl}>Cantidad (unidades) *</label>
+              <label className={lbl}>Bultos *</label>
               <input
-                type="number" min={1} className={inp}
-                value={cantidad} onChange={(e) => setCantidad(e.target.value)} required
+                type="number" min={0}
+                className={inpNum}
+                value={bultos}
+                onChange={(e) => setBultos(e.target.value)}
+                placeholder="0"
               />
-              {cant > 0 && producto && (
-                <p className="text-xs text-gray-400 mt-1">
-                  {bultos} bulto{bultos !== 1 ? 's' : ''} + {sueltas} suelta{sueltas !== 1 ? 's' : ''}
-                </p>
+            </div>
+            <div>
+              <label className={lbl}>Uds. sueltas</label>
+              <input
+                type="number" min={0} max={upb - 1}
+                className={inpNum}
+                value={sueltas}
+                onChange={(e) => setSueltas(e.target.value)}
+                placeholder="0"
+              />
+              {upb > 1 && (
+                <p className="text-xs text-gray-400 mt-1 text-center">máx {upb - 1}</p>
               )}
             </div>
             <div>
@@ -94,10 +138,21 @@ export default function EntradaInventarioModal({ open, onClose, onSaved }) {
             </div>
           </div>
 
+          {/* Total preview */}
+          {totalUds > 0 && producto && (
+            <div className="rounded-md bg-blue-50 border border-blue-100 px-4 py-2 text-sm text-blue-800">
+              Total a ingresar: <span className="font-bold">{totalUds} unidades</span>
+              <span className="text-blue-500 ml-2">
+                ({Number(bultos) || 0}B + {Number(sueltas) || 0}u)
+              </span>
+            </div>
+          )}
+
           <div>
             <label className={lbl}>Nota (opcional)</label>
             <input
-              type="text" className={inp} value={nota} onChange={(e) => setNota(e.target.value)}
+              type="text" className={inp} value={nota}
+              onChange={(e) => setNota(e.target.value)}
               placeholder="Ej: Factura #123, proveedor XYZ..."
             />
           </div>
