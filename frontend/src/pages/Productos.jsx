@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { getProductos, deleteProducto, getGruposProductos } from '../api'
 import PageHeader from '../components/PageHeader'
@@ -8,11 +9,15 @@ import ActualizacionPreciosModal from '../components/ActualizacionPreciosModal'
 export default function Productos() {
   const [productos, setProductos] = useState([])
   const [grupos, setGrupos] = useState([])
-  const [search, setSearch] = useState('')
+  const [searchParams] = useSearchParams()
+  const urlSearch = searchParams.get('search') ?? ''
+  const [search, setSearch] = useState(urlSearch)
   const [grupoId, setGrupoId] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [editId, setEditId] = useState(null)
   const [preciosModalOpen, setPreciosModalOpen] = useState(false)
+
+  useEffect(() => { setSearch(urlSearch) }, [urlSearch])
 
   const load = () =>
     getProductos({ search, grupo_id: grupoId || undefined, activo: true })

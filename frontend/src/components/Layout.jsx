@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import GlobalSearch from './GlobalSearch'
 
 const adminNav = [
   { to: '/dashboard', label: 'Dashboard' },
@@ -57,6 +58,8 @@ export default function Layout() {
           </h1>
           <button className="md:hidden text-gray-400 hover:text-white text-lg leading-none" onClick={close}>✕</button>
         </div>
+
+        {isAdmin && <GlobalSearch onNavigate={close} />}
 
         <nav className="flex-1 overflow-y-auto py-2">
           {navItems.map((item) => (

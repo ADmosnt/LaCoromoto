@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { getClientes, deleteCliente } from '../api'
 import PageHeader from '../components/PageHeader'
@@ -6,9 +7,13 @@ import ClienteModal from '../components/ClienteModal'
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([])
-  const [search, setSearch] = useState('')
+  const [searchParams] = useSearchParams()
+  const urlSearch = searchParams.get('search') ?? ''
+  const [search, setSearch] = useState(urlSearch)
   const [modalOpen, setModalOpen] = useState(false)
   const [editId, setEditId] = useState(null)
+
+  useEffect(() => { setSearch(urlSearch) }, [urlSearch])
 
   const load = () =>
     getClientes({ search, activo: true })
