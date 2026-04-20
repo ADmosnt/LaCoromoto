@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from app import db
-from app.models import Zona, GrupoCliente, GrupoProducto, ListaPrecio
+from app.models import Zona, GrupoCliente, GrupoProducto, ListaPrecio, Cliente, Producto
 from app.auth import require_role
 
 bp = Blueprint('maestras', __name__)
@@ -30,6 +30,31 @@ def _crud(model):
 
     def delete(id):
         item = model.query.get_or_404(id)
+        # Check usage before deleting
+        if model is Zona:
+            n = Cliente.query.filter_by(zona_id=id).count()
+            if n:
+                return jsonify({'error': f'No se puede eliminar: {n} cliente(s) usan esta zona.'}), 409
+        elif model is GrupoCliente:
+            n = Cliente.query.filter_by(grupo_id=id).count()
+            if n:
+                return jsonify({'error': f'No se puede eliminar: {n} cliente(s) pertenecen a este grupo.'}), 409
+        elif model is GrupoProducto:
+            n = Producto.query.filter_by(grupo_id=id, activo=True).count()
+            if n:
+                return jsonify({'error': f'No se puede eliminar: {n} producto(s) pertenecen a este grupo.'}), 409
+        elif model is ListaPrecio:
+            from app.models import ProductoPrecio
+            n_prod = ProductoPrecio.query.filter_by(lista_id=id).count()
+            n_cli = db.session.execute(
+                db.text('SELECT COUNT(*) FROM clientes_lista_precios WHERE lista_id = :id'),
+                {'id': id}
+            ).scalar()
+            if n_prod or n_cli:
+                return jsonify({
+                    'error': f'No se puede eliminar: esta lista tiene precios en {n_prod} producto(s) '
+                             f'y está asignada a {n_cli} cliente(s).'
+                }), 409
         db.session.delete(item)
         db.session.commit()
         return '', 204

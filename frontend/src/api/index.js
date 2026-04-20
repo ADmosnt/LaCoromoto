@@ -69,6 +69,7 @@ export const getCliente = (id) => api.get(`/clientes/${id}`)
 export const createCliente = (data) => api.post('/clientes', data)
 export const updateCliente = (id, data) => api.put(`/clientes/${id}`, data)
 export const deleteCliente = (id) => api.delete(`/clientes/${id}`)
+export const reactivarCliente = (id) => api.post(`/clientes/${id}/reactivar`)
 export const getClienteStock = (id) => api.get(`/clientes/${id}/stock`)
 export const getGrupoConsolidado = (grupoId) => api.get(`/clientes/grupos/${grupoId}/consolidado`)
 
@@ -78,6 +79,7 @@ export const getProducto = (id) => api.get(`/productos/${id}`)
 export const createProducto = (data) => api.post('/productos', data)
 export const updateProducto = (id, data) => api.put(`/productos/${id}`, data)
 export const deleteProducto = (id) => api.delete(`/productos/${id}`)
+export const reactivarProducto = (id) => api.post(`/productos/${id}/reactivar`)
 export const ajustePrecios = (data) => api.post('/productos/precios/ajuste', data)
 
 // Órdenes de Despacho

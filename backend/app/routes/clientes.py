@@ -72,6 +72,15 @@ def create_cliente():
     return jsonify(c.to_dict()), 201
 
 
+@bp.route('/<int:id>/reactivar', methods=['POST'])
+@require_role('admin')
+def reactivar_cliente(id):
+    c = Cliente.query.get_or_404(id)
+    c.activo = True
+    db.session.commit()
+    return jsonify(c.to_dict())
+
+
 @bp.route('/<int:id>', methods=['PUT'])
 @require_role('admin')
 def update_cliente(id):
@@ -103,7 +112,16 @@ def update_cliente(id):
 @bp.route('/<int:id>', methods=['DELETE'])
 @require_role('admin')
 def delete_cliente(id):
+    from app.models import OrdenDespacho
     c = Cliente.query.get_or_404(id)
+    activas = OrdenDespacho.query.filter_by(
+        cliente_id=id, status='activa'
+    ).count()
+    if activas:
+        return jsonify({
+            'error': f'No se puede desactivar: este cliente tiene {activas} orden(es) activa(s). '
+                     'Anúlalas primero o espera a que sean reportadas y confirmadas.'
+        }), 409
     c.activo = False
     db.session.commit()
     return '', 204

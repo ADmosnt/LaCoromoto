@@ -95,10 +95,35 @@ def update_producto(id):
 @bp.route('/<int:id>', methods=['DELETE'])
 @require_role('admin')
 def delete_producto(id):
+    from app.models import OrdenDespachoDetalle, OrdenDespacho
+    from sqlalchemy import exists
     p = Producto.query.get_or_404(id)
+    activa = db.session.query(
+        exists().where(
+            OrdenDespachoDetalle.producto_id == id
+        ).where(
+            OrdenDespachoDetalle.orden_id == OrdenDespacho.id
+        ).where(
+            OrdenDespacho.status == 'activa'
+        )
+    ).scalar()
+    if activa:
+        return jsonify({
+            'error': 'No se puede desactivar: este producto tiene órdenes activas en curso. '
+                     'Espera a que sean reportadas y confirmadas.'
+        }), 409
     p.activo = False
     db.session.commit()
     return '', 204
+
+
+@bp.route('/<int:id>/reactivar', methods=['POST'])
+@require_role('admin')
+def reactivar_producto(id):
+    p = Producto.query.get_or_404(id)
+    p.activo = True
+    db.session.commit()
+    return jsonify(p.to_dict())
 
 
 @bp.route('/precios/ajuste', methods=['POST'])

@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { getProductos, deleteProducto, getGruposProductos } from '../api'
+import { getProductos, deleteProducto, reactivarProducto, getGruposProductos } from '../api'
 import PageHeader from '../components/PageHeader'
 import ProductoModal from '../components/ProductoModal'
 import ActualizacionPreciosModal from '../components/ActualizacionPreciosModal'
 
 export default function Productos() {
   const [productos, setProductos] = useState([])
+  const [desactivados, setDesactivados] = useState([])
   const [grupos, setGrupos] = useState([])
   const [searchParams] = useSearchParams()
   const urlSearch = searchParams.get('search') ?? ''
@@ -16,13 +17,18 @@ export default function Productos() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editId, setEditId] = useState(null)
   const [preciosModalOpen, setPreciosModalOpen] = useState(false)
+  const [showDesactivados, setShowDesactivados] = useState(false)
 
   useEffect(() => { setSearch(urlSearch) }, [urlSearch])
 
-  const load = () =>
+  const load = () => {
     getProductos({ search, grupo_id: grupoId || undefined, activo: true })
       .then((r) => setProductos(r.data))
       .catch(() => toast.error('Error al cargar productos'))
+    getProductos({ activo: false })
+      .then((r) => setDesactivados(r.data))
+      .catch(() => {})
+  }
 
   useEffect(() => { getGruposProductos().then((r) => setGrupos(r.data)) }, [])
   useEffect(() => { load() }, [search, grupoId])
@@ -38,6 +44,16 @@ export default function Productos() {
       load()
     } catch (err) {
       toast.error(err.response?.data?.error ?? 'Error al desactivar producto')
+    }
+  }
+
+  const handleReactivar = async (id, desc) => {
+    try {
+      await reactivarProducto(id)
+      toast.success(`"${desc}" reactivado`)
+      load()
+    } catch (err) {
+      toast.error(err.response?.data?.error ?? 'Error al reactivar producto')
     }
   }
 
@@ -60,7 +76,9 @@ export default function Productos() {
           </button>
         </div>
       </div>
-      <div className="bg-white rounded-lg shadow">
+
+      {/* Active products */}
+      <div className="bg-white rounded-lg shadow mb-4">
         <div className="p-4 border-b flex flex-wrap gap-3">
           <input
             type="text"
@@ -119,6 +137,54 @@ export default function Productos() {
           </table>
         </div>
       </div>
+
+      {/* Deactivated products toggle */}
+      {desactivados.length > 0 && (
+        <div className="bg-white rounded-lg shadow">
+          <button
+            onClick={() => setShowDesactivados((v) => !v)}
+            className="w-full flex items-center justify-between px-4 py-3 text-sm text-gray-500 hover:bg-gray-50 rounded-lg"
+          >
+            <span className="font-medium">
+              Productos desactivados ({desactivados.length})
+            </span>
+            <span>{showDesactivados ? '▲' : '▼'}</span>
+          </button>
+          {showDesactivados && (
+            <div className="overflow-x-auto border-t">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+                  <tr>
+                    <th className="px-4 py-3 text-left">Código</th>
+                    <th className="px-4 py-3 text-left">Descripción</th>
+                    <th className="px-4 py-3 text-left">Grupo</th>
+                    <th className="px-4 py-3 text-center">Uds/Bulto</th>
+                    <th className="px-4 py-3 text-center">Acción</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {desactivados.map((p) => (
+                    <tr key={p.id} className="bg-gray-50 opacity-75">
+                      <td className="px-4 py-3 font-mono text-xs text-gray-400">{p.codigo}</td>
+                      <td className="px-4 py-3 text-gray-500 line-through">{p.descripcion}</td>
+                      <td className="px-4 py-3 text-gray-400">{p.grupo}</td>
+                      <td className="px-4 py-3 text-center text-gray-400">{p.unidades_por_bulto}</td>
+                      <td className="px-4 py-3 text-center">
+                        <button
+                          onClick={() => handleReactivar(p.id, p.descripcion)}
+                          className="text-green-600 hover:underline text-xs font-medium"
+                        >
+                          Reactivar
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       <ProductoModal
         open={modalOpen}

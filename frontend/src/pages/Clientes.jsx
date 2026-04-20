@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { getClientes, deleteCliente, getGruposClientes } from '../api'
+import { getClientes, deleteCliente, reactivarCliente, getGruposClientes } from '../api'
 import PageHeader from '../components/PageHeader'
 import ClienteModal from '../components/ClienteModal'
 import ConsolidadoGrupoModal from '../components/ConsolidadoGrupoModal'
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([])
+  const [desactivados, setDesactivados] = useState([])
   const [grupos, setGrupos] = useState([])
   const [searchParams] = useSearchParams()
   const urlSearch = searchParams.get('search') ?? ''
@@ -16,15 +17,20 @@ export default function Clientes() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editId, setEditId] = useState(null)
   const [consolidadoOpen, setConsolidadoOpen] = useState(false)
+  const [showDesactivados, setShowDesactivados] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => { setSearch(urlSearch) }, [urlSearch])
   useEffect(() => { getGruposClientes().then((r) => setGrupos(r.data)) }, [])
 
-  const load = () =>
+  const load = () => {
     getClientes({ search, grupo_id: grupoId || undefined, activo: true })
       .then((r) => setClientes(r.data))
       .catch(() => toast.error('Error al cargar clientes'))
+    getClientes({ activo: false })
+      .then((r) => setDesactivados(r.data))
+      .catch(() => {})
+  }
 
   useEffect(() => { load() }, [search, grupoId])
 
@@ -43,6 +49,16 @@ export default function Clientes() {
     }
   }
 
+  const handleReactivar = async (id, nombre) => {
+    try {
+      await reactivarCliente(id)
+      toast.success(`"${nombre}" reactivado`)
+      load()
+    } catch (err) {
+      toast.error(err.response?.data?.error ?? 'Error al reactivar cliente')
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
@@ -54,7 +70,9 @@ export default function Clientes() {
           + Nuevo cliente
         </button>
       </div>
-      <div className="bg-white rounded-lg shadow">
+
+      {/* Active clients */}
+      <div className="bg-white rounded-lg shadow mb-4">
         <div className="p-4 border-b flex flex-wrap gap-3 items-center">
           <input
             type="text"
@@ -120,6 +138,54 @@ export default function Clientes() {
           </table>
         </div>
       </div>
+
+      {/* Deactivated clients toggle */}
+      {desactivados.length > 0 && (
+        <div className="bg-white rounded-lg shadow">
+          <button
+            onClick={() => setShowDesactivados((v) => !v)}
+            className="w-full flex items-center justify-between px-4 py-3 text-sm text-gray-500 hover:bg-gray-50 rounded-lg"
+          >
+            <span className="font-medium">
+              Clientes desactivados ({desactivados.length})
+            </span>
+            <span>{showDesactivados ? '▲' : '▼'}</span>
+          </button>
+          {showDesactivados && (
+            <div className="overflow-x-auto border-t">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+                  <tr>
+                    <th className="px-4 py-3 text-left">Código</th>
+                    <th className="px-4 py-3 text-left">Razón Social</th>
+                    <th className="px-4 py-3 text-left">RIF</th>
+                    <th className="px-4 py-3 text-left">Zona</th>
+                    <th className="px-4 py-3 text-center">Acción</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {desactivados.map((c) => (
+                    <tr key={c.id} className="bg-gray-50 opacity-75">
+                      <td className="px-4 py-3 font-mono text-xs text-gray-400">{c.codigo}</td>
+                      <td className="px-4 py-3 text-gray-500 line-through">{c.razon_social}</td>
+                      <td className="px-4 py-3 text-gray-400">{c.rif}</td>
+                      <td className="px-4 py-3 text-gray-400">{c.zona}</td>
+                      <td className="px-4 py-3 text-center">
+                        <button
+                          onClick={() => handleReactivar(c.id, c.razon_social)}
+                          className="text-green-600 hover:underline text-xs font-medium"
+                        >
+                          Reactivar
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       <ClienteModal
         open={modalOpen}
