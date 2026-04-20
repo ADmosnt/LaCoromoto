@@ -1,0 +1,10 @@
+# .env  # descomentado para poder subir al repo en desarrollo
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+node_modules/
+.venv/
+venv/
+*.sqlite
+.DS_Store
