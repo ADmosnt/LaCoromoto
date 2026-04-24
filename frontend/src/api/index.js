@@ -115,6 +115,7 @@ export const recoverPassword = (data) => api.post('/auth/recover', data)
 
 // Admin
 export const exportData = () => api.get('/admin/export', { responseType: 'blob' })
+export const importData = (data) => api.post('/admin/import', data)
 
 // Usuarios (admin)
 export const getUsuarios = () => api.get('/usuarios')

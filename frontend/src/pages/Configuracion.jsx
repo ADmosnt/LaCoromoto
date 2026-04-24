@@ -8,9 +8,10 @@ import {
   getGruposClientes, createGrupoCliente, updateGrupoCliente, deleteGrupoCliente,
   getGruposProductos, createGrupoProducto, updateGrupoProducto, deleteGrupoProducto,
   getListasPrecios, createListaPrecio, updateListaPrecio, deleteListaPrecio,
-  changePassword, setupRecovery, exportData,
+  changePassword, setupRecovery, exportData, importData,
 } from '../api'
 import { useAuth } from '../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 function CatalogSection({ title, items, onCreate, onUpdate, onDelete }) {
   const [input, setInput] = useState('')
@@ -77,12 +78,15 @@ export default function Configuracion() {
   const [listasPrecios, setListasPrecios] = useState([])
   const [scraping, setScraping] = useState(false)
 
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const [pwForm, setPwForm] = useState({ current_password: '', new_username: '', new_password: '', confirm_password: '' })
   const [pwLoading, setPwLoading] = useState(false)
   const [recoveryCode, setRecoveryCode] = useState(null)
   const [generatingCode, setGeneratingCode] = useState(false)
   const [exporting, setExporting] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [importPreview, setImportPreview] = useState(null)
 
   const loadAll = () => {
     getConfig().then((r) => setConfig(r.data))
@@ -155,6 +159,45 @@ export default function Configuracion() {
       toast.error('Error al exportar los datos')
     } finally {
       setExporting(false)
+    }
+  }
+
+  const handleImportFile = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    try {
+      const text = await file.text()
+      const backup = JSON.parse(text)
+      if (backup?.version !== '1' || !backup?.data) {
+        toast.error('El archivo no parece ser un backup válido de LaCoromoto')
+        return
+      }
+      const counts = {
+        clientes: backup.data.clientes?.length ?? 0,
+        productos: backup.data.productos?.length ?? 0,
+        ordenes: backup.data.ordenes_despacho?.length ?? 0,
+        usuarios: backup.data.usuarios?.length ?? 0,
+      }
+      setImportPreview({ backup, counts, fecha: backup.exported_at })
+    } catch {
+      toast.error('No se pudo leer el archivo JSON')
+    }
+  }
+
+  const confirmImport = async () => {
+    if (!importPreview) return
+    setImporting(true)
+    try {
+      await importData({ confirm: true, backup: importPreview.backup })
+      toast.success('Datos restaurados. Inicia sesión nuevamente.')
+      setImportPreview(null)
+      logout()
+      navigate('/login', { replace: true })
+    } catch (err) {
+      toast.error(err.response?.data?.error ?? 'Error al importar los datos')
+    } finally {
+      setImporting(false)
     }
   }
 
@@ -355,24 +398,51 @@ export default function Configuracion() {
       <div className="mt-6 bg-white rounded-lg shadow p-5">
         <h3 className="font-semibold text-gray-700 mb-1">Datos y respaldo</h3>
         <p className="text-xs text-gray-500 mb-4">
-          Descarga una copia de todos los datos de la aplicación en formato JSON. Útil para migrar a otro servidor o como respaldo manual.
+          Descarga una copia completa de todos los datos en formato JSON, o restaura desde un backup previo.
         </p>
-        <div className="flex flex-wrap gap-3 items-start">
+        <div className="flex flex-wrap gap-3">
           <button onClick={handleExport} disabled={exporting}
             className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-md disabled:opacity-50">
             {exporting ? 'Preparando...' : '↓ Descargar backup JSON'}
           </button>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-gray-600 mb-1">Para un backup completo de la base de datos (recomendado para migración):</p>
-            <code className="block text-xs bg-gray-100 rounded px-3 py-2 text-gray-700 break-all">
-              pg_dump "TU_DATABASE_PUBLIC_URL" -Fc -f backup_$(date +%Y%m%d).dump
-            </code>
-            <p className="text-xs text-gray-400 mt-1">
-              Restaurar: <span className="font-mono">pg_restore -d "URL_DESTINO" backup.dump</span>
-            </p>
-          </div>
+          <label className="border border-amber-400 text-amber-700 hover:bg-amber-50 text-sm font-medium px-4 py-2 rounded-md cursor-pointer">
+            ↑ Restaurar desde backup
+            <input type="file" accept="application/json,.json" onChange={handleImportFile} className="hidden" />
+          </label>
         </div>
       </div>
+
+      {/* Modal de confirmación de import */}
+      {importPreview && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-bold text-red-600 mb-2">⚠ Restaurar backup</h3>
+            <p className="text-sm text-gray-700 mb-4">
+              Esta acción <strong>borrará TODOS los datos actuales</strong> y los reemplazará con los del archivo. No se puede deshacer.
+            </p>
+            <div className="bg-gray-50 rounded-md p-3 mb-4 text-xs space-y-1">
+              <p><strong>Fecha del backup:</strong> {new Date(importPreview.fecha).toLocaleString()}</p>
+              <p><strong>Clientes:</strong> {importPreview.counts.clientes}</p>
+              <p><strong>Productos:</strong> {importPreview.counts.productos}</p>
+              <p><strong>Órdenes:</strong> {importPreview.counts.ordenes}</p>
+              <p><strong>Usuarios:</strong> {importPreview.counts.usuarios}</p>
+            </div>
+            <p className="text-xs text-amber-700 mb-4">
+              Después de restaurar, deberás iniciar sesión nuevamente con las credenciales del backup.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setImportPreview(null)} disabled={importing}
+                className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50">
+                Cancelar
+              </button>
+              <button onClick={confirmImport} disabled={importing}
+                className="px-4 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50">
+                {importing ? 'Restaurando...' : 'Sí, restaurar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
