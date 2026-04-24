@@ -109,6 +109,12 @@ export const createDevolucion = (data) => api.post('/devoluciones', data)
 // Auth
 export const authLogin = (data) => api.post('/auth/login', data)
 export const getMe = () => api.get('/auth/me')
+export const changePassword = (data) => api.put('/auth/me/password', data)
+export const setupRecovery = () => api.post('/auth/setup-recovery')
+export const recoverPassword = (data) => api.post('/auth/recover', data)
+
+// Admin
+export const exportData = () => api.get('/admin/export', { responseType: 'blob' })
 
 // Usuarios (admin)
 export const getUsuarios = () => api.get('/usuarios')
