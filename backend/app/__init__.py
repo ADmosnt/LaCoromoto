@@ -54,6 +54,7 @@ def create_app():
     from app.routes.inventario import bp as inventario_bp
     from app.routes.auth import bp as auth_bp
     from app.routes.usuarios import bp as usuarios_bp
+    from app.routes.admin import bp as admin_bp
 
     app.register_blueprint(config_bp, url_prefix='/api/config')
     app.register_blueprint(maestras_bp, url_prefix='/api')
@@ -67,6 +68,7 @@ def create_app():
     app.register_blueprint(inventario_bp, url_prefix='/api/inventario')
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(usuarios_bp, url_prefix='/api/usuarios')
+    app.register_blueprint(admin_bp, url_prefix='/api/admin')
 
     # Defer DB init to first request so the app starts even if Postgres
     # isn't ready yet (e.g. Railway cold start, wrong DATABASE_URL, etc.)
@@ -108,6 +110,9 @@ def _run_migrations():
         ))
         conn.execute(text(
             "ALTER TABLE productos_precios ALTER COLUMN precio_usd TYPE NUMERIC(15,6)"
+        ))
+        conn.execute(text(
+            "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS recovery_code_hash VARCHAR(256)"
         ))
         conn.commit()
 

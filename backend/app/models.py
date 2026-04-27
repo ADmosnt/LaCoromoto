@@ -19,6 +19,8 @@ class Usuario(db.Model):
         from werkzeug.security import check_password_hash
         return check_password_hash(self.password_hash, pw)
 
+    recovery_code_hash = db.Column(db.String(256), nullable=True)
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -26,6 +28,7 @@ class Usuario(db.Model):
             'rol': self.rol,
             'cliente_id': self.cliente_id,
             'activo': self.activo,
+            'has_recovery_code': bool(self.recovery_code_hash),
         }
 
 
