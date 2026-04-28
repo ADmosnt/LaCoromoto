@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from sqlalchemy import func, text
+from sqlalchemy import func, text, case
 import datetime
 from app import db
 from app.models import (OrdenDespacho, Cliente, Producto,
@@ -145,7 +145,7 @@ def _chart_data(periodo):
                 func.extract('year', col).cast(db.Integer).cast(db.String)
                 + '-S'
                 + func.cast(
-                    func.case((func.extract('month', col) <= 6, 1), else_=2),
+                    case((func.extract('month', col) <= 6, 1), else_=2),
                     db.String
                 )
             )
