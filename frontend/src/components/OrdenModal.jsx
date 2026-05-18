@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
 import { HelpTooltip } from './ui/Tooltip'
 import PrecioInput, { parsePrecio } from './ui/PrecioInput'
+import ProductoCombobox from './ui/ProductoCombobox'
 import { createOrden, getClientes, getProductos, getTasaHoy, getGruposProductos, getInventario } from '../api'
 import Alert from './Alert'
 
@@ -258,15 +259,14 @@ export default function OrdenModal({ open, onClose, onSaved }) {
                             <option value="">Todos los grupos</option>
                             {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
                           </select>
-                          {/* Product select */}
-                          <select
-                            className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full"
-                            value={row.producto_id}
-                            onChange={(e) => setRow(i, 'producto_id', e.target.value)}
-                          >
-                            <option value="">Seleccionar producto...</option>
-                            {productosFila.map((p) => <option key={p.id} value={p.id}>{p.descripcion}</option>)}
-                          </select>
+                          {/* Product combobox: busca por código o descripción */}
+                          <ProductoCombobox
+                            productos={productosFila}
+                            selectedId={row.producto_id}
+                            onSelect={(id) => setRow(i, 'producto_id', id)}
+                            placeholder="Código o descripción..."
+                            size="small"
+                          />
                         </td>
                         <td className="px-3 py-2 text-center text-gray-500 text-xs font-medium">{upb}</td>
                         <td className="px-3 py-2 text-center">
