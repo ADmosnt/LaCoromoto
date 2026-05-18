@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { getOrdenes, getOrden, getClientes, downloadOrdenPDF, anularOrden, confirmarReporteVenta } from '../api'
 import OrdenModal from '../components/OrdenModal'
+import OrdenEdicionesModal from '../components/OrdenEdicionesModal'
 import ReporteVentaModal from '../components/ReporteVentaModal'
 import { HelpTooltip } from '../components/ui/Tooltip'
 
@@ -37,7 +38,7 @@ const statusLabel = {
   anulada: 'Anulada',
 }
 
-function OrdenDetailPanel({ ordenId, onAnulada, onReporteCreated }) {
+function OrdenDetailPanel({ ordenId, onAnulada, onReporteCreated, onEditar, onVerEdiciones }) {
   const [detail, setDetail] = useState(null)
   const [loadError, setLoadError] = useState(false)
   const [reporteModalOpen, setReporteModalOpen] = useState(false)
@@ -99,9 +100,22 @@ function OrdenDetailPanel({ ordenId, onAnulada, onReporteCreated }) {
   const isActiva = status === 'activa'
   const isPendiente = status === 'pendiente'
   const isConfirmado = status === 'confirmado'
+  const puedeEditar = Boolean(detail.puede_editar)
+  const edicionesCount = detail.ediciones_count ?? 0
 
   return (
     <div className="bg-gray-50 border-t border-gray-200 px-4 py-3">
+      {edicionesCount > 0 && (
+        <div className="mb-2 flex items-center">
+          <button
+            onClick={() => onVerEdiciones(detail)}
+            className="text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200 rounded px-2 py-1 font-medium inline-flex items-center gap-1"
+          >
+            <span>✎</span>
+            <span>Editada {edicionesCount > 1 ? `(${edicionesCount} cambios)` : '(1 cambio)'} — ver historial</span>
+          </button>
+        </div>
+      )}
       {isAnulada && (
         <div className="mb-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1">
           Orden anulada. El stock fue revertido al almacén.
@@ -196,6 +210,17 @@ function OrdenDetailPanel({ ordenId, onAnulada, onReporteCreated }) {
           >
             Descargar PDF
           </button>
+          {puedeEditar && (
+            <span className="inline-flex items-center gap-1">
+              <button
+                onClick={() => onEditar(detail)}
+                className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded"
+              >
+                Editar Orden
+              </button>
+              <HelpTooltip text="Edita los productos, cantidades, precios, fecha o nota. Se registrará un historial de cambios visible para auditoría." side="top" />
+            </span>
+          )}
           {isActiva && (
             <span className="inline-flex items-center gap-1">
               <button
@@ -258,6 +283,8 @@ export default function Ordenes() {
   const [fechaHasta, setFechaHasta] = useState('')
   const [expanded, setExpanded] = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const [editOrdenId, setEditOrdenId] = useState(null)
+  const [edicionesTarget, setEdicionesTarget] = useState(null)
 
   const load = () =>
     getOrdenes({
@@ -344,6 +371,14 @@ export default function Ordenes() {
                     <span className="font-mono text-xs text-blue-600 w-24 flex-shrink-0">{o.numero_orden}</span>
                     <span className="flex-1 font-medium text-sm truncate min-w-0">{o.cliente}</span>
                     <span className="text-xs text-gray-500 flex-shrink-0 hidden sm:block">{o.fecha_emision}</span>
+                    {o.ediciones_count > 0 && (
+                      <span
+                        className="text-xs px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 flex-shrink-0"
+                        title={`${o.ediciones_count} edición${o.ediciones_count !== 1 ? 'es' : ''}`}
+                      >
+                        ✎
+                      </span>
+                    )}
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${statusBadge[o.status] ?? 'bg-gray-100 text-gray-600'}`}>
                       {statusLabel[o.status] ?? o.status}
                     </span>
@@ -356,6 +391,8 @@ export default function Ordenes() {
                       ordenId={o.id}
                       onAnulada={() => { setExpanded(null); load() }}
                       onReporteCreated={() => load()}
+                      onEditar={(d) => setEditOrdenId(d.id)}
+                      onVerEdiciones={(d) => setEdicionesTarget({ id: d.id, numero: d.numero_orden })}
                     />
                   )}
                 </div>
@@ -378,6 +415,20 @@ export default function Ordenes() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSaved={load}
+      />
+
+      <OrdenModal
+        open={editOrdenId != null}
+        onClose={() => setEditOrdenId(null)}
+        onSaved={() => { load() }}
+        ordenId={editOrdenId}
+      />
+
+      <OrdenEdicionesModal
+        open={edicionesTarget != null}
+        onClose={() => setEdicionesTarget(null)}
+        ordenId={edicionesTarget?.id}
+        numeroOrden={edicionesTarget?.numero}
       />
     </div>
   )

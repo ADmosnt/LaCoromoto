@@ -282,6 +282,38 @@ class OrdenDespachoDetalle(db.Model):
         }
 
 
+class OrdenDespachoEdicion(db.Model):
+    __tablename__ = 'ordenes_despacho_edicion'
+    id = db.Column(db.Integer, primary_key=True)
+    orden_id = db.Column(
+        db.Integer,
+        db.ForeignKey('ordenes_despacho.id', ondelete='CASCADE'),
+        nullable=False,
+    )
+    editado_en = db.Column(
+        db.DateTime(timezone=True),
+        default=datetime.datetime.utcnow,
+        nullable=False,
+    )
+    editado_por_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
+    snapshot_antes = db.Column(db.JSON, nullable=False)
+    snapshot_despues = db.Column(db.JSON, nullable=False)
+    motivo = db.Column(db.Text)
+
+    editor = db.relationship('Usuario')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'orden_id': self.orden_id,
+            'editado_en': self.editado_en.isoformat() if self.editado_en else None,
+            'editado_por': self.editor.username if self.editor else None,
+            'snapshot_antes': self.snapshot_antes,
+            'snapshot_despues': self.snapshot_despues,
+            'motivo': self.motivo,
+        }
+
+
 class StockConsignacion(db.Model):
     __tablename__ = 'stock_consignacion'
     id = db.Column(db.Integer, primary_key=True)

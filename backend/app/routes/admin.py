@@ -3,7 +3,7 @@ from app import db
 from app.models import (
     ConfigEmpresa, Zona, GrupoCliente, GrupoProducto, ListaPrecio,
     Cliente, ClienteTelefono, Producto, ProductoPrecio, TasaBCV,
-    OrdenDespacho, OrdenDespachoDetalle, StockConsignacion,
+    OrdenDespacho, OrdenDespachoDetalle, OrdenDespachoEdicion, StockConsignacion,
     Devolucion, DevolucionDetalle, ReporteVenta, ReporteVentaDetalle,
     InventarioCentral, EntradaInventario, EntradaInventarioDetalle, Usuario,
 )
@@ -96,6 +96,17 @@ def export_data():
                     'precio_usd_momento': float(d.precio_usd_momento),
                 }
                 for d in OrdenDespachoDetalle.query.all()
+            ],
+            'ordenes_despacho_edicion': [
+                {
+                    'id': e.id, 'orden_id': e.orden_id,
+                    'editado_en': e.editado_en.isoformat() if e.editado_en else None,
+                    'editado_por_id': e.editado_por_id,
+                    'snapshot_antes': e.snapshot_antes,
+                    'snapshot_despues': e.snapshot_despues,
+                    'motivo': e.motivo,
+                }
+                for e in OrdenDespachoEdicion.query.all()
             ],
             'stock_consignacion': [
                 {
@@ -192,6 +203,7 @@ _TABLES_DELETE_ORDER = [
     'reportes_venta_detalle', 'reportes_venta',
     'devoluciones_detalle', 'devoluciones',
     'stock_consignacion',
+    'ordenes_despacho_edicion',
     'ordenes_despacho_detalle', 'ordenes_despacho',
     'tasas_bcv',
     'productos_precios', 'productos',
@@ -307,6 +319,17 @@ def import_data():
         for r in d['ordenes_despacho_detalle']:
             db.session.add(OrdenDespachoDetalle(**r))
 
+        # Ediciones de órdenes (opcional, presente desde v2)
+        for r in d.get('ordenes_despacho_edicion', []):
+            db.session.add(OrdenDespachoEdicion(
+                id=r['id'], orden_id=r['orden_id'],
+                editado_en=_parse_datetime(r.get('editado_en')),
+                editado_por_id=r.get('editado_por_id'),
+                snapshot_antes=r.get('snapshot_antes'),
+                snapshot_despues=r.get('snapshot_despues'),
+                motivo=r.get('motivo'),
+            ))
+
         for r in d['stock_consignacion']:
             db.session.add(StockConsignacion(**r))
 
@@ -378,7 +401,8 @@ def import_data():
             'config_empresa', 'zonas', 'grupos_clientes', 'grupos_productos',
             'listas_precios', 'usuarios', 'clientes', 'clientes_telefonos',
             'productos', 'productos_precios', 'tasas_bcv',
-            'ordenes_despacho', 'ordenes_despacho_detalle', 'stock_consignacion',
+            'ordenes_despacho', 'ordenes_despacho_detalle',
+            'ordenes_despacho_edicion', 'stock_consignacion',
             'devoluciones', 'devoluciones_detalle',
             'reportes_venta', 'reportes_venta_detalle',
             'inventario_central', 'entradas_inventario',
