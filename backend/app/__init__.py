@@ -118,12 +118,17 @@ def _run_migrations():
         conn.execute(text(
             "ALTER TABLE entradas_inventario ADD COLUMN IF NOT EXISTS numero_entrada VARCHAR(20)"
         ))
-        conn.execute(text(
-            "ALTER TABLE entradas_inventario ALTER COLUMN producto_id DROP NOT NULL"
-        ))
-        conn.execute(text(
-            "ALTER TABLE entradas_inventario ALTER COLUMN cantidad_unidades DROP NOT NULL"
-        ))
+        conn.execute(text("""
+            DO $$ BEGIN
+                IF EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_name='entradas_inventario' AND column_name='producto_id'
+                ) THEN
+                    ALTER TABLE entradas_inventario ALTER COLUMN producto_id DROP NOT NULL;
+                    ALTER TABLE entradas_inventario ALTER COLUMN cantidad_unidades DROP NOT NULL;
+                END IF;
+            END $$
+        """))
         # Migrar entradas legacy a detalle: 1 fila cabecera → 1 fila detalle
         conn.execute(text("""
             INSERT INTO entradas_inventario_detalle (entrada_id, producto_id, cantidad_unidades)
