@@ -130,15 +130,23 @@ def _run_migrations():
             END $$
         """))
         # Migrar entradas legacy a detalle: 1 fila cabecera → 1 fila detalle
+        # (solo si las columnas legacy todavía existen)
         conn.execute(text("""
-            INSERT INTO entradas_inventario_detalle (entrada_id, producto_id, cantidad_unidades)
-            SELECT e.id, e.producto_id, e.cantidad_unidades
-            FROM entradas_inventario e
-            WHERE e.producto_id IS NOT NULL
-              AND e.cantidad_unidades IS NOT NULL
-              AND NOT EXISTS (
-                SELECT 1 FROM entradas_inventario_detalle d WHERE d.entrada_id = e.id
-              )
+            DO $$ BEGIN
+                IF EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_name='entradas_inventario' AND column_name='producto_id'
+                ) THEN
+                    INSERT INTO entradas_inventario_detalle (entrada_id, producto_id, cantidad_unidades)
+                    SELECT e.id, e.producto_id, e.cantidad_unidades
+                    FROM entradas_inventario e
+                    WHERE e.producto_id IS NOT NULL
+                      AND e.cantidad_unidades IS NOT NULL
+                      AND NOT EXISTS (
+                        SELECT 1 FROM entradas_inventario_detalle d WHERE d.entrada_id = e.id
+                      );
+                END IF;
+            END $$
         """))
         # Asignar numero_entrada a las que no lo tengan, en orden cronológico
         conn.execute(text("""
