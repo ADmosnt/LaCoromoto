@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
+import PrecioInput, { parsePrecio } from './ui/PrecioInput'
 import {
   getProducto, createProducto, updateProducto,
   getGruposProductos, getListasPrecios,
@@ -24,7 +25,14 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
       setGrupos(g.data); setListas(l.data)
     })
     if (isEdit) {
-      getProducto(productoId).then((r) => setForm({ ...r.data, grupo_id: r.data.grupo_id ?? '' }))
+      getProducto(productoId).then((r) => {
+        const upb = r.data.unidades_por_bulto || 1
+        const precios = (r.data.precios ?? []).map((p) => ({
+          lista_id: p.lista_id,
+          precio_bulto_str: String(Number(p.precio_usd) * upb),
+        }))
+        setForm({ ...r.data, grupo_id: r.data.grupo_id ?? '', precios })
+      })
     } else {
       setForm(emptyForm)
     }
@@ -33,30 +41,40 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
   const set = (field, val) => setForm((f) => ({ ...f, [field]: val }))
 
   const setPrecio = (listaId, valorBulto) => {
-    const upb = form.unidades_por_bulto || 1
-    const precioUsd = valorBulto === '' ? '' : String(Number(valorBulto) / upb)
     const precios = [...form.precios]
     const idx = precios.findIndex((p) => p.lista_id === listaId)
-    if (idx >= 0) precios[idx] = { ...precios[idx], precio_usd: precioUsd }
-    else precios.push({ lista_id: listaId, precio_usd: precioUsd })
+    if (idx >= 0) precios[idx] = { ...precios[idx], precio_bulto_str: valorBulto }
+    else precios.push({ lista_id: listaId, precio_bulto_str: valorBulto })
     set('precios', precios)
   }
 
-  const getPrecio = (listaId) => {
-    const usd = form.precios.find((p) => p.lista_id === listaId)?.precio_usd ?? ''
-    if (usd === '') return ''
-    return (Number(usd) * (form.unidades_por_bulto || 1)).toFixed(2)
-  }
+  const getPrecio = (listaId) =>
+    form.precios.find((p) => p.lista_id === listaId)?.precio_bulto_str ?? ''
 
   const submit = async (e) => {
     e.preventDefault()
     setError('')
+
+    const upb = Number(form.unidades_por_bulto) || 1
+    const preciosOut = []
+    for (const p of form.precios) {
+      if (p.precio_bulto_str === '' || p.precio_bulto_str == null) continue
+      const parsed = parsePrecio(p.precio_bulto_str)
+      if (parsed == null || parsed < 0) {
+        setError('Precio inválido. Usa números con "." o "," como separador decimal.')
+        return
+      }
+      if (parsed > 0) {
+        preciosOut.push({ lista_id: p.lista_id, precio_usd: parsed / upb })
+      }
+    }
+
     setLoading(true)
     try {
       const payload = {
         ...form,
         grupo_id: form.grupo_id || null,
-        precios: form.precios.filter((p) => p.precio_usd !== '' && Number(p.precio_usd) > 0),
+        precios: preciosOut,
       }
       if (isEdit) await updateProducto(productoId, payload)
       else await createProducto(payload)
@@ -106,15 +124,16 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
           {listas.length > 0 && (
             <div>
               <label className={lbl}>Precios por bulto (USD)</label>
+              <p className="text-xs text-gray-400 mb-2">Usa punto o coma como separador decimal (ej: 10.50 o 10,50)</p>
               <div className="space-y-2">
                 {listas.map((l) => (
                   <div key={l.id} className="flex items-center gap-3">
                     <span className="text-sm text-gray-600 flex-1">{l.nombre}</span>
-                    <input
-                      type="number" step="0.01" min="0" placeholder="0.00"
+                    <PrecioInput
+                      placeholder="0.00"
                       className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={getPrecio(l.id)}
-                      onChange={(e) => setPrecio(l.id, e.target.value)}
+                      onChange={(v) => setPrecio(l.id, v)}
                     />
                   </div>
                 ))}

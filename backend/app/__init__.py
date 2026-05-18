@@ -114,6 +114,60 @@ def _run_migrations():
         conn.execute(text(
             "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS recovery_code_hash VARCHAR(256)"
         ))
+        # Entradas de inventario: cabecera + detalle
+        conn.execute(text(
+            "ALTER TABLE entradas_inventario ADD COLUMN IF NOT EXISTS numero_entrada VARCHAR(20)"
+        ))
+        conn.execute(text("""
+            DO $$ BEGIN
+                IF EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_name='entradas_inventario' AND column_name='producto_id'
+                ) THEN
+                    ALTER TABLE entradas_inventario ALTER COLUMN producto_id DROP NOT NULL;
+                    ALTER TABLE entradas_inventario ALTER COLUMN cantidad_unidades DROP NOT NULL;
+                END IF;
+            END $$
+        """))
+        # Migrar entradas legacy a detalle: 1 fila cabecera → 1 fila detalle
+        # (solo si las columnas legacy todavía existen)
+        conn.execute(text("""
+            DO $$ BEGIN
+                IF EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_name='entradas_inventario' AND column_name='producto_id'
+                ) THEN
+                    INSERT INTO entradas_inventario_detalle (entrada_id, producto_id, cantidad_unidades)
+                    SELECT e.id, e.producto_id, e.cantidad_unidades
+                    FROM entradas_inventario e
+                    WHERE e.producto_id IS NOT NULL
+                      AND e.cantidad_unidades IS NOT NULL
+                      AND NOT EXISTS (
+                        SELECT 1 FROM entradas_inventario_detalle d WHERE d.entrada_id = e.id
+                      );
+                END IF;
+            END $$
+        """))
+        # Asignar numero_entrada a las que no lo tengan, en orden cronológico
+        conn.execute(text("""
+            WITH numerar AS (
+                SELECT id,
+                       'ENT-' || LPAD(ROW_NUMBER() OVER (ORDER BY creado_en, id)::text, 6, '0') AS nuevo
+                FROM entradas_inventario
+                WHERE numero_entrada IS NULL
+            )
+            UPDATE entradas_inventario e
+            SET numero_entrada = n.nuevo
+            FROM numerar n
+            WHERE e.id = n.id
+        """))
+        # Drop columnas legacy de la cabecera
+        conn.execute(text(
+            "ALTER TABLE entradas_inventario DROP COLUMN IF EXISTS producto_id"
+        ))
+        conn.execute(text(
+            "ALTER TABLE entradas_inventario DROP COLUMN IF EXISTS cantidad_unidades"
+        ))
         conn.commit()
 
 

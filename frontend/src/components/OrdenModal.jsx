@@ -2,13 +2,18 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
 import { HelpTooltip } from './ui/Tooltip'
-import { createOrden, getClientes, getProductos, getTasaHoy, getGruposProductos, getInventario } from '../api'
+import PrecioInput, { parsePrecio } from './ui/PrecioInput'
+import ProductoCombobox from './ui/ProductoCombobox'
+import {
+  createOrden, updateOrden, getOrden,
+  getClientes, getProductos, getTasaHoy, getGruposProductos, getInventario,
+} from '../api'
 import Alert from './Alert'
 
 const emptyRow = () => ({
   grupo_filtro: '',
   producto_id: '', descripcion: '', codigo: '',
-  unidades_por_bulto: 1, precio_usd_momento: '',
+  unidades_por_bulto: 1, precio_bulto_str: '',
   bultos: '', sueltas: '',
   precios: [],
 })
@@ -18,14 +23,18 @@ const rowUnidades = (row) => {
   return (Number(row.bultos) || 0) * upb + (Number(row.sueltas) || 0)
 }
 
-export default function OrdenModal({ open, onClose, onSaved }) {
+export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
+  const isEdit = Boolean(ordenId)
   const [clientes, setClientes] = useState([])
   const [productos, setProductos] = useState([])
   const [grupos, setGrupos] = useState([])
   const [inventario, setInventario] = useState([])
   const [clienteId, setClienteId] = useState('')
+  const [clienteNombre, setClienteNombre] = useState('')
+  const [numeroOrden, setNumeroOrden] = useState('')
   const [fecha, setFecha] = useState(new Date().toISOString().slice(0, 10))
   const [nota, setNota] = useState('')
+  const [motivo, setMotivo] = useState('')
   const [tasa, setTasa] = useState(null)
   const [tasaManual, setTasaManual] = useState('')
   const [rows, setRows] = useState([emptyRow()])
@@ -36,7 +45,10 @@ export default function OrdenModal({ open, onClose, onSaved }) {
     if (!open) return
     setError('')
     setClienteId('')
+    setClienteNombre('')
+    setNumeroOrden('')
     setNota('')
+    setMotivo('')
     setTasaManual('')
     setRows([emptyRow()])
     setFecha(new Date().toISOString().slice(0, 10))
@@ -51,10 +63,37 @@ export default function OrdenModal({ open, onClose, onSaved }) {
         setProductos(p.data)
         setGrupos(g.data)
         setInventario(inv.data)
+
+        if (isEdit) {
+          getOrden(ordenId).then((r) => {
+            const o = r.data
+            setClienteId(String(o.cliente_id))
+            setClienteNombre(o.cliente)
+            setNumeroOrden(o.numero_orden)
+            setFecha(o.fecha_emision)
+            setNota(o.nota || '')
+            setTasaManual(String(o.tasa_valor || ''))
+            setRows((o.detalles ?? []).map((d) => {
+              const prod = p.data.find((x) => x.id === d.producto_id)
+              const upb = d.unidades_por_bulto || prod?.unidades_por_bulto || 1
+              return {
+                grupo_filtro: prod?.grupo_id ? String(prod.grupo_id) : '',
+                producto_id: d.producto_id,
+                descripcion: d.descripcion,
+                codigo: d.codigo,
+                unidades_por_bulto: upb,
+                precio_bulto_str: String(Number(d.precio_usd_momento) * upb),
+                bultos: Math.floor(d.cantidad_unidades / upb),
+                sueltas: d.cantidad_unidades % upb,
+                precios: prod?.precios || [],
+              }
+            }))
+          }).catch(() => setError('Error al cargar la orden'))
+        }
       })
       .catch(() => setError('Error al cargar datos'))
     getTasaHoy().then((r) => setTasa(r.data)).catch(() => setTasa(null))
-  }, [open])
+  }, [open, ordenId])
 
   const invMap = Object.fromEntries(inventario.map((inv) => [inv.producto_id, inv]))
 
@@ -70,7 +109,7 @@ export default function OrdenModal({ open, onClose, onSaved }) {
       rs[i].codigo = ''
       rs[i].unidades_por_bulto = 1
       rs[i].precios = []
-      rs[i].precio_usd_momento = ''
+      rs[i].precio_bulto_str = ''
       rs[i].bultos = ''
       rs[i].sueltas = ''
     }
@@ -81,7 +120,9 @@ export default function OrdenModal({ open, onClose, onSaved }) {
         rs[i].codigo = prod.codigo
         rs[i].unidades_por_bulto = prod.unidades_por_bulto
         rs[i].precios = prod.precios
-        rs[i].precio_usd_momento = prod.precios?.[0]?.precio_usd ?? ''
+        const first = prod.precios?.[0]?.precio_usd
+        rs[i].precio_bulto_str =
+          first != null ? String(Number(first) * (prod.unidades_por_bulto || 1)) : ''
       }
       rs[i].bultos = ''
       rs[i].sueltas = ''
@@ -93,7 +134,9 @@ export default function OrdenModal({ open, onClose, onSaved }) {
   const removeRow = (i) => setRows(rows.filter((_, idx) => idx !== i))
 
   const totalUsd = rows.reduce((sum, r) => {
-    return sum + rowUnidades(r) * (Number(r.precio_usd_momento) || 0)
+    const upb = r.unidades_por_bulto || 1
+    const precioBulto = parsePrecio(r.precio_bulto_str) || 0
+    return sum + (rowUnidades(r) / upb) * precioBulto
   }, 0)
 
   const submit = async (e) => {
@@ -101,27 +144,55 @@ export default function OrdenModal({ open, onClose, onSaved }) {
     setError('')
     if (!clienteId) { setError('Seleccione un cliente'); return }
     if (!tasaValor) { setError('Ingrese la tasa BCV'); return }
-    const detalles = rows.filter((r) => r.producto_id && rowUnidades(r) > 0 && r.precio_usd_momento)
+
+    const detalles = []
+    for (const r of rows) {
+      if (!r.producto_id) continue
+      const uds = rowUnidades(r)
+      if (uds <= 0) continue
+      const precioBulto = parsePrecio(r.precio_bulto_str)
+      if (precioBulto == null) {
+        setError(`Precio inválido para "${r.descripcion}". Usa "." o "," como separador decimal.`)
+        return
+      }
+      if (precioBulto < 0) {
+        setError(`Precio no puede ser negativo para "${r.descripcion}".`)
+        return
+      }
+      const upb = r.unidades_por_bulto || 1
+      detalles.push({
+        producto_id: Number(r.producto_id),
+        cantidad_unidades: uds,
+        precio_usd_momento: precioBulto / upb,
+      })
+    }
     if (!detalles.length) { setError('Agregue al menos un producto con cantidad y precio'); return }
 
     setLoading(true)
     try {
-      await createOrden({
-        cliente_id: Number(clienteId),
-        fecha_emision: fecha,
-        nota,
-        tasa_valor: tasaValor,
-        detalles: detalles.map((r) => ({
-          producto_id: Number(r.producto_id),
-          cantidad_unidades: rowUnidades(r),
-          precio_usd_momento: Number(r.precio_usd_momento),
-        })),
-      })
-      toast.success('Orden de despacho creada')
+      if (isEdit) {
+        await updateOrden(ordenId, {
+          fecha_emision: fecha,
+          nota,
+          tasa_valor: tasaValor,
+          detalles,
+          motivo: motivo || null,
+        })
+        toast.success(`Orden ${numeroOrden} actualizada`)
+      } else {
+        await createOrden({
+          cliente_id: Number(clienteId),
+          fecha_emision: fecha,
+          nota,
+          tasa_valor: tasaValor,
+          detalles,
+        })
+        toast.success('Orden de despacho creada')
+      }
       onSaved()
       onClose()
     } catch (err) {
-      setError(err.response?.data?.error ?? 'Error al crear la orden')
+      setError(err.response?.data?.error ?? (isEdit ? 'Error al actualizar la orden' : 'Error al crear la orden'))
     } finally {
       setLoading(false)
     }
@@ -132,7 +203,10 @@ export default function OrdenModal({ open, onClose, onSaved }) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent title="Nueva Orden de Despacho" size="xl">
+      <DialogContent
+        title={isEdit ? `Editar orden ${numeroOrden}` : 'Nueva Orden de Despacho'}
+        size="xl"
+      >
         <Alert type="error" message={error} />
         <form onSubmit={submit} className="space-y-4">
           {/* General data */}
@@ -141,10 +215,14 @@ export default function OrdenModal({ open, onClose, onSaved }) {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="sm:col-span-2">
                 <label className="block text-xs font-medium text-gray-700 mb-1">Cliente *</label>
-                <select className={inp} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
-                  <option value="">Seleccionar cliente...</option>
-                  {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
-                </select>
+                {isEdit ? (
+                  <div className={`${inp} bg-gray-100 text-gray-600`}>{clienteNombre}</div>
+                ) : (
+                  <select className={inp} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
+                    <option value="">Seleccionar cliente...</option>
+                    {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
+                  </select>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Fecha</label>
@@ -209,7 +287,8 @@ export default function OrdenModal({ open, onClose, onSaved }) {
                   {rows.map((row, i) => {
                     const upb = row.unidades_por_bulto || 1
                     const total = rowUnidades(row)
-                    const precio = Number(row.precio_usd_momento) || 0
+                    const precioBulto = parsePrecio(row.precio_bulto_str) || 0
+                    const rowTotalUsd = (total / upb) * precioBulto
 
                     // Stock en almacén para este producto
                     const invItem = row.producto_id ? invMap[Number(row.producto_id)] : null
@@ -235,15 +314,14 @@ export default function OrdenModal({ open, onClose, onSaved }) {
                             <option value="">Todos los grupos</option>
                             {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
                           </select>
-                          {/* Product select */}
-                          <select
-                            className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full"
-                            value={row.producto_id}
-                            onChange={(e) => setRow(i, 'producto_id', e.target.value)}
-                          >
-                            <option value="">Seleccionar producto...</option>
-                            {productosFila.map((p) => <option key={p.id} value={p.id}>{p.descripcion}</option>)}
-                          </select>
+                          {/* Product combobox: busca por código o descripción */}
+                          <ProductoCombobox
+                            productos={productosFila}
+                            selectedId={row.producto_id}
+                            onSelect={(id) => setRow(i, 'producto_id', id)}
+                            placeholder="Código o descripción..."
+                            size="small"
+                          />
                         </td>
                         <td className="px-3 py-2 text-center text-gray-500 text-xs font-medium">{upb}</td>
                         <td className="px-3 py-2 text-center">
@@ -258,18 +336,18 @@ export default function OrdenModal({ open, onClose, onSaved }) {
                         </td>
                         <td className="px-3 py-2">
                           <input
-                            type="number" min={0}
+                            type="text" inputMode="numeric"
                             className={inpNum}
                             value={row.bultos}
-                            onChange={(e) => setRow(i, 'bultos', e.target.value)}
+                            onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRow(i, 'bultos', e.target.value) }}
                           />
                         </td>
                         <td className="px-3 py-2">
                           <input
-                            type="number" min={0} max={upb - 1}
+                            type="text" inputMode="numeric"
                             className={inpNum}
                             value={row.sueltas}
-                            onChange={(e) => setRow(i, 'sueltas', e.target.value)}
+                            onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRow(i, 'sueltas', e.target.value) }}
                           />
                         </td>
                         <td className="px-3 py-2 text-center text-xs font-medium text-gray-700">
@@ -277,24 +355,21 @@ export default function OrdenModal({ open, onClose, onSaved }) {
                         </td>
                         <td className="px-3 py-2">
                           <div className="flex flex-col items-end gap-1">
-                            <input
-                              type="number" step="0.01" min={0}
+                            <PrecioInput
+                              placeholder="0.00"
                               className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full text-right"
-                              value={row.precio_usd_momento === '' ? '' : (Number(row.precio_usd_momento) * upb).toFixed(2)}
-                              onChange={(e) => {
-                                const val = e.target.value
-                                setRow(i, 'precio_usd_momento', val === '' ? '' : String(Number(val) / upb))
-                              }}
+                              value={row.precio_bulto_str}
+                              onChange={(v) => setRow(i, 'precio_bulto_str', v)}
                             />
                             {row.precios?.length > 0 && (
                               <select
                                 className="text-xs text-gray-400 border-0 p-0 bg-transparent cursor-pointer w-full text-right"
-                                onChange={(e) => setRow(i, 'precio_usd_momento', e.target.value)}
+                                onChange={(e) => setRow(i, 'precio_bulto_str', e.target.value)}
                                 defaultValue=""
                               >
                                 <option value="" disabled>Lista de precios</option>
                                 {row.precios.map((p) => (
-                                  <option key={p.lista_id} value={p.precio_usd}>
+                                  <option key={p.lista_id} value={String(Number(p.precio_usd) * upb)}>
                                     {p.lista}: ${(Number(p.precio_usd) * upb).toFixed(2)}/bulto
                                   </option>
                                 ))}
@@ -303,7 +378,7 @@ export default function OrdenModal({ open, onClose, onSaved }) {
                           </div>
                         </td>
                         <td className="px-3 py-2 text-right font-medium text-sm">
-                          {total > 0 ? `$${(total * precio).toFixed(2)}` : '—'}
+                          {total > 0 ? `$${rowTotalUsd.toFixed(2)}` : '—'}
                         </td>
                         <td className="px-3 py-2">
                           {rows.length > 1 && (
@@ -328,12 +403,23 @@ export default function OrdenModal({ open, onClose, onSaved }) {
             </div>
           </div>
 
+          {isEdit && (
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Motivo del cambio (opcional)</label>
+              <input
+                className={inp} value={motivo}
+                onChange={(e) => setMotivo(e.target.value)}
+                placeholder="Ej: el cliente solicitó cambiar el precio de Mini Velón"
+              />
+            </div>
+          )}
+
           <div className="flex justify-end gap-3 pt-2 border-t">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
               Cancelar
             </button>
             <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
-              {loading ? 'Creando...' : 'Crear Orden'}
+              {loading ? (isEdit ? 'Guardando...' : 'Creando...') : (isEdit ? 'Guardar cambios' : 'Crear Orden')}
             </button>
           </div>
         </form>

@@ -86,6 +86,8 @@ export const ajustePrecios = (data) => api.post('/productos/precios/ajuste', dat
 export const getOrdenes = (params) => api.get('/ordenes', { params })
 export const getOrden = (id) => api.get(`/ordenes/${id}`)
 export const createOrden = (data) => api.post('/ordenes', data)
+export const updateOrden = (id, data) => api.put(`/ordenes/${id}`, data)
+export const getOrdenEdiciones = (id) => api.get(`/ordenes/${id}/ediciones`)
 export const anularOrden = (id) => api.put(`/ordenes/${id}/anular`)
 export const downloadOrdenPDF = (id) =>
   api.get(`/ordenes/${id}/pdf`, { responseType: 'blob' })
@@ -93,7 +95,10 @@ export const downloadOrdenPDF = (id) =>
 // Inventario Central
 export const getInventario = () => api.get('/inventario')
 export const getEntradas = (params) => api.get('/inventario/entradas', { params })
+export const getEntrada = (id) => api.get(`/inventario/entradas/${id}`)
 export const createEntrada = (data) => api.post('/inventario/entradas', data)
+export const updateEntrada = (id, data) => api.put(`/inventario/entradas/${id}`, data)
+export const deleteEntrada = (id) => api.delete(`/inventario/entradas/${id}`)
 
 // Reportes de Venta
 export const getReportesVenta = (params) => api.get('/reportes-venta', { params })

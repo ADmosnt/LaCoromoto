@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
 import { HelpTooltip } from './ui/Tooltip'
+import PrecioInput, { parsePrecio } from './ui/PrecioInput'
 import { getListasPrecios, getGruposProductos, ajustePrecios } from '../api'
 import Alert from './Alert'
 
@@ -32,8 +33,8 @@ export default function ActualizacionPreciosModal({ open, onClose, onSaved }) {
   const handlePreview = async () => {
     setError('')
     if (!listaId) { setError('Selecciona una lista de precios'); return }
-    const num = Number(valor)
-    if (!valor || isNaN(num)) { setError('Ingresa un valor numérico'); return }
+    const num = parsePrecio(valor)
+    if (num == null) { setError('Ingresa un valor numérico válido (usa "." o "," como decimal)'); return }
     if (num === 0) { setError('El valor no puede ser 0'); return }
 
     setLoading(true)
@@ -59,7 +60,7 @@ export default function ActualizacionPreciosModal({ open, onClose, onSaved }) {
     setError('')
     setApplying(true)
     try {
-      const num = Number(valor)
+      const num = parsePrecio(valor)
       await ajustePrecios({
         lista_id: Number(listaId),
         grupo_id: grupoId ? Number(grupoId) : null,
@@ -79,7 +80,8 @@ export default function ActualizacionPreciosModal({ open, onClose, onSaved }) {
 
   const listaLabel = listas.find((l) => String(l.id) === listaId)?.nombre ?? ''
   const grupoLabel = grupos.find((g) => String(g.id) === grupoId)?.nombre ?? 'Todos los grupos'
-  const signo = Number(valor) > 0 ? '+' : ''
+  const valorNum = parsePrecio(valor)
+  const signo = valorNum != null && valorNum > 0 ? '+' : ''
   const resumen = valor
     ? `${signo}${valor}${tipo === 'porcentaje' ? '%' : ' USD'} — ${listaLabel}${grupoId ? ` / ${grupoLabel}` : ''}`
     : null
@@ -146,13 +148,12 @@ export default function ActualizacionPreciosModal({ open, onClose, onSaved }) {
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 select-none">
                 {tipo === 'porcentaje' ? '%' : '$'}
               </span>
-              <input
-                type="number"
-                step={tipo === 'porcentaje' ? '0.01' : '0.01'}
+              <PrecioInput
+                allowNegative
                 placeholder={tipo === 'porcentaje' ? 'Ej: 10 o -5' : 'Ej: 0.50 o -1.00'}
                 className={`${inp} pl-8`}
                 value={valor}
-                onChange={(e) => setValor(e.target.value)}
+                onChange={setValor}
                 onKeyDown={(e) => e.key === 'Enter' && handlePreview()}
               />
             </div>

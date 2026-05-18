@@ -19,7 +19,7 @@ from app import create_app, db
 from app.models import (
     ConfigEmpresa, Zona, GrupoCliente, GrupoProducto, ListaPrecio,
     TasaBCV, Producto, ProductoPrecio, Cliente, ClienteTelefono,
-    InventarioCentral, EntradaInventario, StockConsignacion,
+    InventarioCentral, EntradaInventario, EntradaInventarioDetalle, StockConsignacion,
     OrdenDespacho, OrdenDespachoDetalle,
     ReporteVenta, ReporteVentaDetalle,
     Devolucion, DevolucionDetalle,
@@ -215,15 +215,20 @@ with app.app_context():
         ('HI-001', 480, '2025-03-22', 'Compra inicial — Jabón Rey'),
     ]
 
-    for cod, cant, fecha_str, nota in entradas_data:
+    for idx, (cod, cant, fecha_str, nota) in enumerate(entradas_data, start=1):
         prod = productos[cod]
         entrada = EntradaInventario(
-            producto_id=prod.id,
-            cantidad_unidades=cant,
+            numero_entrada=f"ENT-{idx:06d}",
             fecha=datetime.date.fromisoformat(fecha_str),
             nota=nota,
         )
         db.session.add(entrada)
+        db.session.flush()
+        db.session.add(EntradaInventarioDetalle(
+            entrada_id=entrada.id,
+            producto_id=prod.id,
+            cantidad_unidades=cant,
+        ))
         inv = InventarioCentral.query.filter_by(producto_id=prod.id).first()
         if inv:
             inv.cantidad_unidades += cant
