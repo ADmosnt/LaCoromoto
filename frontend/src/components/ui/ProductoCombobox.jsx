@@ -32,7 +32,8 @@ export default function ProductoCombobox({
       top: rect.bottom + 2,
       left: rect.left,
       width: rect.width,
-      zIndex: 9999,
+      zIndex: 99999,
+      pointerEvents: 'auto',
     })
   }, [])
 
@@ -124,7 +125,7 @@ export default function ProductoCombobox({
               className={`px-3 py-1.5 cursor-pointer flex items-baseline gap-2 ${idx === highlight ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
             >
               <span className="font-mono text-xs text-gray-500 flex-shrink-0">{p.codigo}</span>
-              <span className="text-gray-800 truncate">{p.descripcion}</span>
+              <span className="text-gray-800">{p.descripcion}</span>
             </li>
           ))}
           {filtered.length > limitedList.length && (
