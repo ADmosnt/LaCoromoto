@@ -448,11 +448,43 @@ class InventarioCentral(db.Model):
 class EntradaInventario(db.Model):
     __tablename__ = 'entradas_inventario'
     id = db.Column(db.Integer, primary_key=True)
-    producto_id = db.Column(db.Integer, db.ForeignKey('productos.id'), nullable=False)
-    cantidad_unidades = db.Column(db.Integer, nullable=False)
+    numero_entrada = db.Column(db.String(20), unique=True, nullable=True)
     fecha = db.Column(db.Date, nullable=False, default=datetime.date.today)
     nota = db.Column(db.Text)
     creado_en = db.Column(db.DateTime(timezone=True), default=datetime.datetime.utcnow)
+
+    detalles = db.relationship(
+        'EntradaInventarioDetalle',
+        backref='entrada',
+        cascade='all, delete-orphan',
+    )
+
+    def to_dict(self, include_detalles=True):
+        total_uds = sum(d.cantidad_unidades for d in self.detalles)
+        d = {
+            'id': self.id,
+            'numero_entrada': self.numero_entrada,
+            'fecha': self.fecha.isoformat(),
+            'nota': self.nota,
+            'creado_en': self.creado_en.isoformat() if self.creado_en else None,
+            'total_unidades': total_uds,
+            'total_productos': len(self.detalles),
+        }
+        if include_detalles:
+            d['detalles'] = [det.to_dict() for det in self.detalles]
+        return d
+
+
+class EntradaInventarioDetalle(db.Model):
+    __tablename__ = 'entradas_inventario_detalle'
+    id = db.Column(db.Integer, primary_key=True)
+    entrada_id = db.Column(
+        db.Integer,
+        db.ForeignKey('entradas_inventario.id', ondelete='CASCADE'),
+        nullable=False,
+    )
+    producto_id = db.Column(db.Integer, db.ForeignKey('productos.id'), nullable=False)
+    cantidad_unidades = db.Column(db.Integer, nullable=False)
 
     producto = db.relationship('Producto')
 
@@ -467,6 +499,5 @@ class EntradaInventario(db.Model):
             'unidades_por_bulto': upb,
             'cantidad_unidades': self.cantidad_unidades,
             'bultos': self.cantidad_unidades // upb,
-            'fecha': self.fecha.isoformat(),
-            'nota': self.nota,
+            'unidades_sueltas': self.cantidad_unidades % upb,
         }

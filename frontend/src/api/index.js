@@ -93,7 +93,10 @@ export const downloadOrdenPDF = (id) =>
 // Inventario Central
 export const getInventario = () => api.get('/inventario')
 export const getEntradas = (params) => api.get('/inventario/entradas', { params })
+export const getEntrada = (id) => api.get(`/inventario/entradas/${id}`)
 export const createEntrada = (data) => api.post('/inventario/entradas', data)
+export const updateEntrada = (id, data) => api.put(`/inventario/entradas/${id}`, data)
+export const deleteEntrada = (id) => api.delete(`/inventario/entradas/${id}`)
 
 // Reportes de Venta
 export const getReportesVenta = (params) => api.get('/reportes-venta', { params })

@@ -5,7 +5,7 @@ from app.models import (
     Cliente, ClienteTelefono, Producto, ProductoPrecio, TasaBCV,
     OrdenDespacho, OrdenDespachoDetalle, StockConsignacion,
     Devolucion, DevolucionDetalle, ReporteVenta, ReporteVentaDetalle,
-    InventarioCentral, EntradaInventario, Usuario,
+    InventarioCentral, EntradaInventario, EntradaInventarioDetalle, Usuario,
 )
 from app.auth import require_role
 from sqlalchemy import text
@@ -30,7 +30,7 @@ def _date_str(d):
 @require_role('admin')
 def export_data():
     data = {
-        'version': '1',
+        'version': '2',
         'exported_at': datetime.datetime.utcnow().isoformat(),
         'data': {
             'config_empresa': [
@@ -148,12 +148,19 @@ def export_data():
             ],
             'entradas_inventario': [
                 {
-                    'id': e.id, 'producto_id': e.producto_id,
-                    'cantidad_unidades': e.cantidad_unidades,
+                    'id': e.id, 'numero_entrada': e.numero_entrada,
                     'fecha': _date_str(e.fecha), 'nota': e.nota,
                     'creado_en': e.creado_en.isoformat() if e.creado_en else None,
                 }
                 for e in EntradaInventario.query.all()
+            ],
+            'entradas_inventario_detalle': [
+                {
+                    'id': d.id, 'entrada_id': d.entrada_id,
+                    'producto_id': d.producto_id,
+                    'cantidad_unidades': d.cantidad_unidades,
+                }
+                for d in EntradaInventarioDetalle.query.all()
             ],
             'usuarios': [
                 {
@@ -181,7 +188,7 @@ def export_data():
 
 # Tablas en orden inverso de dependencias para borrado / orden directo para inserción
 _TABLES_DELETE_ORDER = [
-    'entradas_inventario', 'inventario_central',
+    'entradas_inventario_detalle', 'entradas_inventario', 'inventario_central',
     'reportes_venta_detalle', 'reportes_venta',
     'devoluciones_detalle', 'devoluciones',
     'stock_consignacion',
@@ -218,9 +225,10 @@ def import_data():
     if not payload.get('confirm'):
         return jsonify({'error': 'Falta confirmación explícita'}), 400
     backup = payload.get('backup')
-    if not isinstance(backup, dict) or backup.get('version') != '1' or 'data' not in backup:
+    if not isinstance(backup, dict) or backup.get('version') not in ('1', '2') or 'data' not in backup:
         return jsonify({'error': 'Archivo de backup inválido o versión incompatible'}), 400
     d = backup['data']
+    version = backup['version']
 
     required = [
         'config_empresa', 'zonas', 'grupos_clientes', 'grupos_productos',
@@ -332,13 +340,36 @@ def import_data():
         for r in d['inventario_central']:
             db.session.add(InventarioCentral(**r))
 
-        for r in d['entradas_inventario']:
-            db.session.add(EntradaInventario(
-                id=r['id'], producto_id=r['producto_id'],
-                cantidad_unidades=r['cantidad_unidades'],
-                fecha=_parse_date(r['fecha']), nota=r.get('nota'),
-                creado_en=_parse_datetime(r.get('creado_en')),
-            ))
+        # Entradas de inventario: v1 (1 producto por entrada en cabecera) o v2 (cabecera+detalle)
+        if version == '1':
+            # Migrar al vuelo: cada entrada vieja se vuelve cabecera con un único detalle
+            for idx, r in enumerate(d['entradas_inventario'], start=1):
+                entrada = EntradaInventario(
+                    id=r['id'],
+                    numero_entrada=f"ENT-{idx:06d}",
+                    fecha=_parse_date(r['fecha']),
+                    nota=r.get('nota'),
+                    creado_en=_parse_datetime(r.get('creado_en')),
+                )
+                db.session.add(entrada)
+                db.session.flush()
+                db.session.add(EntradaInventarioDetalle(
+                    entrada_id=entrada.id,
+                    producto_id=r['producto_id'],
+                    cantidad_unidades=r['cantidad_unidades'],
+                ))
+        else:
+            for r in d['entradas_inventario']:
+                db.session.add(EntradaInventario(
+                    id=r['id'],
+                    numero_entrada=r.get('numero_entrada'),
+                    fecha=_parse_date(r['fecha']),
+                    nota=r.get('nota'),
+                    creado_en=_parse_datetime(r.get('creado_en')),
+                ))
+            db.session.flush()
+            for r in d.get('entradas_inventario_detalle', []):
+                db.session.add(EntradaInventarioDetalle(**r))
 
         db.session.flush()
 
@@ -351,6 +382,7 @@ def import_data():
             'devoluciones', 'devoluciones_detalle',
             'reportes_venta', 'reportes_venta_detalle',
             'inventario_central', 'entradas_inventario',
+            'entradas_inventario_detalle',
         ):
             _bump_sequence(table, d.get(table, []))
 

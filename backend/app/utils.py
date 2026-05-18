@@ -88,3 +88,16 @@ def siguiente_numero_orden(db, OrdenDespacho):
         return str(int(max_num) + 1).zfill(8)
     except (ValueError, TypeError):
         return str(int(max_num.lstrip('0') or '0') + 1).zfill(8)
+
+
+def siguiente_numero_entrada(db, EntradaInventario):
+    """Generate next entry number as ENT-XXXXXX (6 digits zero-padded)."""
+    from sqlalchemy import func
+    max_num = db.session.query(func.max(EntradaInventario.numero_entrada)).scalar()
+    if not max_num:
+        return 'ENT-000001'
+    try:
+        n = int(max_num.replace('ENT-', '').lstrip('0') or '0')
+    except (ValueError, TypeError, AttributeError):
+        n = 0
+    return f"ENT-{(n + 1):06d}"
