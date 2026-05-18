@@ -328,6 +328,8 @@ def update_orden(id):
     orden.total_bs = total_usd * orden.tasa.valor
 
     db.session.flush()
+    # Force SQLAlchemy to re-query the relationship so snapshot reflects new rows
+    db.session.expire(orden, ['detalles'])
 
     # Snapshot DESPUÉS
     snapshot_despues = orden.to_dict(include_detalles=True)

@@ -336,18 +336,18 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                         </td>
                         <td className="px-3 py-2">
                           <input
-                            type="number" min={0}
+                            type="text" inputMode="numeric"
                             className={inpNum}
                             value={row.bultos}
-                            onChange={(e) => setRow(i, 'bultos', e.target.value)}
+                            onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRow(i, 'bultos', e.target.value) }}
                           />
                         </td>
                         <td className="px-3 py-2">
                           <input
-                            type="number" min={0} max={upb - 1}
+                            type="text" inputMode="numeric"
                             className={inpNum}
                             value={row.sueltas}
-                            onChange={(e) => setRow(i, 'sueltas', e.target.value)}
+                            onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRow(i, 'sueltas', e.target.value) }}
                           />
                         </td>
                         <td className="px-3 py-2 text-center text-xs font-medium text-gray-700">

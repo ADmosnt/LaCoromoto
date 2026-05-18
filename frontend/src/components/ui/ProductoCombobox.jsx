@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 
 const displayLabel = (p) => p ? `${p.codigo} — ${p.descripcion}` : ''
 
@@ -12,8 +13,10 @@ export default function ProductoCombobox({
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const [highlight, setHighlight] = useState(0)
+  const [dropStyle, setDropStyle] = useState({})
   const containerRef = useRef(null)
   const inputRef = useRef(null)
+  const listRef = useRef(null)
 
   const selected = productos.find((p) => String(p.id) === String(selectedId))
 
@@ -21,9 +24,35 @@ export default function ProductoCombobox({
     if (!open) setQuery(displayLabel(selected))
   }, [selectedId, productos.length, open])
 
+  const updateDropPosition = useCallback(() => {
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    setDropStyle({
+      position: 'fixed',
+      top: rect.bottom + 2,
+      left: rect.left,
+      width: rect.width,
+      zIndex: 9999,
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!open) return
+    updateDropPosition()
+    window.addEventListener('scroll', updateDropPosition, true)
+    window.addEventListener('resize', updateDropPosition)
+    return () => {
+      window.removeEventListener('scroll', updateDropPosition, true)
+      window.removeEventListener('resize', updateDropPosition)
+    }
+  }, [open, updateDropPosition])
+
   useEffect(() => {
     const handleClick = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
+      if (
+        containerRef.current && !containerRef.current.contains(e.target) &&
+        listRef.current && !listRef.current.contains(e.target)
+      ) {
         setOpen(false)
         setQuery(displayLabel(selected))
       }
@@ -83,6 +112,36 @@ export default function ProductoCombobox({
     ? 'border border-gray-300 rounded px-2 py-1.5 pr-7 text-sm w-full focus:outline-none focus:ring-1 focus:ring-blue-500'
     : 'w-full border border-gray-300 rounded-md px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
 
+  const dropdown = open && (limitedList.length > 0 || (q.length > 0 && !isShowingSelectedLabel)) && createPortal(
+    <div ref={listRef} style={dropStyle}>
+      {limitedList.length > 0 ? (
+        <ul className="bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto text-sm">
+          {limitedList.map((p, idx) => (
+            <li
+              key={p.id}
+              onMouseDown={(e) => { e.preventDefault(); select(p) }}
+              onMouseEnter={() => setHighlight(idx)}
+              className={`px-3 py-1.5 cursor-pointer flex items-baseline gap-2 ${idx === highlight ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+            >
+              <span className="font-mono text-xs text-gray-500 flex-shrink-0">{p.codigo}</span>
+              <span className="text-gray-800 truncate">{p.descripcion}</span>
+            </li>
+          ))}
+          {filtered.length > limitedList.length && (
+            <li className="px-3 py-1 text-xs text-gray-400 text-center italic border-t">
+              … {filtered.length - limitedList.length} más. Refina la búsqueda.
+            </li>
+          )}
+        </ul>
+      ) : (
+        <div className="bg-white border border-gray-200 rounded-md shadow-lg px-3 py-2 text-sm text-gray-400 italic">
+          Sin coincidencias
+        </div>
+      )}
+    </div>,
+    document.body
+  )
+
   return (
     <div ref={containerRef} className="relative">
       <input
@@ -92,6 +151,7 @@ export default function ProductoCombobox({
         value={query}
         placeholder={placeholder}
         onFocus={() => {
+          updateDropPosition()
           setOpen(true)
           setHighlight(0)
           if (selected && query === displayLabel(selected)) inputRef.current?.select()
@@ -110,31 +170,7 @@ export default function ProductoCombobox({
           ×
         </button>
       )}
-      {open && limitedList.length > 0 && (
-        <ul className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto text-sm">
-          {limitedList.map((p, idx) => (
-            <li
-              key={p.id}
-              onMouseDown={(e) => { e.preventDefault(); select(p) }}
-              onMouseEnter={() => setHighlight(idx)}
-              className={`px-3 py-1.5 cursor-pointer flex items-baseline gap-2 ${idx === highlight ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-            >
-              <span className="font-mono text-xs text-gray-500 flex-shrink-0">{p.codigo}</span>
-              <span className="text-gray-800 truncate">{p.descripcion}</span>
-            </li>
-          ))}
-          {filtered.length > limitedList.length && (
-            <li className="px-3 py-1 text-xs text-gray-400 text-center italic border-t">
-              … {filtered.length - limitedList.length} más. Refina la búsqueda.
-            </li>
-          )}
-        </ul>
-      )}
-      {open && q.length > 0 && !isShowingSelectedLabel && limitedList.length === 0 && (
-        <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg px-3 py-2 text-sm text-gray-400 italic">
-          Sin coincidencias
-        </div>
-      )}
+      {dropdown}
     </div>
   )
 }

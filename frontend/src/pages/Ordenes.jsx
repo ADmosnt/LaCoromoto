@@ -38,7 +38,7 @@ const statusLabel = {
   anulada: 'Anulada',
 }
 
-function OrdenDetailPanel({ ordenId, onAnulada, onReporteCreated, onEditar, onVerEdiciones }) {
+function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, onEditar, onVerEdiciones }) {
   const [detail, setDetail] = useState(null)
   const [loadError, setLoadError] = useState(false)
   const [reporteModalOpen, setReporteModalOpen] = useState(false)
@@ -50,7 +50,7 @@ function OrdenDetailPanel({ ordenId, onAnulada, onReporteCreated, onEditar, onVe
     getOrden(ordenId).then((r) => setDetail(r.data)).catch(() => setLoadError(true))
   }
 
-  useEffect(() => { fetchDetail() }, [ordenId])
+  useEffect(() => { fetchDetail() }, [ordenId, refreshKey])
 
   const handlePDF = async () => {
     try {
@@ -282,6 +282,7 @@ export default function Ordenes() {
   const [fechaDesde, setFechaDesde] = useState('')
   const [fechaHasta, setFechaHasta] = useState('')
   const [expanded, setExpanded] = useState(null)
+  const [panelRefreshKey, setPanelRefreshKey] = useState(0)
   const [modalOpen, setModalOpen] = useState(false)
   const [editOrdenId, setEditOrdenId] = useState(null)
   const [edicionesTarget, setEdicionesTarget] = useState(null)
@@ -389,6 +390,7 @@ export default function Ordenes() {
                   {expanded === o.id && (
                     <OrdenDetailPanel
                       ordenId={o.id}
+                      refreshKey={panelRefreshKey}
                       onAnulada={() => { setExpanded(null); load() }}
                       onReporteCreated={() => load()}
                       onEditar={(d) => setEditOrdenId(d.id)}
@@ -420,7 +422,7 @@ export default function Ordenes() {
       <OrdenModal
         open={editOrdenId != null}
         onClose={() => setEditOrdenId(null)}
-        onSaved={() => { load() }}
+        onSaved={() => { load(); setPanelRefreshKey((k) => k + 1) }}
         ordenId={editOrdenId}
       />
 
