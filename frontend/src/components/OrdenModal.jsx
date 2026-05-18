@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
 import { HelpTooltip } from './ui/Tooltip'
+import PrecioInput, { parsePrecio } from './ui/PrecioInput'
 import { createOrden, getClientes, getProductos, getTasaHoy, getGruposProductos, getInventario } from '../api'
 import Alert from './Alert'
 
 const emptyRow = () => ({
   grupo_filtro: '',
   producto_id: '', descripcion: '', codigo: '',
-  unidades_por_bulto: 1, precio_usd_momento: '',
+  unidades_por_bulto: 1, precio_bulto_str: '',
   bultos: '', sueltas: '',
   precios: [],
 })
@@ -70,7 +71,7 @@ export default function OrdenModal({ open, onClose, onSaved }) {
       rs[i].codigo = ''
       rs[i].unidades_por_bulto = 1
       rs[i].precios = []
-      rs[i].precio_usd_momento = ''
+      rs[i].precio_bulto_str = ''
       rs[i].bultos = ''
       rs[i].sueltas = ''
     }
@@ -81,7 +82,9 @@ export default function OrdenModal({ open, onClose, onSaved }) {
         rs[i].codigo = prod.codigo
         rs[i].unidades_por_bulto = prod.unidades_por_bulto
         rs[i].precios = prod.precios
-        rs[i].precio_usd_momento = prod.precios?.[0]?.precio_usd ?? ''
+        const first = prod.precios?.[0]?.precio_usd
+        rs[i].precio_bulto_str =
+          first != null ? String(Number(first) * (prod.unidades_por_bulto || 1)) : ''
       }
       rs[i].bultos = ''
       rs[i].sueltas = ''
@@ -93,7 +96,9 @@ export default function OrdenModal({ open, onClose, onSaved }) {
   const removeRow = (i) => setRows(rows.filter((_, idx) => idx !== i))
 
   const totalUsd = rows.reduce((sum, r) => {
-    return sum + rowUnidades(r) * (Number(r.precio_usd_momento) || 0)
+    const upb = r.unidades_por_bulto || 1
+    const precioBulto = parsePrecio(r.precio_bulto_str) || 0
+    return sum + (rowUnidades(r) / upb) * precioBulto
   }, 0)
 
   const submit = async (e) => {
@@ -101,7 +106,28 @@ export default function OrdenModal({ open, onClose, onSaved }) {
     setError('')
     if (!clienteId) { setError('Seleccione un cliente'); return }
     if (!tasaValor) { setError('Ingrese la tasa BCV'); return }
-    const detalles = rows.filter((r) => r.producto_id && rowUnidades(r) > 0 && r.precio_usd_momento)
+
+    const detalles = []
+    for (const r of rows) {
+      if (!r.producto_id) continue
+      const uds = rowUnidades(r)
+      if (uds <= 0) continue
+      const precioBulto = parsePrecio(r.precio_bulto_str)
+      if (precioBulto == null) {
+        setError(`Precio inválido para "${r.descripcion}". Usa "." o "," como separador decimal.`)
+        return
+      }
+      if (precioBulto < 0) {
+        setError(`Precio no puede ser negativo para "${r.descripcion}".`)
+        return
+      }
+      const upb = r.unidades_por_bulto || 1
+      detalles.push({
+        producto_id: Number(r.producto_id),
+        cantidad_unidades: uds,
+        precio_usd_momento: precioBulto / upb,
+      })
+    }
     if (!detalles.length) { setError('Agregue al menos un producto con cantidad y precio'); return }
 
     setLoading(true)
@@ -111,11 +137,7 @@ export default function OrdenModal({ open, onClose, onSaved }) {
         fecha_emision: fecha,
         nota,
         tasa_valor: tasaValor,
-        detalles: detalles.map((r) => ({
-          producto_id: Number(r.producto_id),
-          cantidad_unidades: rowUnidades(r),
-          precio_usd_momento: Number(r.precio_usd_momento),
-        })),
+        detalles,
       })
       toast.success('Orden de despacho creada')
       onSaved()
@@ -209,7 +231,8 @@ export default function OrdenModal({ open, onClose, onSaved }) {
                   {rows.map((row, i) => {
                     const upb = row.unidades_por_bulto || 1
                     const total = rowUnidades(row)
-                    const precio = Number(row.precio_usd_momento) || 0
+                    const precioBulto = parsePrecio(row.precio_bulto_str) || 0
+                    const rowTotalUsd = (total / upb) * precioBulto
 
                     // Stock en almacén para este producto
                     const invItem = row.producto_id ? invMap[Number(row.producto_id)] : null
@@ -277,24 +300,21 @@ export default function OrdenModal({ open, onClose, onSaved }) {
                         </td>
                         <td className="px-3 py-2">
                           <div className="flex flex-col items-end gap-1">
-                            <input
-                              type="number" step="0.01" min={0}
+                            <PrecioInput
+                              placeholder="0.00"
                               className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full text-right"
-                              value={row.precio_usd_momento === '' ? '' : (Number(row.precio_usd_momento) * upb).toFixed(2)}
-                              onChange={(e) => {
-                                const val = e.target.value
-                                setRow(i, 'precio_usd_momento', val === '' ? '' : String(Number(val) / upb))
-                              }}
+                              value={row.precio_bulto_str}
+                              onChange={(v) => setRow(i, 'precio_bulto_str', v)}
                             />
                             {row.precios?.length > 0 && (
                               <select
                                 className="text-xs text-gray-400 border-0 p-0 bg-transparent cursor-pointer w-full text-right"
-                                onChange={(e) => setRow(i, 'precio_usd_momento', e.target.value)}
+                                onChange={(e) => setRow(i, 'precio_bulto_str', e.target.value)}
                                 defaultValue=""
                               >
                                 <option value="" disabled>Lista de precios</option>
                                 {row.precios.map((p) => (
-                                  <option key={p.lista_id} value={p.precio_usd}>
+                                  <option key={p.lista_id} value={String(Number(p.precio_usd) * upb)}>
                                     {p.lista}: ${(Number(p.precio_usd) * upb).toFixed(2)}/bulto
                                   </option>
                                 ))}
@@ -303,7 +323,7 @@ export default function OrdenModal({ open, onClose, onSaved }) {
                           </div>
                         </td>
                         <td className="px-3 py-2 text-right font-medium text-sm">
-                          {total > 0 ? `$${(total * precio).toFixed(2)}` : '—'}
+                          {total > 0 ? `$${rowTotalUsd.toFixed(2)}` : '—'}
                         </td>
                         <td className="px-3 py-2">
                           {rows.length > 1 && (

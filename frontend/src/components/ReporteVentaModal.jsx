@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
 import { HelpTooltip } from './ui/Tooltip'
+import PrecioInput, { parsePrecio } from './ui/PrecioInput'
 import { createReporteVenta, getTasaHoy } from '../api'
 import { useAuth } from '../context/AuthContext'
 import Alert from './Alert'
@@ -72,6 +73,20 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
       return
     }
 
+    const detallesOut = []
+    for (const r of detalles) {
+      const precioBulto = parsePrecio(r.precio_bulto)
+      if (precioBulto == null || precioBulto < 0) {
+        setError(`Precio inválido para "${r.descripcion}". Usa "." o "," como separador decimal.`)
+        return
+      }
+      detallesOut.push({
+        producto_id: Number(r.producto_id),
+        cantidad_unidades: r.cantidad_unidades,
+        precio_usd_momento: precioBulto / (r.upb || 1),
+      })
+    }
+
     setLoading(true)
     try {
       await createReporteVenta({
@@ -79,11 +94,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
         orden_id: orden.id,
         fecha,
         tasa_valor: Number(tasaManual) || undefined,
-        detalles: detalles.map((r) => ({
-          producto_id: Number(r.producto_id),
-          cantidad_unidades: r.cantidad_unidades,
-          precio_usd_momento: Number(r.precio_bulto) / (r.upb || 1),
-        })),
+        detalles: detallesOut,
       })
       toast.success('Reporte de venta registrado')
       onSaved()
@@ -155,7 +166,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                     const upb = row.upb || 1
                     const total = totalUnidades(row)
                     const excede = total > row.despacho_uds
-                    const totalUsd = (total / upb) * Number(row.precio_bulto)
+                    const totalUsd = (total / upb) * (parsePrecio(row.precio_bulto) || 0)
                     return (
                       <tr key={i} className={excede ? 'bg-red-50' : ''}>
                         <td className="px-3 py-2 font-medium">
@@ -189,11 +200,10 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                         </td>
                         {!isCliente && (
                           <td className="px-3 py-2 text-right">
-                            <input
-                              type="number" min={0} step="0.01"
+                            <PrecioInput
                               className={`${inp} w-24 text-right`}
                               value={row.precio_bulto}
-                              onChange={(e) => setRowField(i, 'precio_bulto', e.target.value)}
+                              onChange={(v) => setRowField(i, 'precio_bulto', v)}
                             />
                           </td>
                         )}
