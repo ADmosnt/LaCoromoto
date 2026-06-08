@@ -351,6 +351,117 @@ def update_orden(id):
     return jsonify(orden.to_dict(include_detalles=True))
 
 
+def _parse_ids_param():
+    raw = request.args.get('ids', '')
+    try:
+        ids = [int(x) for x in raw.split(',') if x.strip()]
+    except ValueError:
+        return None, jsonify({'error': 'IDs inválidos'}), 400
+    if not ids:
+        return None, jsonify({'error': 'Debe seleccionar al menos una orden'}), 400
+    return ids, None, None
+
+
+def _agregar_productos(ordenes):
+    """Agrupa los detalles de varias órdenes por producto."""
+    agg = {}
+    for o in ordenes:
+        for d in o.detalles:
+            pid = d.producto_id
+            if pid not in agg:
+                p = d.producto
+                agg[pid] = {
+                    'producto_id': pid,
+                    'codigo': p.codigo if p else None,
+                    'descripcion': p.descripcion if p else None,
+                    'unidades_por_bulto': (p.unidades_por_bulto if p else 1) or 1,
+                    'cantidad_unidades': 0,
+                    'orden_ids': set(),
+                }
+            agg[pid]['cantidad_unidades'] += d.cantidad_unidades
+            agg[pid]['orden_ids'].add(o.id)
+
+    productos = []
+    for pid, data in agg.items():
+        upb = data['unidades_por_bulto']
+        cant = data['cantidad_unidades']
+        productos.append({
+            'producto_id': pid,
+            'codigo': data['codigo'],
+            'descripcion': data['descripcion'],
+            'unidades_por_bulto': upb,
+            'facturas': len(data['orden_ids']),
+            'cantidad_unidades': cant,
+            'bultos': cant // upb,
+            'sueltas': cant % upb,
+        })
+    productos.sort(key=lambda x: (x['descripcion'] or '').lower())
+    return productos
+
+
+@bp.route('/resumen', methods=['GET'])
+@require_role('admin')
+def resumen_ordenes():
+    ids, err_resp, status = _parse_ids_param()
+    if err_resp:
+        return err_resp, status
+
+    ordenes = OrdenDespacho.query.filter(OrdenDespacho.id.in_(ids)).all()
+    if not ordenes:
+        return jsonify({'error': 'No se encontraron órdenes'}), 404
+    ordenes.sort(key=lambda o: (o.fecha_emision, o.numero_orden))
+
+    productos = _agregar_productos(ordenes)
+    total_unidades = sum(p['cantidad_unidades'] for p in productos)
+    total_bultos = sum(p['bultos'] for p in productos)
+    total_sueltas = sum(p['sueltas'] for p in productos)
+
+    return jsonify({
+        'ordenes': [
+            {
+                'id': o.id,
+                'numero_orden': o.numero_orden,
+                'cliente': o.cliente.razon_social if o.cliente else None,
+                'fecha_emision': o.fecha_emision.isoformat(),
+                'status': o.status,
+            }
+            for o in ordenes
+        ],
+        'productos': productos,
+        'totales': {
+            'total_productos': len(productos),
+            'total_unidades': total_unidades,
+            'total_bultos': total_bultos,
+            'total_sueltas': total_sueltas,
+            'total_facturas': len(ordenes),
+        },
+    })
+
+
+@bp.route('/resumen/pdf', methods=['GET'])
+@require_role('admin')
+def resumen_ordenes_pdf():
+    ids, err_resp, status = _parse_ids_param()
+    if err_resp:
+        return err_resp, status
+
+    ordenes = OrdenDespacho.query.filter(OrdenDespacho.id.in_(ids)).all()
+    if not ordenes:
+        return jsonify({'error': 'No se encontraron órdenes'}), 404
+    ordenes.sort(key=lambda o: (o.fecha_emision, o.numero_orden))
+
+    from app.models import ConfigEmpresa
+    from app.services.pdf_generator import generar_pdf_resumen_ordenes
+    config = ConfigEmpresa.query.first()
+    pdf_bytes = generar_pdf_resumen_ordenes(ordenes, _agregar_productos(ordenes), config)
+    return send_file(
+        io.BytesIO(pdf_bytes),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name='resumen_general_despacho.pdf',
+    )
+
+
 @bp.route('/<int:id>/anular', methods=['PUT'])
 @require_role('admin')
 def anular_orden(id):

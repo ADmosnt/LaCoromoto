@@ -95,3 +95,112 @@ def create_devolucion():
 
     db.session.commit()
     return jsonify(devolucion.to_dict(include_detalles=True)), 201
+
+
+@bp.route('/<int:id>', methods=['PUT'])
+@require_role('admin')
+def update_devolucion(id):
+    devolucion = Devolucion.query.get_or_404(id)
+    data = request.get_json() or {}
+
+    detalles_in = data.get('detalles')
+    if not detalles_in:
+        return jsonify({'error': 'La devolución debe tener al menos un producto'}), 400
+
+    # Validar y normalizar los nuevos detalles
+    nuevos = []
+    for item in detalles_in:
+        try:
+            pid = int(item['producto_id'])
+            cant = int(item['cantidad_unidades'])
+        except (KeyError, TypeError, ValueError):
+            return jsonify({'error': 'Detalles inválidos'}), 400
+        if cant <= 0:
+            return jsonify({'error': 'La cantidad debe ser mayor a 0'}), 400
+        prod = Producto.query.get(pid)
+        if not prod:
+            return jsonify({'error': f'Producto id={pid} no existe'}), 400
+        nuevos.append({'producto_id': pid, 'cantidad_unidades': cant, 'descripcion': prod.descripcion})
+
+    cliente_id = devolucion.cliente_id
+    reingresar_old = devolucion.reingresar_almacen
+    reingresar_new = bool(data.get('reingresar_almacen', reingresar_old))
+
+    # --- 1. Revertir el efecto de la devolución actual ---
+    for det in devolucion.detalles:
+        # Devolver las unidades al stock en consignación del cliente
+        stock = StockConsignacion.query.filter_by(
+            cliente_id=cliente_id, producto_id=det.producto_id
+        ).with_for_update().first()
+        if stock:
+            stock.cantidad_unidades += det.cantidad_unidades
+        else:
+            db.session.add(StockConsignacion(
+                cliente_id=cliente_id, producto_id=det.producto_id,
+                cantidad_unidades=det.cantidad_unidades,
+            ))
+        # Si se había reingresado al almacén, retirarlo de nuevo
+        if reingresar_old:
+            inv = InventarioCentral.query.filter_by(
+                producto_id=det.producto_id
+            ).with_for_update().first()
+            disponible = inv.cantidad_unidades if inv else 0
+            if disponible < det.cantidad_unidades:
+                db.session.rollback()
+                nombre = det.producto.descripcion if det.producto else f'ID {det.producto_id}'
+                return jsonify({
+                    'error': f"No se puede editar: la mercancía reingresada de '{nombre}' "
+                             f"ya fue despachada del almacén (disponible {disponible}, "
+                             f"se necesitan {det.cantidad_unidades})."
+                }), 400
+            inv.cantidad_unidades -= det.cantidad_unidades
+
+    # Eliminar los detalles viejos
+    for det in list(devolucion.detalles):
+        db.session.delete(det)
+    db.session.flush()
+
+    # --- 2. Aplicar los nuevos detalles ---
+    for n in nuevos:
+        stock = StockConsignacion.query.filter_by(
+            cliente_id=cliente_id, producto_id=n['producto_id']
+        ).with_for_update().first()
+        disponible = stock.cantidad_unidades if stock else 0
+        if disponible < n['cantidad_unidades']:
+            db.session.rollback()
+            return jsonify({
+                'error': f"No se pueden devolver {n['cantidad_unidades']} uds de "
+                         f"'{n['descripcion']}': el cliente solo tiene {disponible} en consignación."
+            }), 400
+        stock.cantidad_unidades -= n['cantidad_unidades']
+
+        db.session.add(DevolucionDetalle(
+            devolucion_id=devolucion.id,
+            producto_id=n['producto_id'],
+            cantidad_unidades=n['cantidad_unidades'],
+        ))
+        if reingresar_new:
+            inv = InventarioCentral.query.filter_by(
+                producto_id=n['producto_id']
+            ).with_for_update().first()
+            if inv:
+                inv.cantidad_unidades += n['cantidad_unidades']
+            else:
+                db.session.add(InventarioCentral(
+                    producto_id=n['producto_id'],
+                    cantidad_unidades=n['cantidad_unidades'],
+                ))
+
+    # Campos de cabecera editables (cliente y orden de origen quedan fijos)
+    if 'fecha' in data and data['fecha']:
+        try:
+            devolucion.fecha = datetime.date.fromisoformat(data['fecha'])
+        except ValueError:
+            db.session.rollback()
+            return jsonify({'error': 'Fecha inválida'}), 400
+    if 'nota' in data:
+        devolucion.nota = data.get('nota')
+    devolucion.reingresar_almacen = reingresar_new
+
+    db.session.commit()
+    return jsonify(devolucion.to_dict(include_detalles=True))
