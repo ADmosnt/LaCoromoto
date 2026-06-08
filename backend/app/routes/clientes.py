@@ -87,6 +87,14 @@ def update_cliente(id):
     c = Cliente.query.get_or_404(id)
     data = request.get_json()
 
+    if 'codigo' in data and (data['codigo'] or '').strip() != c.codigo:
+        nuevo = (data['codigo'] or '').strip()
+        if not nuevo:
+            return jsonify({'error': 'El código no puede estar vacío'}), 400
+        if Cliente.query.filter(Cliente.codigo == nuevo, Cliente.id != id).first():
+            return jsonify({'error': 'El código ya existe'}), 409
+        c.codigo = nuevo
+
     for field in ('razon_social', 'rif', 'direccion', 'zona_id', 'grupo_id',
                   'contacto', 'cobrador', 'vendedor', 'observaciones', 'activo'):
         if field in data:

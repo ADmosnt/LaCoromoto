@@ -9,6 +9,7 @@ export default function Devoluciones() {
   const [clienteId, setClienteId] = useState('')
   const [error, setError] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
+  const [editId, setEditId] = useState(null)
   const [expanded, setExpanded] = useState(null)
   const [details, setDetails] = useState({})
 
@@ -98,24 +99,32 @@ export default function Devoluciones() {
                         {!details[d.id] ? (
                           <span className="text-xs text-gray-400">Cargando...</span>
                         ) : (
-                          <table className="text-xs">
-                            <thead className="text-gray-500 uppercase">
-                              <tr>
-                                <th className="py-1 pr-6 text-left">Código</th>
-                                <th className="py-1 pr-6 text-left">Descripción</th>
-                                <th className="py-1 text-center">Uds devueltas</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-orange-100">
-                              {details[d.id].detalles?.map((det) => (
-                                <tr key={det.id}>
-                                  <td className="py-1.5 pr-6 font-mono">{det.codigo}</td>
-                                  <td className="py-1.5 pr-6 font-medium">{det.descripcion}</td>
-                                  <td className="py-1.5 text-center font-semibold text-orange-700">{det.cantidad_unidades} uds</td>
+                          <div className="space-y-2">
+                            <table className="text-xs">
+                              <thead className="text-gray-500 uppercase">
+                                <tr>
+                                  <th className="py-1 pr-6 text-left">Código</th>
+                                  <th className="py-1 pr-6 text-left">Descripción</th>
+                                  <th className="py-1 text-center">Uds devueltas</th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                              </thead>
+                              <tbody className="divide-y divide-orange-100">
+                                {details[d.id].detalles?.map((det) => (
+                                  <tr key={det.id}>
+                                    <td className="py-1.5 pr-6 font-mono">{det.codigo}</td>
+                                    <td className="py-1.5 pr-6 font-medium">{det.descripcion}</td>
+                                    <td className="py-1.5 text-center font-semibold text-orange-700">{det.cantidad_unidades} uds</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                            <button
+                              onClick={() => setEditId(d.id)}
+                              className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded"
+                            >
+                              Editar Devolución
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -136,6 +145,16 @@ export default function Devoluciones() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSaved={load}
+      />
+
+      <DevolucionModal
+        open={editId != null}
+        devolucionId={editId}
+        onClose={() => setEditId(null)}
+        onSaved={() => {
+          if (editId != null) setDetails((prev) => { const n = { ...prev }; delete n[editId]; return n })
+          load()
+        }}
       />
     </div>
   )

@@ -75,6 +75,14 @@ def update_producto(id):
     p = Producto.query.get_or_404(id)
     data = request.get_json()
 
+    if 'codigo' in data and (data['codigo'] or '').strip() != p.codigo:
+        nuevo = (data['codigo'] or '').strip()
+        if not nuevo:
+            return jsonify({'error': 'El código no puede estar vacío'}), 400
+        if Producto.query.filter(Producto.codigo == nuevo, Producto.id != id).first():
+            return jsonify({'error': 'El código ya existe'}), 409
+        p.codigo = nuevo
+
     for field in ('descripcion', 'unidades_por_bulto', 'grupo_id', 'activo'):
         if field in data:
             setattr(p, field, data[field])

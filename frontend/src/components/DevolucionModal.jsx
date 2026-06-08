@@ -2,29 +2,89 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
 import { HelpTooltip } from './ui/Tooltip'
-import { createDevolucion, getClientes, getOrdenes, getOrden } from '../api'
+import { createDevolucion, updateDevolucion, getClientes, getOrdenes, getOrden, getDevolucion } from '../api'
 import Alert from './Alert'
 
-export default function DevolucionModal({ open, onClose, onSaved }) {
+export default function DevolucionModal({ open, onClose, onSaved, devolucionId }) {
+  const isEdit = Boolean(devolucionId)
   const [clientes, setClientes] = useState([])
   const [clienteId, setClienteId] = useState('')
+  const [clienteNombre, setClienteNombre] = useState('')
   const [ordenes, setOrdenes] = useState([])
   const [ordenId, setOrdenId] = useState('')
+  const [ordenNumero, setOrdenNumero] = useState('')
   const [rows, setRows] = useState([])
   const [nota, setNota] = useState('')
   const [reingresar, setReingresar] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    if (!open) return
-    setError(''); setClienteId(''); setOrdenId(''); setRows([]); setNota(''); setReingresar(false); setOrdenes([])
-    getClientes({ activo: true })
-      .then((r) => setClientes(r.data))
-      .catch(() => setError('Error al cargar clientes'))
-  }, [open])
+  const buildRowsFromOrden = (ordenData, returnedMap = {}) =>
+    (ordenData.detalles ?? []).map((d) => {
+      const upb = d.unidades_por_bulto || 1
+      const ret = returnedMap[d.producto_id] || 0
+      return {
+        producto_id: d.producto_id,
+        descripcion: d.descripcion,
+        codigo: d.codigo,
+        upb,
+        cantidad_despachada: d.cantidad_unidades,
+        bultos: ret ? String(Math.floor(ret / upb)) : '',
+        sueltas: ret ? String(ret % upb) : '',
+      }
+    })
 
   useEffect(() => {
+    if (!open) return
+    setError(''); setRows([]); setNota(''); setReingresar(false)
+    setOrdenes([]); setOrdenId(''); setOrdenNumero(''); setClienteNombre('')
+
+    if (isEdit) {
+      setClienteId('')
+      ;(async () => {
+        try {
+          const dr = await getDevolucion(devolucionId)
+          const dev = dr.data
+          setClienteNombre(dev.cliente)
+          setOrdenNumero(dev.numero_orden_origen ?? '')
+          setOrdenId(dev.orden_origen_id ? String(dev.orden_origen_id) : '')
+          setNota(dev.nota || '')
+          setReingresar(dev.reingresar_almacen)
+
+          const returnedMap = {}
+          for (const det of dev.detalles ?? []) returnedMap[det.producto_id] = det.cantidad_unidades
+
+          if (dev.orden_origen_id) {
+            const or = await getOrden(dev.orden_origen_id)
+            const baseRows = buildRowsFromOrden(or.data, returnedMap)
+            // Productos devueltos que ya no están en la orden de origen
+            const enOrden = new Set((or.data.detalles ?? []).map((d) => d.producto_id))
+            for (const det of dev.detalles ?? []) {
+              if (!enOrden.has(det.producto_id)) {
+                baseRows.push({
+                  producto_id: det.producto_id, descripcion: det.descripcion, codigo: det.codigo,
+                  upb: 1, cantidad_despachada: det.cantidad_unidades,
+                  bultos: String(det.cantidad_unidades), sueltas: '0',
+                })
+              }
+            }
+            setRows(baseRows)
+          }
+        } catch {
+          setError('Error al cargar la devolución')
+        }
+      })()
+    } else {
+      setClienteId('')
+      getClientes({ activo: true })
+        .then((r) => setClientes(r.data))
+        .catch(() => setError('Error al cargar clientes'))
+    }
+  }, [open, devolucionId])
+
+  // Cadena cliente → órdenes (solo en modo crear)
+  useEffect(() => {
+    if (isEdit || !open) return
     if (!clienteId) { setOrdenes([]); setOrdenId(''); setRows([]); return }
     getOrdenes({ cliente_id: clienteId, status: 'activa' })
       .then((r) => setOrdenes(r.data))
@@ -33,24 +93,11 @@ export default function DevolucionModal({ open, onClose, onSaved }) {
     setRows([])
   }, [clienteId])
 
+  // orden → detalles (solo en modo crear)
   useEffect(() => {
+    if (isEdit || !open) return
     if (!ordenId) { setRows([]); return }
-    getOrden(ordenId).then((r) => {
-      setRows(
-        (r.data.detalles ?? []).map((d) => {
-          const upb = d.unidades_por_bulto || 1
-          return {
-            producto_id: d.producto_id,
-            descripcion: d.descripcion,
-            codigo: d.codigo,
-            upb,
-            cantidad_despachada: d.cantidad_unidades,
-            bultos: '',
-            sueltas: '',
-          }
-        })
-      )
-    })
+    getOrden(ordenId).then((r) => setRows(buildRowsFromOrden(r.data)))
   }, [ordenId])
 
   const setRowField = (i, field, val) => {
@@ -82,35 +129,44 @@ export default function DevolucionModal({ open, onClose, onSaved }) {
 
     setLoading(true)
     try {
-      await createDevolucion({
-        cliente_id: Number(clienteId),
-        orden_origen_id: Number(ordenId),
-        nota,
-        reingresar_almacen: reingresar,
-        detalles: detalles.map((r) => ({
-          producto_id: Number(r.producto_id),
-          cantidad_unidades: r.cantidad_unidades,
-        })),
-      })
-      toast.success('Devolución registrada')
+      const detallesOut = detalles.map((r) => ({
+        producto_id: Number(r.producto_id),
+        cantidad_unidades: r.cantidad_unidades,
+      }))
+      if (isEdit) {
+        await updateDevolucion(devolucionId, { nota, reingresar_almacen: reingresar, detalles: detallesOut })
+        toast.success('Devolución actualizada')
+      } else {
+        await createDevolucion({
+          cliente_id: Number(clienteId),
+          orden_origen_id: Number(ordenId),
+          nota,
+          reingresar_almacen: reingresar,
+          detalles: detallesOut,
+        })
+        toast.success('Devolución registrada')
+      }
       onSaved()
       onClose()
     } catch (err) {
-      setError(err.response?.data?.error ?? 'Error al registrar devolución')
+      setError(err.response?.data?.error ?? 'Error al guardar la devolución')
     } finally {
       setLoading(false)
     }
   }
 
   const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  const inpRO = 'w-full border border-gray-200 rounded-md px-3 py-2 text-sm bg-gray-100 text-gray-600'
   const lbl = 'block text-sm font-medium text-gray-700 mb-1'
   const inpNum = 'border border-gray-300 rounded px-2 py-1 text-sm w-16 text-center focus:outline-none focus:ring-1 focus:ring-blue-500'
+
+  const mostrarDetalle = isEdit || Boolean(ordenId)
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent title={
         <span className="inline-flex items-center gap-1">
-          Nueva Devolución
+          {isEdit ? 'Editar Devolución' : 'Nueva Devolución'}
           <HelpTooltip text="Registra la devolución de productos que el cliente tenía en consignación. Las unidades se retiran del stock del cliente. Marca 'Reingresar al almacén' si la mercancía sirve para volver a despacharla." side="bottom" />
         </span>
       } size="lg">
@@ -119,13 +175,22 @@ export default function DevolucionModal({ open, onClose, onSaved }) {
 
           <div>
             <label className={lbl}>Cliente *</label>
-            <select className={inp} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
-              <option value="">Seleccionar cliente...</option>
-              {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
-            </select>
+            {isEdit ? (
+              <div className={inpRO}>{clienteNombre}</div>
+            ) : (
+              <select className={inp} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
+                <option value="">Seleccionar cliente...</option>
+                {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
+              </select>
+            )}
           </div>
 
-          {clienteId && (
+          {isEdit ? (
+            <div>
+              <label className={lbl}>Orden de origen</label>
+              <div className={inpRO}>#{ordenNumero}</div>
+            </div>
+          ) : clienteId && (
             <div>
               <label className={lbl}>Orden de origen *</label>
               {ordenes.length === 0 ? (
@@ -173,18 +238,18 @@ export default function DevolucionModal({ open, onClose, onSaved }) {
                           </td>
                           <td className="px-3 py-2 text-center">
                             <input
-                              type="number" min={0} max={Math.floor(row.cantidad_despachada / upb)}
+                              type="text" inputMode="numeric"
                               className={inpNum}
                               value={row.bultos}
-                              onChange={(e) => setRowField(i, 'bultos', e.target.value)}
+                              onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRowField(i, 'bultos', e.target.value) }}
                             />
                           </td>
                           <td className="px-3 py-2 text-center">
                             <input
-                              type="number" min={0} max={upb - 1}
+                              type="text" inputMode="numeric"
                               className={inpNum}
                               value={row.sueltas}
-                              onChange={(e) => setRowField(i, 'sueltas', e.target.value)}
+                              onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRowField(i, 'sueltas', e.target.value) }}
                             />
                           </td>
                           <td className={`px-3 py-2 text-center text-xs font-medium ${excede ? 'text-red-600' : 'text-gray-700'}`}>
@@ -199,7 +264,7 @@ export default function DevolucionModal({ open, onClose, onSaved }) {
             </div>
           )}
 
-          {ordenId && (
+          {mostrarDetalle && (
             <>
               <div>
                 <label className={lbl}>Nota / Motivo</label>
@@ -234,8 +299,8 @@ export default function DevolucionModal({ open, onClose, onSaved }) {
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
               Cancelar
             </button>
-            <button type="submit" disabled={loading || !ordenId} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
-              {loading ? 'Registrando...' : 'Registrar Devolución'}
+            <button type="submit" disabled={loading || (!isEdit && !ordenId)} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+              {loading ? 'Guardando...' : (isEdit ? 'Guardar cambios' : 'Registrar Devolución')}
             </button>
           </div>
         </form>

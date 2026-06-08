@@ -115,6 +115,7 @@ export const confirmarReporteVenta = (id) => api.put(`/reportes-venta/${id}/conf
 export const getDevoluciones = (params) => api.get('/devoluciones', { params })
 export const getDevolucion = (id) => api.get(`/devoluciones/${id}`)
 export const createDevolucion = (data) => api.post('/devoluciones', data)
+export const updateDevolucion = (id, data) => api.put(`/devoluciones/${id}`, data)
 
 // Auth
 export const authLogin = (data) => api.post('/auth/login', data)
