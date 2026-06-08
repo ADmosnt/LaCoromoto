@@ -3,6 +3,22 @@ from fpdf import FPDF
 from app.utils import numero_a_letras
 
 
+def _latin1(s):
+    """Las fuentes core de FPDF solo soportan latin-1. Reemplaza puntuación
+    unicode común y descarta cualquier carácter no codificable."""
+    if s is None:
+        return ''
+    s = str(s)
+    repl = {
+        '•': '-', '–': '-', '—': '-',
+        '‘': "'", '’': "'", '“': '"', '”': '"',
+        '…': '...', ' ': ' ',
+    }
+    for k, v in repl.items():
+        s = s.replace(k, v)
+    return s.encode('latin-1', 'replace').decode('latin-1')
+
+
 def generar_pdf_orden(orden, config) -> bytes:
     pdf = FPDF(orientation='P', unit='mm', format='Letter')
 
@@ -22,14 +38,14 @@ def generar_pdf_orden(orden, config) -> bytes:
     pdf.set_xy(L, 15)
     pdf.set_font('Helvetica', 'B', 13)
     pdf.set_text_color(30, 30, 30)
-    pdf.cell(W * 0.52, 7, config.nombre, ln=True)
+    pdf.cell(W * 0.52, 7, _latin1(config.nombre), ln=True)
 
     pdf.set_font('Helvetica', '', 9)
     pdf.set_text_color(90, 90, 90)
     pdf.set_x(L)
-    pdf.cell(W * 0.52, 5, config.direccion or '', ln=True)
+    pdf.cell(W * 0.52, 5, _latin1(config.direccion or ''), ln=True)
     pdf.set_x(L)
-    pdf.cell(W * 0.52, 5, config.ciudad or '', ln=True)
+    pdf.cell(W * 0.52, 5, _latin1(config.ciudad or ''), ln=True)
 
     # Right: document box
     bx = L + W * 0.55
@@ -167,14 +183,14 @@ def generar_pdf_resumen_ordenes(ordenes, productos, config) -> bytes:
     pdf.set_xy(L, 15)
     pdf.set_font('Helvetica', 'B', 13)
     pdf.set_text_color(30, 30, 30)
-    pdf.cell(W * 0.52, 7, config.nombre, ln=True)
+    pdf.cell(W * 0.52, 7, _latin1(config.nombre), ln=True)
 
     pdf.set_font('Helvetica', '', 9)
     pdf.set_text_color(90, 90, 90)
     pdf.set_x(L)
-    pdf.cell(W * 0.52, 5, config.direccion or '', ln=True)
+    pdf.cell(W * 0.52, 5, _latin1(config.direccion or ''), ln=True)
     pdf.set_x(L)
-    pdf.cell(W * 0.52, 5, config.ciudad or '', ln=True)
+    pdf.cell(W * 0.52, 5, _latin1(config.ciudad or ''), ln=True)
 
     bx = L + W * 0.55
     bw = W * 0.45
@@ -212,7 +228,7 @@ def generar_pdf_resumen_ordenes(ordenes, productos, config) -> bytes:
     for o in ordenes:
         pdf.set_x(L)
         cliente = o.cliente.razon_social if o.cliente else ''
-        pdf.cell(0, 4.5, f'  • {o.numero_orden}  —  {cliente}  ({o.fecha_emision})', ln=True)
+        pdf.cell(0, 4.5, _latin1(f'  - {o.numero_orden}   {cliente}   ({o.fecha_emision})'), ln=True)
 
     pdf.ln(2)
     pdf.set_draw_color(0, 0, 0)
@@ -238,8 +254,8 @@ def generar_pdf_resumen_ordenes(ordenes, productos, config) -> bytes:
         pdf.set_font('Helvetica', '', 8)
         bultos_str = f"{p['bultos']}B + {p['sueltas']}u" if p['sueltas'] else f"{p['bultos']}B"
         vals = [
-            p['codigo'] or '',
-            p['descripcion'] or '',
+            _latin1(p['codigo'] or ''),
+            _latin1(p['descripcion'] or ''),
             str(p['facturas']),
             str(p['cantidad_unidades']),
             bultos_str,
