@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from decimal import Decimal
 import datetime
+from sqlalchemy import func
 from app import db
 from app.models import (ReporteVenta, ReporteVentaDetalle,
                          StockConsignacion, TasaBCV, Cliente, Producto,
@@ -9,6 +10,21 @@ from app.utils import resolv_tasa
 from app.auth import require_role, get_current_user
 
 bp = Blueprint('reportes_venta', __name__)
+
+
+def _reportado_por_producto(orden_id, statuses=('pendiente', 'confirmado')):
+    """Cantidad ya reportada por producto para una orden, en los estados dados."""
+    rows = (
+        db.session.query(
+            ReporteVentaDetalle.producto_id,
+            func.sum(ReporteVentaDetalle.cantidad_unidades),
+        )
+        .join(ReporteVenta, ReporteVenta.id == ReporteVentaDetalle.reporte_id)
+        .filter(ReporteVenta.orden_id == orden_id, ReporteVenta.status.in_(statuses))
+        .group_by(ReporteVentaDetalle.producto_id)
+        .all()
+    )
+    return {pid: int(qty) for pid, qty in rows}
 
 
 @bp.route('', methods=['GET'])
@@ -57,17 +73,19 @@ def create_reporte():
 
     orden = None
     orden_id = data.get('orden_id')
+    despachado = {}
+    reportado = {}
     if orden_id:
         orden = OrdenDespacho.query.get_or_404(orden_id)
         if current_user.rol == 'cliente' and orden.cliente_id != current_user.cliente_id:
             return jsonify({'error': 'Sin permiso'}), 403
-        if orden.status != 'activa':
+        if orden.status not in ('activa', 'parcial'):
             return jsonify({'error': f'La orden está en estado "{orden.status}" y no acepta reportes'}), 400
-        existing = ReporteVenta.query.filter_by(orden_id=orden_id).filter(
-            ReporteVenta.status.in_(['pendiente', 'confirmado'])
-        ).first()
-        if existing:
-            return jsonify({'error': 'Esta orden ya tiene un reporte registrado'}), 400
+        pendiente = ReporteVenta.query.filter_by(orden_id=orden_id, status='pendiente').first()
+        if pendiente:
+            return jsonify({'error': 'Esta orden ya tiene un reporte pendiente de confirmación'}), 400
+        despachado = {d.producto_id: d.cantidad_unidades for d in orden.detalles}
+        reportado = _reportado_por_producto(orden_id)
 
     fecha = datetime.date.fromisoformat(data.get('fecha', datetime.date.today().isoformat()))
     tasa = resolv_tasa(TasaBCV, fecha, data.get('tasa_bcv_id'))
@@ -84,6 +102,15 @@ def create_reporte():
             return jsonify({'error': 'La cantidad debe ser mayor a 0'}), 400
         if precio < 0:
             return jsonify({'error': 'El precio no puede ser negativo'}), 400
+        if orden_id:
+            pid = item.get('producto_id')
+            restante = despachado.get(pid, 0) - reportado.get(pid, 0)
+            if cantidad > restante:
+                producto = Producto.query.get(pid)
+                nombre = producto.descripcion if producto else f'ID {pid}'
+                return jsonify({
+                    'error': f'"{nombre}": no puede reportar más de lo pendiente por reportar ({restante} uds)'
+                }), 400
 
     reporte = ReporteVenta(
         cliente_id=cliente.id,
@@ -135,11 +162,15 @@ def confirmar_reporte(id):
         stock.cantidad_unidades -= det.cantidad_unidades
 
     reporte.status = 'confirmado'
+    db.session.flush()
 
     if reporte.orden_id:
         orden = OrdenDespacho.query.get(reporte.orden_id)
-        if orden and orden.status == 'pendiente':
-            orden.status = 'confirmado'
+        if orden:
+            despachado = {d.producto_id: d.cantidad_unidades for d in orden.detalles}
+            confirmado = _reportado_por_producto(orden.id, statuses=('confirmado',))
+            completo = all(confirmado.get(pid, 0) >= cant for pid, cant in despachado.items())
+            orden.status = 'confirmado' if completo else 'parcial'
 
     db.session.commit()
     return jsonify(reporte.to_dict(include_detalles=True))

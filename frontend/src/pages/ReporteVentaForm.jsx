@@ -24,7 +24,7 @@ export default function ReporteVentaForm() {
   useEffect(() => {
     if (!clienteId) { setStockCliente([]); setRows([]); setProductoAdd(''); return }
     getClienteStock(clienteId).then((r) => {
-      setStockCliente(r.data)
+      setStockCliente(r.data.stock)
       setRows([])
       setProductoAdd('')
     })

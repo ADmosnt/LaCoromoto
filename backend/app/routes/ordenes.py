@@ -53,6 +53,9 @@ def list_ordenes():
         cliente_id = request.args.get('cliente_id')
         if cliente_id:
             q = q.filter(OrdenDespacho.cliente_id == int(cliente_id))
+        grupo_id = request.args.get('grupo_id')
+        if grupo_id:
+            q = q.join(Cliente, Cliente.id == OrdenDespacho.cliente_id).filter(Cliente.grupo_id == int(grupo_id))
     fecha_desde = request.args.get('fecha_desde')
     if fecha_desde:
         q = q.filter(OrdenDespacho.fecha_emision >= datetime.date.fromisoformat(fecha_desde))

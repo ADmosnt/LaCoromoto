@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { getOrdenes, getOrden, getClientes, downloadOrdenPDF, anularOrden, confirmarReporteVenta } from '../api'
+import { getOrdenes, getOrden, getClientes, getGruposClientes, downloadOrdenPDF, anularOrden, confirmarReporteVenta } from '../api'
 import OrdenModal from '../components/OrdenModal'
 import OrdenEdicionesModal from '../components/OrdenEdicionesModal'
 import OrdenesResumenModal from '../components/OrdenesResumenModal'
@@ -28,6 +28,7 @@ function groupByMonth(ordenes) {
 const statusBadge = {
   activa: 'bg-green-100 text-green-700',
   pendiente: 'bg-yellow-100 text-yellow-700',
+  parcial: 'bg-indigo-100 text-indigo-700',
   confirmado: 'bg-blue-100 text-blue-700',
   anulada: 'bg-red-100 text-red-700',
 }
@@ -35,6 +36,7 @@ const statusBadge = {
 const statusLabel = {
   activa: 'Activa',
   pendiente: 'Pendiente',
+  parcial: 'Parcialmente reportada',
   confirmado: 'Confirmado',
   anulada: 'Anulada',
 }
@@ -100,6 +102,7 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
   const isAnulada = status === 'anulada'
   const isActiva = status === 'activa'
   const isPendiente = status === 'pendiente'
+  const isParcial = status === 'parcial'
   const isConfirmado = status === 'confirmado'
   const puedeEditar = Boolean(detail.puede_editar)
   const edicionesCount = detail.ediciones_count ?? 0
@@ -127,6 +130,11 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
           Reporte de venta registrado — pendiente de confirmación.
         </div>
       )}
+      {isParcial && (
+        <div className="mb-2 text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-2 py-1">
+          Reportada y confirmada parcialmente. Aún queda stock en consignación por reportar.
+        </div>
+      )}
       {isConfirmado && (
         <div className="mb-2 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1">
           Venta confirmada. Stock descontado.
@@ -141,6 +149,17 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
             }
           }
           const hayDevolucion = Object.keys(devueltoMap).length > 0
+
+          const reportadoMap = {}
+          for (const rep of detail.reportes ?? []) {
+            if (rep.status === 'pendiente' || rep.status === 'confirmado') {
+              for (const det of rep.detalles ?? []) {
+                reportadoMap[det.producto_id] = (reportadoMap[det.producto_id] || 0) + det.cantidad_unidades
+              }
+            }
+          }
+          const hayReporte = Object.keys(reportadoMap).length > 0
+
           return (
             <table className="w-full text-xs">
               <thead className="bg-gray-200 text-gray-600 uppercase">
@@ -150,6 +169,8 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
                   <th className="px-3 py-2 text-center">Despachado</th>
                   {hayDevolucion && <th className="px-3 py-2 text-center text-orange-700">Devuelto</th>}
                   {hayDevolucion && <th className="px-3 py-2 text-center">Neto</th>}
+                  {hayReporte && <th className="px-3 py-2 text-center text-blue-700">Reportado</th>}
+                  {hayReporte && <th className="px-3 py-2 text-center">Pendiente</th>}
                   <th className="px-3 py-2 text-right">Precio/Bulto</th>
                   <th className="px-3 py-2 text-right">Total USD</th>
                 </tr>
@@ -160,6 +181,8 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
                   const precioBulto = Number(d.precio_usd_momento) * upb
                   const devuelto = devueltoMap[d.producto_id] || 0
                   const neto = d.cantidad_unidades - devuelto
+                  const reportado = reportadoMap[d.producto_id] || 0
+                  const pendienteReporte = d.cantidad_unidades - reportado
                   return (
                     <tr key={d.id} className="hover:bg-gray-100">
                       <td className="px-3 py-2 font-mono">{d.codigo}</td>
@@ -175,6 +198,16 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
                       {hayDevolucion && (
                         <td className="px-3 py-2 text-center font-medium">
                           {Math.floor(neto / upb)}B+{neto % upb}u
+                        </td>
+                      )}
+                      {hayReporte && (
+                        <td className="px-3 py-2 text-center text-blue-600">
+                          {reportado > 0 ? `${reportado} uds` : '—'}
+                        </td>
+                      )}
+                      {hayReporte && (
+                        <td className="px-3 py-2 text-center font-medium">
+                          {pendienteReporte > 0 ? `${pendienteReporte} uds` : '—'}
                         </td>
                       )}
                       <td className="px-3 py-2 text-right">${precioBulto.toFixed(2)}</td>
@@ -222,7 +255,7 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
               <HelpTooltip text="Edita los productos, cantidades, precios, fecha o nota. Se registrará un historial de cambios visible para auditoría." side="top" />
             </span>
           )}
-          {isActiva && (
+          {(isActiva || isParcial) && (
             <span className="inline-flex items-center gap-1">
               <button
                 onClick={() => setReporteModalOpen(true)}
@@ -230,7 +263,7 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
               >
                 Registrar Reporte de Venta
               </button>
-              <HelpTooltip text="Registra cuántas unidades fueron vendidas y cobradas. Queda pendiente de confirmación hasta que el administrador lo apruebe." side="top" />
+              <HelpTooltip text="Registra cuántas unidades fueron vendidas y cobradas. Puedes registrar varios reportes por partes hasta cubrir todo lo despachado. Cada uno queda pendiente de confirmación hasta que el administrador lo apruebe." side="top" />
             </span>
           )}
           {isPendiente && (
@@ -279,7 +312,10 @@ const sel = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-n
 export default function Ordenes() {
   const [ordenes, setOrdenes] = useState([])
   const [clientes, setClientes] = useState([])
+  const [grupos, setGrupos] = useState([])
+  const [modo, setModo] = useState('cliente') // 'cliente' | 'grupo'
   const [clienteId, setClienteId] = useState('')
+  const [grupoId, setGrupoId] = useState('')
   const [fechaDesde, setFechaDesde] = useState('')
   const [fechaHasta, setFechaHasta] = useState('')
   const [expanded, setExpanded] = useState(null)
@@ -292,15 +328,26 @@ export default function Ordenes() {
 
   const load = () =>
     getOrdenes({
-      cliente_id: clienteId || undefined,
+      cliente_id: modo === 'cliente' ? (clienteId || undefined) : undefined,
+      grupo_id: modo === 'grupo' ? (grupoId || undefined) : undefined,
       fecha_desde: fechaDesde || undefined,
       fecha_hasta: fechaHasta || undefined,
     })
       .then((r) => setOrdenes(r.data))
       .catch(() => toast.error('Error al cargar órdenes'))
 
-  useEffect(() => { getClientes({ activo: true }).then((r) => setClientes(r.data)).catch(() => {}) }, [])
-  useEffect(() => { load(); setSelectedIds(new Set()) }, [clienteId, fechaDesde, fechaHasta])
+  useEffect(() => {
+    getClientes({ activo: true }).then((r) => setClientes(r.data)).catch(() => {})
+    getGruposClientes().then((r) => setGrupos(r.data)).catch(() => {})
+  }, [])
+  useEffect(() => { load(); setSelectedIds(new Set()) }, [modo, clienteId, grupoId, fechaDesde, fechaHasta])
+
+  const cambiarModo = (m) => {
+    if (m === modo) return
+    setModo(m)
+    setClienteId('')
+    setGrupoId('')
+  }
 
   const toggle = (id) => setExpanded((prev) => (prev === id ? null : id))
 
@@ -315,7 +362,7 @@ export default function Ordenes() {
 
   const clearSelection = () => setSelectedIds(new Set())
 
-  const grupos = groupByMonth(ordenes)
+  const meses = groupByMonth(ordenes)
   const grandTotal = ordenes
     .filter((o) => o.status !== 'anulada')
     .reduce((s, o) => s + Number(o.total_usd), 0)
@@ -334,11 +381,37 @@ export default function Ordenes() {
 
       <div className="bg-white rounded-lg shadow p-4 mb-4 flex flex-wrap gap-3 items-end">
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Cliente</label>
-          <select value={clienteId} onChange={(e) => setClienteId(e.target.value)} className={sel}>
-            <option value="">Todos</option>
-            {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
-          </select>
+          <label className="block text-xs text-gray-500 mb-1">Filtrar por</label>
+          <div className="inline-flex rounded-md border border-gray-300 overflow-hidden text-sm">
+            <button
+              type="button"
+              onClick={() => cambiarModo('cliente')}
+              className={`px-3 py-2 font-medium ${modo === 'cliente' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            >
+              Cliente
+            </button>
+            <button
+              type="button"
+              onClick={() => cambiarModo('grupo')}
+              className={`px-3 py-2 font-medium border-l border-gray-300 ${modo === 'grupo' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            >
+              Grupo
+            </button>
+          </div>
+        </div>
+        <div>
+          <label className="block text-xs text-gray-500 mb-1">{modo === 'cliente' ? 'Cliente' : 'Grupo'}</label>
+          {modo === 'cliente' ? (
+            <select value={clienteId} onChange={(e) => setClienteId(e.target.value)} className={sel}>
+              <option value="">Todos</option>
+              {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
+            </select>
+          ) : (
+            <select value={grupoId} onChange={(e) => setGrupoId(e.target.value)} className={sel}>
+              <option value="">Todos</option>
+              {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
+            </select>
+          )}
         </div>
         <div>
           <label className="block text-xs text-gray-500 mb-1">Desde</label>
@@ -349,18 +422,18 @@ export default function Ordenes() {
           <input type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} className={sel} />
         </div>
         <button
-          onClick={() => { setClienteId(''); setFechaDesde(''); setFechaHasta('') }}
+          onClick={() => { setClienteId(''); setGrupoId(''); setFechaDesde(''); setFechaHasta('') }}
           className="text-sm text-gray-500 hover:text-gray-700 py-2"
         >
           Limpiar
         </button>
       </div>
 
-      {grupos.length === 0 && (
+      {meses.length === 0 && (
         <div className="bg-white rounded-lg shadow p-8 text-center text-gray-400">No hay órdenes registradas</div>
       )}
 
-      {grupos.map(([key, items]) => {
+      {meses.map(([key, items]) => {
         const totalMes = items
           .filter((o) => o.status !== 'anulada')
           .reduce((s, o) => s + Number(o.total_usd), 0)

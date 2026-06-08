@@ -24,20 +24,33 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
     getTasaHoy().then((r) => {
       if (r.data?.valor) setTasaManual(String(r.data.valor))
     }).catch(() => {})
-    setRows(
-      (orden.detalles ?? []).map((d) => {
-        const upb = d.unidades_por_bulto || 1
-        return {
-          producto_id: d.producto_id,
-          descripcion: d.descripcion,
-          codigo: d.codigo,
-          upb,
-          despacho_uds: d.cantidad_unidades,
-          bultos: '',
-          sueltas: '',
-          precio_bulto: (Number(d.precio_usd_momento) * upb).toFixed(2),
+    const reportadoMap = {}
+    for (const rep of orden.reportes ?? []) {
+      if (rep.status === 'pendiente' || rep.status === 'confirmado') {
+        for (const det of rep.detalles ?? []) {
+          reportadoMap[det.producto_id] = (reportadoMap[det.producto_id] || 0) + det.cantidad_unidades
         }
-      })
+      }
+    }
+
+    setRows(
+      (orden.detalles ?? [])
+        .map((d) => {
+          const upb = d.unidades_por_bulto || 1
+          const reportado = reportadoMap[d.producto_id] || 0
+          return {
+            producto_id: d.producto_id,
+            descripcion: d.descripcion,
+            codigo: d.codigo,
+            upb,
+            despacho_uds: d.cantidad_unidades,
+            restante: d.cantidad_unidades - reportado,
+            bultos: '',
+            sueltas: '',
+            precio_bulto: (Number(d.precio_usd_momento) * upb).toFixed(2),
+          }
+        })
+        .filter((r) => r.restante > 0)
     )
   }, [open, orden])
 
@@ -62,9 +75,9 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
 
     if (!detalles.length) { setError('Ingrese al menos una unidad vendida'); return }
 
-    const excede = detalles.find((r) => r.cantidad_unidades > r.despacho_uds)
+    const excede = detalles.find((r) => r.cantidad_unidades > r.restante)
     if (excede) {
-      setError(`"${excede.descripcion}": no puede superar las ${excede.despacho_uds} unidades despachadas`)
+      setError(`"${excede.descripcion}": no puede superar las ${excede.restante} unidades pendientes por reportar`)
       return
     }
 
@@ -145,6 +158,9 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
             )}
           </div>
 
+          {rows.length === 0 ? (
+            <p className="text-sm text-gray-400 py-2">Ya se ha reportado la totalidad de las unidades despachadas en esta orden.</p>
+          ) : (
           <div>
             <label className={lbl}>Unidades vendidas</label>
             <div className="overflow-x-auto rounded-lg border border-gray-200">
@@ -153,7 +169,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                   <tr>
                     <th className="px-3 py-2 text-left">Producto</th>
                     <th className="px-3 py-2 text-center">Uds/Bulto</th>
-                    <th className="px-3 py-2 text-center">Despachado</th>
+                    <th className="px-3 py-2 text-center">Pendiente por reportar</th>
                     <th className="px-3 py-2 text-center">Bultos</th>
                     <th className="px-3 py-2 text-center">Uds. sueltas</th>
                     <th className="px-3 py-2 text-center">Total uds</th>
@@ -165,7 +181,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                   {rows.map((row, i) => {
                     const upb = row.upb || 1
                     const total = totalUnidades(row)
-                    const excede = total > row.despacho_uds
+                    const excede = total > row.restante
                     const totalUsd = (total / upb) * (parsePrecio(row.precio_bulto) || 0)
                     return (
                       <tr key={i} className={excede ? 'bg-red-50' : ''}>
@@ -177,11 +193,11 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                           {upb}
                         </td>
                         <td className="px-3 py-2 text-center text-gray-500 text-xs">
-                          {Math.floor(row.despacho_uds / upb)}B+{row.despacho_uds % upb}u
+                          {Math.floor(row.restante / upb)}B+{row.restante % upb}u
                         </td>
                         <td className="px-3 py-2 text-center">
                           <input
-                            type="number" min={0} max={Math.floor(row.despacho_uds / upb)}
+                            type="number" min={0} max={Math.floor(row.restante / upb)}
                             className={`${inp} w-16 text-center`}
                             value={row.bultos}
                             onChange={(e) => setRowField(i, 'bultos', e.target.value)}
@@ -219,12 +235,13 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
               </table>
             </div>
           </div>
+          )}
 
           <div className="flex justify-end gap-3 pt-2 border-t">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
               Cancelar
             </button>
-            <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+            <button type="submit" disabled={loading || rows.length === 0} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
               {loading ? 'Registrando...' : 'Registrar Reporte'}
             </button>
           </div>

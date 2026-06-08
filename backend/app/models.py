@@ -240,11 +240,27 @@ class OrdenDespacho(db.Model):
         }
         if include_detalles:
             d['detalles'] = [det.to_dict() for det in self.detalles]
-            active_rep = next(
-                (r for r in self.reportes if r.status in ('pendiente', 'confirmado')),
-                None
-            ) if hasattr(self, 'reportes') else None
+            active_rep = None
+            if hasattr(self, 'reportes'):
+                # Prioriza el reporte pendiente (el que requiere confirmación);
+                # si no hay, cae al último confirmado.
+                active_rep = next((r for r in self.reportes if r.status == 'pendiente'), None)
+                if not active_rep:
+                    confirmados = [r for r in self.reportes if r.status == 'confirmado']
+                    active_rep = max(confirmados, key=lambda r: r.fecha) if confirmados else None
             d['reporte_id'] = active_rep.id if active_rep else None
+            d['reportes'] = [
+                {
+                    'id': r.id,
+                    'fecha': r.fecha.isoformat(),
+                    'status': r.status,
+                    'detalles': [
+                        {'producto_id': det.producto_id, 'cantidad_unidades': det.cantidad_unidades}
+                        for det in r.detalles
+                    ],
+                }
+                for r in sorted(self.reportes, key=lambda r: r.fecha)
+            ] if hasattr(self, 'reportes') else []
             devs = Devolucion.query.filter_by(orden_origen_id=self.id).all()
             d['devoluciones'] = [
                 {

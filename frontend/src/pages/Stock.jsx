@@ -1,10 +1,21 @@
 import { useEffect, useState, Fragment } from 'react'
-import { getClientes, getClienteStock, getGruposClientes, getGrupoStock } from '../api'
+import { toast } from 'sonner'
+import { getClientes, getClienteStock, getGruposClientes, getGrupoStock, getOrden } from '../api'
 import { HelpTooltip } from '../components/ui/Tooltip'
+import ReporteVentaModal from '../components/ReporteVentaModal'
 
 const statusBadge = {
   activa: 'bg-green-100 text-green-700',
   pendiente: 'bg-yellow-100 text-yellow-700',
+  parcial: 'bg-blue-100 text-blue-700',
+  confirmado: 'bg-blue-100 text-blue-700',
+}
+
+const statusLabel = {
+  activa: 'Activa',
+  pendiente: 'Pendiente',
+  parcial: 'Parcialmente reportada',
+  confirmado: 'Confirmada',
 }
 
 const agingClass = (dias) => {
@@ -31,9 +42,20 @@ export default function Stock() {
   const [clienteId, setClienteId] = useState('')
   const [grupoId, setGrupoId] = useState('')
   const [stock, setStock] = useState([])
+  const [ordenesReportando, setOrdenesReportando] = useState([])
   const [cliente, setCliente] = useState(null)
   const [grupo, setGrupo] = useState(null)
   const [expanded, setExpanded] = useState(null)
+  const [reporteOrden, setReporteOrden] = useState(null)
+  const [reporteModalOpen, setReporteModalOpen] = useState(false)
+
+  const reload = () => {
+    if (modo === 'cliente' && clienteId) {
+      getClienteStock(clienteId).then((r) => { setStock(r.data.stock); setOrdenesReportando(r.data.ordenes_reportando) })
+    } else if (modo === 'grupo' && grupoId) {
+      getGrupoStock(grupoId).then((r) => { setStock(r.data.stock); setOrdenesReportando(r.data.ordenes_reportando) })
+    }
+  }
 
   useEffect(() => {
     getClientes({ activo: true }).then((r) => setClientes(r.data))
@@ -46,6 +68,7 @@ export default function Stock() {
     setClienteId('')
     setGrupoId('')
     setStock([])
+    setOrdenesReportando([])
     setCliente(null)
     setGrupo(null)
     setExpanded(null)
@@ -53,21 +76,31 @@ export default function Stock() {
 
   useEffect(() => {
     if (modo !== 'cliente') return
-    if (!clienteId) { setStock([]); setCliente(null); setExpanded(null); return }
+    if (!clienteId) { setStock([]); setOrdenesReportando([]); setCliente(null); setExpanded(null); return }
     const c = clientes.find((c) => String(c.id) === clienteId)
     setCliente(c)
     setExpanded(null)
-    getClienteStock(clienteId).then((r) => setStock(r.data))
+    getClienteStock(clienteId).then((r) => { setStock(r.data.stock); setOrdenesReportando(r.data.ordenes_reportando) })
   }, [modo, clienteId, clientes])
 
   useEffect(() => {
     if (modo !== 'grupo') return
-    if (!grupoId) { setStock([]); setGrupo(null); setExpanded(null); return }
+    if (!grupoId) { setStock([]); setOrdenesReportando([]); setGrupo(null); setExpanded(null); return }
     const g = grupos.find((g) => String(g.id) === grupoId)
     setGrupo(g)
     setExpanded(null)
-    getGrupoStock(grupoId).then((r) => setStock(r.data))
+    getGrupoStock(grupoId).then((r) => { setStock(r.data.stock); setOrdenesReportando(r.data.ordenes_reportando) })
   }, [modo, grupoId, grupos])
+
+  const abrirReporte = async (id) => {
+    try {
+      const r = await getOrden(id)
+      setReporteOrden(r.data)
+      setReporteModalOpen(true)
+    } catch {
+      toast.error('Error al cargar la orden')
+    }
+  }
 
   const totalUds = stock.reduce((s, x) => s + x.cantidad_unidades, 0)
   const seleccionado = modo === 'cliente' ? clienteId : grupoId
@@ -236,6 +269,61 @@ export default function Stock() {
           </table>
         </div>
       </div>
+
+      {seleccionado && ordenesReportando.length > 0 && (
+        <div className="bg-white rounded-lg shadow mt-4">
+          <div className="px-5 py-3 border-b">
+            <h3 className="text-sm font-semibold text-gray-700 inline-flex items-center gap-1">
+              Órdenes con reportes de venta en curso
+              <HelpTooltip text="Órdenes que ya tienen reportes de venta registrados pero aún no han sido reportadas/confirmadas en su totalidad. Puedes seguir registrando reportes hasta cubrir todo lo despachado; al confirmarse por completo, la orden saldrá de esta lista y solo se verá en Órdenes de Despacho." />
+            </h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+                <tr>
+                  <th className="px-4 py-3 text-left">N° Orden</th>
+                  {modo === 'grupo' && <th className="px-4 py-3 text-left">Cliente</th>}
+                  <th className="px-4 py-3 text-left">Fecha</th>
+                  <th className="px-4 py-3 text-left">Estado</th>
+                  <th className="px-4 py-3 text-right">Total USD</th>
+                  <th className="px-4 py-3 text-right"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {ordenesReportando.map((o) => (
+                  <tr key={o.id} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
+                    <td className="px-4 py-3 font-mono text-xs text-blue-600">{o.numero_orden}</td>
+                    {modo === 'grupo' && <td className="px-4 py-3">{o.cliente}</td>}
+                    <td className="px-4 py-3 text-gray-500">{o.fecha_emision}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${statusBadge[o.status] ?? 'bg-gray-100 text-gray-600'}`}>
+                        {statusLabel[o.status] ?? o.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right font-medium">${Number(o.total_usd).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={() => abrirReporte(o.id)}
+                        className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded"
+                      >
+                        Registrar reporte
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      <ReporteVentaModal
+        open={reporteModalOpen}
+        onClose={() => setReporteModalOpen(false)}
+        onSaved={reload}
+        orden={reporteOrden}
+      />
     </div>
   )
 }
