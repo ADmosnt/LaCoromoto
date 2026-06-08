@@ -72,6 +72,7 @@ export const deleteCliente = (id) => api.delete(`/clientes/${id}`)
 export const reactivarCliente = (id) => api.post(`/clientes/${id}/reactivar`)
 export const getClienteStock = (id) => api.get(`/clientes/${id}/stock`)
 export const getGrupoConsolidado = (grupoId) => api.get(`/clientes/grupos/${grupoId}/consolidado`)
+export const getGrupoStock = (grupoId) => api.get(`/clientes/grupos/${grupoId}/stock`)
 
 // Productos
 export const getProductos = (params) => api.get('/productos', { params })
@@ -91,6 +92,10 @@ export const getOrdenEdiciones = (id) => api.get(`/ordenes/${id}/ediciones`)
 export const anularOrden = (id) => api.put(`/ordenes/${id}/anular`)
 export const downloadOrdenPDF = (id) =>
   api.get(`/ordenes/${id}/pdf`, { responseType: 'blob' })
+export const getOrdenesResumen = (ids) =>
+  api.get('/ordenes/resumen', { params: { ids: ids.join(',') } })
+export const downloadOrdenesResumenPDF = (ids) =>
+  api.get('/ordenes/resumen/pdf', { params: { ids: ids.join(',') }, responseType: 'blob' })
 
 // Inventario Central
 export const getInventario = () => api.get('/inventario')

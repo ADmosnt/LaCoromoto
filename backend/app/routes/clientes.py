@@ -178,6 +178,93 @@ def get_cliente_stock(id):
     return jsonify(result)
 
 
+@bp.route('/grupos/<int:grupo_id>/stock', methods=['GET'])
+@require_role('admin')
+def get_grupo_stock(grupo_id):
+    import datetime
+    from app.models import StockConsignacion, OrdenDespacho, OrdenDespachoDetalle
+    from sqlalchemy import and_
+
+    GrupoCliente.query.get_or_404(grupo_id)
+    clientes = Cliente.query.filter_by(grupo_id=grupo_id, activo=True).all()
+    cliente_ids = [c.id for c in clientes]
+    if not cliente_ids:
+        return jsonify([])
+    cliente_map = {c.id: c for c in clientes}
+
+    stocks = (
+        StockConsignacion.query
+        .filter(
+            StockConsignacion.cliente_id.in_(cliente_ids),
+            StockConsignacion.cantidad_unidades > 0,
+        )
+        .all()
+    )
+
+    agg = {}
+    for s in stocks:
+        pid = s.producto_id
+        if pid not in agg:
+            p = s.producto
+            agg[pid] = {
+                'id': pid,
+                'producto_id': pid,
+                'codigo': p.codigo if p else None,
+                'descripcion': p.descripcion if p else None,
+                'unidades_por_bulto': (p.unidades_por_bulto if p else 1) or 1,
+                'cantidad_unidades': 0,
+            }
+        agg[pid]['cantidad_unidades'] += s.cantidad_unidades
+
+    today = datetime.date.today()
+    result = []
+    for pid, d in agg.items():
+        upb = d['unidades_por_bulto']
+        d['bultos'] = d['cantidad_unidades'] // upb
+        d['unidades_sueltas'] = d['cantidad_unidades'] % upb
+
+        ordenes_q = db.session.query(
+            OrdenDespacho.id,
+            OrdenDespacho.numero_orden,
+            OrdenDespacho.cliente_id,
+            OrdenDespacho.fecha_emision,
+            OrdenDespacho.status,
+            OrdenDespachoDetalle.cantidad_unidades.label('uds_orden'),
+        ).join(
+            OrdenDespachoDetalle,
+            and_(
+                OrdenDespachoDetalle.orden_id == OrdenDespacho.id,
+                OrdenDespachoDetalle.producto_id == pid,
+            )
+        ).filter(
+            OrdenDespacho.cliente_id.in_(cliente_ids),
+            OrdenDespacho.status.in_(['activa', 'pendiente']),
+        ).all()
+        ordenes = sorted(ordenes_q, key=lambda o: o.fecha_emision)
+        d['ordenes'] = [
+            {
+                'id': o.id,
+                'numero_orden': o.numero_orden,
+                'cliente_id': o.cliente_id,
+                'cliente': cliente_map[o.cliente_id].razon_social if o.cliente_id in cliente_map else None,
+                'fecha_emision': o.fecha_emision.isoformat(),
+                'status': o.status,
+                'cantidad_unidades': o.uds_orden,
+            }
+            for o in ordenes
+        ]
+        if ordenes:
+            d['fecha_mas_antigua'] = ordenes[0].fecha_emision.isoformat()
+            d['dias_antiguedad'] = (today - ordenes[0].fecha_emision).days
+        else:
+            d['fecha_mas_antigua'] = None
+            d['dias_antiguedad'] = None
+        result.append(d)
+
+    result.sort(key=lambda x: (x['descripcion'] or '').lower())
+    return jsonify(result)
+
+
 @bp.route('/grupos/<int:grupo_id>/consolidado', methods=['GET'])
 @require_role('admin')
 def get_grupo_consolidado(grupo_id):

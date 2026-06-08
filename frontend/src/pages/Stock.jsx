@@ -1,5 +1,5 @@
 import { useEffect, useState, Fragment } from 'react'
-import { getClientes, getClienteStock } from '../api'
+import { getClientes, getClienteStock, getGruposClientes, getGrupoStock } from '../api'
 import { HelpTooltip } from '../components/ui/Tooltip'
 
 const statusBadge = {
@@ -22,48 +22,106 @@ const agingLabel = (dias) => {
   return `${dias} días`
 }
 
+const sel = 'border border-gray-300 rounded-md px-3 py-2 text-sm w-72 focus:outline-none focus:ring-2 focus:ring-blue-500'
+
 export default function Stock() {
+  const [modo, setModo] = useState('cliente') // 'cliente' | 'grupo'
   const [clientes, setClientes] = useState([])
+  const [grupos, setGrupos] = useState([])
   const [clienteId, setClienteId] = useState('')
+  const [grupoId, setGrupoId] = useState('')
   const [stock, setStock] = useState([])
   const [cliente, setCliente] = useState(null)
+  const [grupo, setGrupo] = useState(null)
   const [expanded, setExpanded] = useState(null)
 
   useEffect(() => {
     getClientes({ activo: true }).then((r) => setClientes(r.data))
+    getGruposClientes().then((r) => setGrupos(r.data))
   }, [])
 
+  const cambiarModo = (m) => {
+    if (m === modo) return
+    setModo(m)
+    setClienteId('')
+    setGrupoId('')
+    setStock([])
+    setCliente(null)
+    setGrupo(null)
+    setExpanded(null)
+  }
+
   useEffect(() => {
+    if (modo !== 'cliente') return
     if (!clienteId) { setStock([]); setCliente(null); setExpanded(null); return }
     const c = clientes.find((c) => String(c.id) === clienteId)
     setCliente(c)
     setExpanded(null)
     getClienteStock(clienteId).then((r) => setStock(r.data))
-  }, [clienteId, clientes])
+  }, [modo, clienteId, clientes])
+
+  useEffect(() => {
+    if (modo !== 'grupo') return
+    if (!grupoId) { setStock([]); setGrupo(null); setExpanded(null); return }
+    const g = grupos.find((g) => String(g.id) === grupoId)
+    setGrupo(g)
+    setExpanded(null)
+    getGrupoStock(grupoId).then((r) => setStock(r.data))
+  }, [modo, grupoId, grupos])
 
   const totalUds = stock.reduce((s, x) => s + x.cantidad_unidades, 0)
+  const seleccionado = modo === 'cliente' ? clienteId : grupoId
 
   return (
     <div>
       <h2 className="text-xl font-bold text-gray-800 mb-6">Stock en Consignación</h2>
 
       <div className="bg-white rounded-lg shadow">
-        <div className="p-4 border-b">
-          <select
-            value={clienteId}
-            onChange={(e) => setClienteId(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm w-72 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Seleccionar cliente...</option>
-            {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
-          </select>
+        <div className="p-4 border-b flex flex-wrap items-center gap-3">
+          <div className="inline-flex rounded-md border border-gray-300 overflow-hidden text-sm">
+            <button
+              type="button"
+              onClick={() => cambiarModo('cliente')}
+              className={`px-3 py-2 font-medium ${modo === 'cliente' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            >
+              Por cliente
+            </button>
+            <button
+              type="button"
+              onClick={() => cambiarModo('grupo')}
+              className={`px-3 py-2 font-medium border-l border-gray-300 ${modo === 'grupo' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            >
+              Por grupo
+            </button>
+          </div>
+
+          {modo === 'cliente' ? (
+            <select value={clienteId} onChange={(e) => setClienteId(e.target.value)} className={sel}>
+              <option value="">Seleccionar cliente...</option>
+              {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
+            </select>
+          ) : (
+            <select value={grupoId} onChange={(e) => setGrupoId(e.target.value)} className={sel}>
+              <option value="">Seleccionar grupo...</option>
+              {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
+            </select>
+          )}
         </div>
 
-        {cliente && (
+        {modo === 'cliente' && cliente && (
           <div className="px-5 py-3 bg-blue-50 border-b text-sm">
             <span className="font-medium">{cliente.razon_social}</span>
             {cliente.rif && <span className="text-gray-500 ml-3">RIF: {cliente.rif}</span>}
             {cliente.zona && <span className="text-gray-500 ml-3">Zona: {cliente.zona}</span>}
+          </div>
+        )}
+        {modo === 'grupo' && grupo && (
+          <div className="px-5 py-3 bg-blue-50 border-b text-sm">
+            <span className="font-medium">Grupo: {grupo.nombre}</span>
+            <span className="text-gray-500 ml-3">
+              {clientes.filter((c) => String(c.grupo_id) === String(grupo.id)).length} clientes
+            </span>
+            <span className="text-gray-400 ml-3 italic">Stock consolidado de todos los clientes del grupo</span>
           </div>
         )}
 
@@ -81,7 +139,7 @@ export default function Stock() {
                 <th className="px-4 py-3 text-center">
                   <span className="inline-flex items-center gap-1">
                     Antigüedad
-                    <HelpTooltip text="Días que lleva la mercancía más antigua de este producto en consignación con este cliente. Verde: <30 días. Amarillo: 30-59. Naranja: 60-89. Rojo: 90+ (requiere atención)." />
+                    <HelpTooltip text="Días que lleva la mercancía más antigua de este producto en consignación. Verde: <30 días. Amarillo: 30-59. Naranja: 60-89. Rojo: 90+ (requiere atención)." />
                   </span>
                 </th>
               </tr>
@@ -115,10 +173,11 @@ export default function Stock() {
                     <tr>
                       <td colSpan={8} className="px-8 py-2 bg-blue-50 border-b border-blue-100">
                         <p className="text-xs text-gray-500 mb-1 font-medium uppercase">Órdenes de origen</p>
-                        <table className="text-xs w-full max-w-md">
+                        <table className="text-xs w-full max-w-xl">
                           <thead className="text-gray-500">
                             <tr>
                               <th className="py-1 text-left pr-4">N° Orden</th>
+                              {modo === 'grupo' && <th className="py-1 text-left pr-4">Cliente</th>}
                               <th className="py-1 text-left pr-4">Fecha</th>
                               <th className="py-1 text-center pr-4">Cant. despachada</th>
                               <th className="py-1 text-left">Estado</th>
@@ -130,6 +189,7 @@ export default function Stock() {
                               return (
                                 <tr key={o.id}>
                                   <td className="py-1.5 pr-4 font-mono font-medium text-blue-700">{o.numero_orden}</td>
+                                  {modo === 'grupo' && <td className="py-1.5 pr-4 text-gray-700">{o.cliente}</td>}
                                   <td className="py-1.5 pr-4 text-gray-600">{o.fecha_emision}</td>
                                   <td className="py-1.5 pr-4 text-center">
                                     {Math.floor(o.cantidad_unidades / upb)}B+{o.cantidad_unidades % upb}u
@@ -149,17 +209,17 @@ export default function Stock() {
                   )}
                 </Fragment>
               ))}
-              {clienteId && stock.length === 0 && (
+              {seleccionado && stock.length === 0 && (
                 <tr>
                   <td colSpan={8} className="px-4 py-8 text-center text-gray-400">
-                    Este cliente no tiene stock en consignación
+                    {modo === 'cliente' ? 'Este cliente no tiene stock en consignación' : 'Ningún cliente de este grupo tiene stock en consignación'}
                   </td>
                 </tr>
               )}
-              {!clienteId && (
+              {!seleccionado && (
                 <tr>
                   <td colSpan={8} className="px-4 py-8 text-center text-gray-400">
-                    Seleccione un cliente para ver su stock
+                    {modo === 'cliente' ? 'Seleccione un cliente para ver su stock' : 'Seleccione un grupo para ver su stock consolidado'}
                   </td>
                 </tr>
               )}

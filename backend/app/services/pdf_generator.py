@@ -1,3 +1,4 @@
+import datetime
 from fpdf import FPDF
 from app.utils import numero_a_letras
 
@@ -144,5 +145,137 @@ def generar_pdf_orden(orden, config) -> bytes:
     pdf.set_font('Helvetica', 'I', 8)
     pdf.set_text_color(90, 90, 90)
     pdf.cell(0, 5, f'Son: {numero_a_letras(total_usd)} Dólares', ln=True)
+
+    return bytes(pdf.output())
+
+
+def generar_pdf_resumen_ordenes(ordenes, productos, config) -> bytes:
+    """Resumen general de despacho: agrega productos de varias órdenes en un solo PDF."""
+    pdf = FPDF(orientation='P', unit='mm', format='Letter')
+
+    PAGE_H   = 279.4
+    MARGIN   = 15
+    W        = 180
+    L        = MARGIN
+    FOOTER_H = 38
+
+    pdf.set_margins(MARGIN, MARGIN, MARGIN)
+    pdf.set_auto_page_break(auto=True, margin=FOOTER_H + MARGIN)
+    pdf.add_page()
+
+    # ── Header ────────────────────────────────────────────────────────────────
+    pdf.set_xy(L, 15)
+    pdf.set_font('Helvetica', 'B', 13)
+    pdf.set_text_color(30, 30, 30)
+    pdf.cell(W * 0.52, 7, config.nombre, ln=True)
+
+    pdf.set_font('Helvetica', '', 9)
+    pdf.set_text_color(90, 90, 90)
+    pdf.set_x(L)
+    pdf.cell(W * 0.52, 5, config.direccion or '', ln=True)
+    pdf.set_x(L)
+    pdf.cell(W * 0.52, 5, config.ciudad or '', ln=True)
+
+    bx = L + W * 0.55
+    bw = W * 0.45
+    pdf.set_xy(bx, 15)
+    pdf.set_font('Helvetica', 'B', 11)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_fill_color(30, 30, 30)
+    pdf.cell(bw, 8, 'RESUMEN GENERAL DE DESPACHO', border=0, align='C', fill=True, ln=True)
+
+    doc_rows = [
+        ('RIF:', config.rif or ''),
+        ('GENERADO:', datetime.date.today().isoformat()),
+        ('FACTURAS:', str(len(ordenes))),
+    ]
+    pdf.set_text_color(30, 30, 30)
+    for label, value in doc_rows:
+        pdf.set_xy(bx, pdf.get_y())
+        pdf.set_font('Helvetica', 'B', 9)
+        pdf.cell(bw * 0.45, 5, label, align='R')
+        pdf.set_font('Helvetica', '', 9)
+        pdf.cell(bw * 0.55, 5, value, ln=True)
+
+    pdf.set_y(max(pdf.get_y(), 40))
+    pdf.set_draw_color(0, 0, 0)
+    pdf.line(L, pdf.get_y(), L + W, pdf.get_y())
+    pdf.ln(3)
+
+    # ── Órdenes incluidas ─────────────────────────────────────────────────────
+    pdf.set_x(L)
+    pdf.set_font('Helvetica', 'B', 9)
+    pdf.set_text_color(30, 30, 30)
+    pdf.cell(0, 5, 'FACTURAS / ÓRDENES INCLUIDAS', ln=True)
+    pdf.set_font('Helvetica', '', 8)
+    pdf.set_text_color(70, 70, 70)
+    for o in ordenes:
+        pdf.set_x(L)
+        cliente = o.cliente.razon_social if o.cliente else ''
+        pdf.cell(0, 4.5, f'  • {o.numero_orden}  —  {cliente}  ({o.fecha_emision})', ln=True)
+
+    pdf.ln(2)
+    pdf.set_draw_color(0, 0, 0)
+    pdf.line(L, pdf.get_y(), L + W, pdf.get_y())
+    pdf.ln(3)
+
+    # ── Tabla de productos agregados ──────────────────────────────────────────
+    col_w   = [26, 78, 22, 27, 27]
+    headers = ['CÓDIGO', 'DESCRIPCIÓN', 'FACTURAS', 'UNIDADES', 'BULTOS']
+    aligns  = ['C',      'L',           'C',        'C',        'C']
+
+    pdf.set_fill_color(30, 30, 30)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font('Helvetica', 'B', 8)
+    for w, h, a in zip(col_w, headers, aligns):
+        pdf.cell(w, 6, h, border=0, align=a, fill=True)
+    pdf.ln()
+
+    pdf.set_text_color(30, 30, 30)
+    shade = False
+    for p in productos:
+        pdf.set_fill_color(245, 245, 245)
+        pdf.set_font('Helvetica', '', 8)
+        bultos_str = f"{p['bultos']}B + {p['sueltas']}u" if p['sueltas'] else f"{p['bultos']}B"
+        vals = [
+            p['codigo'] or '',
+            p['descripcion'] or '',
+            str(p['facturas']),
+            str(p['cantidad_unidades']),
+            bultos_str,
+        ]
+        for w, v, a in zip(col_w, vals, aligns):
+            pdf.cell(w, 5, v, border='B', align=a, fill=shade)
+        pdf.ln()
+        shade = not shade
+
+    # ── Footer (totales pinned to bottom) ─────────────────────────────────────
+    pdf.set_auto_page_break(auto=False)
+    footer_y = PAGE_H - MARGIN - FOOTER_H
+    pdf.set_y(max(footer_y, pdf.get_y() + 4))
+
+    pdf.set_draw_color(0, 0, 0)
+    pdf.line(L, pdf.get_y(), L + W, pdf.get_y())
+    pdf.ln(3)
+
+    total_unidades = sum(p['cantidad_unidades'] for p in productos)
+    total_bultos = sum(p['bultos'] for p in productos)
+
+    label_w = 60
+    val_w   = 38
+    stats = [
+        ('TOTAL DE PRODUCTOS:', str(len(productos))),
+        ('TOTAL DE UNIDADES:', str(total_unidades)),
+        ('TOTAL DE BULTOS:', str(total_bultos)),
+        ('TOTAL DE FACTURAS:', str(len(ordenes))),
+    ]
+    for label, value in stats:
+        pdf.set_font('Helvetica', 'B', 9)
+        pdf.set_text_color(90, 90, 90)
+        pdf.cell(W - label_w - val_w, 5, '')
+        pdf.cell(label_w, 5, label, align='R')
+        pdf.set_font('Helvetica', 'B', 10)
+        pdf.set_text_color(30, 30, 30)
+        pdf.cell(val_w, 5, value, align='R', ln=True)
 
     return bytes(pdf.output())

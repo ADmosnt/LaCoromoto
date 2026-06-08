@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { getOrdenes, getOrden, getClientes, downloadOrdenPDF, anularOrden, confirmarReporteVenta } from '../api'
 import OrdenModal from '../components/OrdenModal'
 import OrdenEdicionesModal from '../components/OrdenEdicionesModal'
+import OrdenesResumenModal from '../components/OrdenesResumenModal'
 import ReporteVentaModal from '../components/ReporteVentaModal'
 import { HelpTooltip } from '../components/ui/Tooltip'
 
@@ -286,6 +287,8 @@ export default function Ordenes() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editOrdenId, setEditOrdenId] = useState(null)
   const [edicionesTarget, setEdicionesTarget] = useState(null)
+  const [selectedIds, setSelectedIds] = useState(new Set())
+  const [resumenOpen, setResumenOpen] = useState(false)
 
   const load = () =>
     getOrdenes({
@@ -297,9 +300,20 @@ export default function Ordenes() {
       .catch(() => toast.error('Error al cargar órdenes'))
 
   useEffect(() => { getClientes({ activo: true }).then((r) => setClientes(r.data)).catch(() => {}) }, [])
-  useEffect(() => { load() }, [clienteId, fechaDesde, fechaHasta])
+  useEffect(() => { load(); setSelectedIds(new Set()) }, [clienteId, fechaDesde, fechaHasta])
 
   const toggle = (id) => setExpanded((prev) => (prev === id ? null : id))
+
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const clearSelection = () => setSelectedIds(new Set())
 
   const grupos = groupByMonth(ordenes)
   const grandTotal = ordenes
@@ -366,6 +380,15 @@ export default function Ordenes() {
                     className={`flex items-center gap-2 sm:gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 select-none ${o.status === 'anulada' ? 'opacity-60' : ''}`}
                     onClick={() => toggle(o.id)}
                   >
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(o.id)}
+                      disabled={o.status === 'anulada'}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={() => toggleSelect(o.id)}
+                      className="flex-shrink-0 w-4 h-4 accent-blue-600 disabled:opacity-30"
+                      title={o.status === 'anulada' ? 'No se pueden incluir órdenes anuladas' : 'Seleccionar para resumen general'}
+                    />
                     <span className="text-gray-400 text-xs w-3 flex-shrink-0">
                       {expanded === o.id ? '▼' : '▶'}
                     </span>
@@ -413,6 +436,26 @@ export default function Ordenes() {
         </div>
       )}
 
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-gray-900 text-white rounded-full shadow-lg px-5 py-3 flex items-center gap-4">
+          <span className="text-sm">
+            <strong>{selectedIds.size}</strong> orden{selectedIds.size !== 1 ? 'es' : ''} seleccionada{selectedIds.size !== 1 ? 's' : ''}
+          </span>
+          <button
+            onClick={() => setResumenOpen(true)}
+            className="text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-full font-medium"
+          >
+            Generar resumen general
+          </button>
+          <button
+            onClick={clearSelection}
+            className="text-sm text-gray-300 hover:text-white"
+          >
+            Limpiar
+          </button>
+        </div>
+      )}
+
       <OrdenModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -431,6 +474,12 @@ export default function Ordenes() {
         onClose={() => setEdicionesTarget(null)}
         ordenId={edicionesTarget?.id}
         numeroOrden={edicionesTarget?.numero}
+      />
+
+      <OrdenesResumenModal
+        open={resumenOpen}
+        onClose={() => setResumenOpen(false)}
+        ordenIds={Array.from(selectedIds)}
       />
     </div>
   )
