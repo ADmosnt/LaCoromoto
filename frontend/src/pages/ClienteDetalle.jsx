@@ -42,7 +42,7 @@ export default function ClienteDetalle() {
         getDevoluciones({ cliente_id: id }),
       ])
       setCliente(c.data)
-      setStock(s.data)
+      setStock(s.data.stock)
       setOrdenes(o.data)
       setReportes(r.data)
       setDevoluciones(d.data)

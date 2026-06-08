@@ -135,10 +135,33 @@ def delete_cliente(id):
     return '', 204
 
 
+def _ordenes_reportando(cliente_ids, cliente_map):
+    """Órdenes con reportes de venta en curso (pendiente/parcial) — aún visibles en /stock."""
+    from app.models import OrdenDespacho
+    ordenes = (
+        OrdenDespacho.query
+        .filter(OrdenDespacho.cliente_id.in_(cliente_ids), OrdenDespacho.status.in_(['pendiente', 'parcial']))
+        .order_by(OrdenDespacho.fecha_emision.asc())
+        .all()
+    )
+    return [
+        {
+            'id': o.id,
+            'numero_orden': o.numero_orden,
+            'cliente_id': o.cliente_id,
+            'cliente': cliente_map[o.cliente_id].razon_social if o.cliente_id in cliente_map else None,
+            'fecha_emision': o.fecha_emision.isoformat(),
+            'status': o.status,
+            'total_usd': float(o.total_usd),
+        }
+        for o in ordenes
+    ]
+
+
 @bp.route('/<int:id>/stock', methods=['GET'])
 @require_role('admin')
 def get_cliente_stock(id):
-    Cliente.query.get_or_404(id)
+    cliente = Cliente.query.get_or_404(id)
     import datetime
     from app.models import StockConsignacion, OrdenDespacho, OrdenDespachoDetalle
     from sqlalchemy import and_
@@ -163,7 +186,7 @@ def get_cliente_stock(id):
             )
         ).filter(
             OrdenDespacho.cliente_id == id,
-            OrdenDespacho.status.in_(['activa', 'pendiente']),
+            OrdenDespacho.status.in_(['activa', 'pendiente', 'parcial']),
         ).all()
         ordenes = sorted(ordenes_q, key=lambda o: o.fecha_emision)
         d['ordenes'] = [
@@ -183,7 +206,11 @@ def get_cliente_stock(id):
             d['fecha_mas_antigua'] = None
             d['dias_antiguedad'] = None
         result.append(d)
-    return jsonify(result)
+
+    return jsonify({
+        'stock': result,
+        'ordenes_reportando': _ordenes_reportando([id], {id: cliente}),
+    })
 
 
 @bp.route('/grupos/<int:grupo_id>/stock', methods=['GET'])
@@ -197,7 +224,7 @@ def get_grupo_stock(grupo_id):
     clientes = Cliente.query.filter_by(grupo_id=grupo_id, activo=True).all()
     cliente_ids = [c.id for c in clientes]
     if not cliente_ids:
-        return jsonify([])
+        return jsonify({'stock': [], 'ordenes_reportando': []})
     cliente_map = {c.id: c for c in clientes}
 
     stocks = (
@@ -246,7 +273,7 @@ def get_grupo_stock(grupo_id):
             )
         ).filter(
             OrdenDespacho.cliente_id.in_(cliente_ids),
-            OrdenDespacho.status.in_(['activa', 'pendiente']),
+            OrdenDespacho.status.in_(['activa', 'pendiente', 'parcial']),
         ).all()
         ordenes = sorted(ordenes_q, key=lambda o: o.fecha_emision)
         d['ordenes'] = [
@@ -270,7 +297,10 @@ def get_grupo_stock(grupo_id):
         result.append(d)
 
     result.sort(key=lambda x: (x['descripcion'] or '').lower())
-    return jsonify(result)
+    return jsonify({
+        'stock': result,
+        'ordenes_reportando': _ordenes_reportando(cliente_ids, cliente_map),
+    })
 
 
 @bp.route('/grupos/<int:grupo_id>/consolidado', methods=['GET'])

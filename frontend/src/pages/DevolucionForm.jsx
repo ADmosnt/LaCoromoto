@@ -23,8 +23,8 @@ export default function DevolucionForm() {
   useEffect(() => {
     if (!clienteId) { setStockCliente([]); setRows([]); setOrdenes([]); return }
     Promise.all([getClienteStock(clienteId), getOrdenes({ cliente_id: clienteId })]).then(([s, o]) => {
-      setStockCliente(s.data)
-      setRows(s.data.map((st) => ({ producto_id: st.producto_id, descripcion: st.descripcion, disponible: st.cantidad_unidades, cantidad_unidades: '' })))
+      setStockCliente(s.data.stock)
+      setRows(s.data.stock.map((st) => ({ producto_id: st.producto_id, descripcion: st.descripcion, disponible: st.cantidad_unidades, cantidad_unidades: '' })))
       setOrdenes(o.data)
     })
   }, [clienteId])
