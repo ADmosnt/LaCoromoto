@@ -169,7 +169,7 @@ export default function Configuracion() {
     try {
       const text = await file.text()
       const backup = JSON.parse(text)
-      if (backup?.version !== '1' || !backup?.data) {
+      if (!['1', '2'].includes(backup?.version) || !backup?.data) {
         toast.error('El archivo no parece ser un backup válido de LaCoromoto')
         return
       }
