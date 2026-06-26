@@ -3,14 +3,7 @@ import { getOrdenes, getOrden, downloadOrdenPDF } from '../api'
 import { useAuth } from '../context/AuthContext'
 import Alert from '../components/Alert'
 import ReporteVentaModal from '../components/ReporteVentaModal'
-
-const statusBadge = {
-  activa: 'bg-green-100 text-green-700',
-  pendiente: 'bg-yellow-100 text-yellow-700',
-  confirmado: 'bg-blue-100 text-blue-700',
-  anulada: 'bg-red-100 text-red-700',
-}
-const statusLabel = { activa: 'Activa', pendiente: 'Pendiente', confirmado: 'Confirmado', anulada: 'Anulada' }
+import StatusBadge from '../components/ui/StatusBadge'
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -154,15 +147,13 @@ export default function MisOrdenes() {
             {items.map((o) => (
               <div key={o.id} className="border-b border-gray-100 last:border-b-0">
                 <div
-                  className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 select-none ${o.status === 'anulada' ? 'opacity-60' : ''}`}
+                  className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-brand-50 select-none ${o.status === 'anulada' ? 'opacity-60' : ''}`}
                   onClick={() => toggle(o.id)}
                 >
                   <span className="text-gray-400 text-xs w-3 flex-shrink-0">{expanded === o.id ? '▼' : '▶'}</span>
                   <span className="font-mono text-xs text-blue-600 w-24 flex-shrink-0">{o.numero_orden}</span>
                   <span className="text-xs text-gray-500 flex-shrink-0">{o.fecha_emision}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${statusBadge[o.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                    {statusLabel[o.status] ?? o.status}
-                  </span>
+                  <StatusBadge status={o.status} />
                   <span className="ml-auto text-sm font-medium">${Number(o.total_usd).toFixed(2)}</span>
                 </div>
                 {expanded === o.id && (
