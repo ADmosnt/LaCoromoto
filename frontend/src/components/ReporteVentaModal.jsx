@@ -6,6 +6,7 @@ import PrecioInput, { parsePrecio } from './ui/PrecioInput'
 import { createReporteVenta, getTasaHoy } from '../api'
 import { useAuth } from '../context/AuthContext'
 import Alert from './Alert'
+import { inputClass, selectClass } from '../lib/styles'
 
 export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
   const { user } = useAuth()
@@ -119,7 +120,6 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
     }
   }
 
-  const inp = 'border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500'
   const lbl = 'block text-sm font-medium text-gray-700 mb-1'
 
   if (!orden) return null
@@ -138,7 +138,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
           <div className={`grid grid-cols-1 gap-4 ${isCliente ? '' : 'sm:grid-cols-2'}`}>
             <div>
               <label className={lbl}>Fecha de cobro</label>
-              <input type="date" className={`${inp} w-full`} value={fecha} onChange={(e) => setFecha(e.target.value)} required />
+              <input type="date" className={inputClass} value={fecha} onChange={(e) => setFecha(e.target.value)} required />
             </div>
             {!isCliente && (
               <div>
@@ -148,7 +148,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
               </label>
                 <input
                   type="number" min="0" step="0.0001"
-                  className={`${inp} w-full`}
+                  className={inputClass}
                   value={tasaManual}
                   onChange={(e) => setTasaManual(e.target.value)}
                   placeholder="Ej: 45.50"
@@ -198,7 +198,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                         <td className="px-3 py-2 text-center">
                           <input
                             type="number" min={0} max={Math.floor(row.restante / upb)}
-                            className={`${inp} w-16 text-center`}
+                            className={`w-16 text-center ${selectClass}`}
                             value={row.bultos}
                             onChange={(e) => setRowField(i, 'bultos', e.target.value)}
                           />
@@ -206,7 +206,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                         <td className="px-3 py-2 text-center">
                           <input
                             type="number" min={0} max={upb - 1}
-                            className={`${inp} w-16 text-center`}
+                            className={`w-16 text-center ${selectClass}`}
                             value={row.sueltas}
                             onChange={(e) => setRowField(i, 'sueltas', e.target.value)}
                           />
@@ -217,7 +217,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                         {!isCliente && (
                           <td className="px-3 py-2 text-right">
                             <PrecioInput
-                              className={`${inp} w-24 text-right`}
+                              className={`w-24 text-right ${selectClass}`}
                               value={row.precio_bulto}
                               onChange={(v) => setRowField(i, 'precio_bulto', v)}
                             />

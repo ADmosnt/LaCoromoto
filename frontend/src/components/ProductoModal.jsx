@@ -7,6 +7,7 @@ import {
   getGruposProductos, getListasPrecios,
 } from '../api'
 import Alert from './Alert'
+import { inputClass, selectClass } from '../lib/styles'
 
 const emptyForm = { codigo: '', descripcion: '', unidades_por_bulto: 1, grupo_id: '', activo: true, precios: [] }
 
@@ -108,7 +109,6 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
   const lbl = 'block text-sm font-medium text-gray-700 mb-1'
 
   const upb = Number(form.unidades_por_bulto) || 1
@@ -174,24 +174,24 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={lbl}>Código *</label>
-                <input className={inp} value={form.codigo} onChange={(e) => set('codigo', e.target.value)} required />
+                <input className={inputClass} value={form.codigo} onChange={(e) => set('codigo', e.target.value)} required />
                 {isEdit && <p className="text-xs text-gray-400 mt-1">Editable. Debe ser único.</p>}
               </div>
               <div>
                 <label className={lbl}>Unidades por bulto *</label>
-                <input type="number" min={1} className={inp} value={form.unidades_por_bulto}
+                <input type="number" min={1} className={inputClass} value={form.unidades_por_bulto}
                   onChange={(e) => set('unidades_por_bulto', parseInt(e.target.value) || 1)} required />
               </div>
             </div>
 
             <div>
               <label className={lbl}>Descripción *</label>
-              <input className={inp} value={form.descripcion} onChange={(e) => set('descripcion', e.target.value)} required />
+              <input className={inputClass} value={form.descripcion} onChange={(e) => set('descripcion', e.target.value)} required />
             </div>
 
             <div>
               <label className={lbl}>Grupo</label>
-              <select className={inp} value={form.grupo_id} onChange={(e) => set('grupo_id', e.target.value)}>
+              <select className={inputClass} value={form.grupo_id} onChange={(e) => set('grupo_id', e.target.value)}>
                 <option value="">Sin grupo</option>
                 {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
               </select>

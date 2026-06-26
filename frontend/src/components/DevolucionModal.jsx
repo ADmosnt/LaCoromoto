@@ -4,6 +4,7 @@ import { Dialog, DialogContent } from './ui/Dialog'
 import { HelpTooltip } from './ui/Tooltip'
 import { createDevolucion, updateDevolucion, getClientes, getOrdenes, getOrden, getDevolucion } from '../api'
 import Alert from './Alert'
+import { inputClass, selectClass } from '../lib/styles'
 
 export default function DevolucionModal({ open, onClose, onSaved, devolucionId }) {
   const isEdit = Boolean(devolucionId)
@@ -155,7 +156,6 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
   const inpRO = 'w-full border border-gray-200 rounded-md px-3 py-2 text-sm bg-gray-100 text-gray-600'
   const lbl = 'block text-sm font-medium text-gray-700 mb-1'
   const inpNum = 'border border-gray-300 rounded px-2 py-1 text-sm w-16 text-center focus:outline-none focus:ring-1 focus:ring-blue-500'
@@ -178,7 +178,7 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
             {isEdit ? (
               <div className={inpRO}>{clienteNombre}</div>
             ) : (
-              <select className={inp} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
+              <select className={inputClass} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
                 <option value="">Seleccionar cliente...</option>
                 {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
               </select>
@@ -196,7 +196,7 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
               {ordenes.length === 0 ? (
                 <p className="text-sm text-gray-400 py-1">Este cliente no tiene órdenes activas.</p>
               ) : (
-                <select className={inp} value={ordenId} onChange={(e) => setOrdenId(e.target.value)} required>
+                <select className={inputClass} value={ordenId} onChange={(e) => setOrdenId(e.target.value)} required>
                   <option value="">Seleccionar orden...</option>
                   {ordenes.map((o) => (
                     <option key={o.id} value={o.id}>#{o.numero_orden} — {o.fecha_emision}</option>
@@ -268,7 +268,7 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
             <>
               <div>
                 <label className={lbl}>Nota / Motivo</label>
-                <input className={inp} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Ej: Producto en mal estado..." />
+                <input className={inputClass} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Ej: Producto en mal estado..." />
               </div>
 
               <div className="rounded-md border border-gray-200 bg-gray-50 p-3">

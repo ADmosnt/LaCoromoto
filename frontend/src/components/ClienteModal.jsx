@@ -6,6 +6,7 @@ import {
   getZonas, getGruposClientes, getListasPrecios,
 } from '../api'
 import Alert from './Alert'
+import { inputClass, selectClass } from '../lib/styles'
 
 const emptyForm = {
   codigo: '', razon_social: '', rif: '', direccion: '',
@@ -75,7 +76,6 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
   const lbl = 'block text-sm font-medium text-gray-700 mb-1'
 
   const nombreZona = zonas.find((z) => String(z.id) === String(form.zona_id))?.nombre
@@ -133,36 +133,36 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={lbl}>Código *</label>
-                <input className={inp} value={form.codigo} onChange={(e) => set('codigo', e.target.value)} required />
+                <input className={inputClass} value={form.codigo} onChange={(e) => set('codigo', e.target.value)} required />
                 {isEdit && <p className="text-xs text-gray-400 mt-1">Editable. Debe ser único.</p>}
               </div>
               <div>
                 <label className={lbl}>RIF</label>
-                <input className={inp} value={form.rif ?? ''} onChange={(e) => set('rif', e.target.value)} />
+                <input className={inputClass} value={form.rif ?? ''} onChange={(e) => set('rif', e.target.value)} />
               </div>
             </div>
 
             <div>
               <label className={lbl}>Razón Social *</label>
-              <input className={inp} value={form.razon_social} onChange={(e) => set('razon_social', e.target.value)} required />
+              <input className={inputClass} value={form.razon_social} onChange={(e) => set('razon_social', e.target.value)} required />
             </div>
 
             <div>
               <label className={lbl}>Dirección</label>
-              <textarea className={inp} rows={2} value={form.direccion ?? ''} onChange={(e) => set('direccion', e.target.value)} />
+              <textarea className={inputClass} rows={2} value={form.direccion ?? ''} onChange={(e) => set('direccion', e.target.value)} />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={lbl}>Zona</label>
-                <select className={inp} value={form.zona_id} onChange={(e) => set('zona_id', e.target.value)}>
+                <select className={inputClass} value={form.zona_id} onChange={(e) => set('zona_id', e.target.value)}>
                   <option value="">Sin zona</option>
                   {zonas.map((z) => <option key={z.id} value={z.id}>{z.nombre}</option>)}
                 </select>
               </div>
               <div>
                 <label className={lbl}>Grupo</label>
-                <select className={inp} value={form.grupo_id} onChange={(e) => set('grupo_id', e.target.value)}>
+                <select className={inputClass} value={form.grupo_id} onChange={(e) => set('grupo_id', e.target.value)}>
                   <option value="">Sin grupo</option>
                   {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
                 </select>
@@ -172,15 +172,15 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className={lbl}>Contacto</label>
-                <input className={inp} value={form.contacto ?? ''} onChange={(e) => set('contacto', e.target.value)} />
+                <input className={inputClass} value={form.contacto ?? ''} onChange={(e) => set('contacto', e.target.value)} />
               </div>
               <div>
                 <label className={lbl}>Cobrador</label>
-                <input className={inp} value={form.cobrador ?? ''} onChange={(e) => set('cobrador', e.target.value)} />
+                <input className={inputClass} value={form.cobrador ?? ''} onChange={(e) => set('cobrador', e.target.value)} />
               </div>
               <div>
                 <label className={lbl}>Vendedor</label>
-                <input className={inp} value={form.vendedor ?? ''} onChange={(e) => set('vendedor', e.target.value)} />
+                <input className={inputClass} value={form.vendedor ?? ''} onChange={(e) => set('vendedor', e.target.value)} />
               </div>
             </div>
 
@@ -188,7 +188,7 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
               <label className={lbl}>Teléfonos</label>
               {form.telefonos.map((tel, i) => (
                 <div key={i} className="flex gap-2 mb-2">
-                  <input className={inp} value={tel} onChange={(e) => setTel(i, e.target.value)} placeholder="04XX-XXXXXXX" />
+                  <input className={inputClass} value={tel} onChange={(e) => setTel(i, e.target.value)} placeholder="04XX-XXXXXXX" />
                   {form.telefonos.length > 1 && (
                     <button type="button" onClick={() => removeTel(i)} className="text-red-500 hover:text-red-700 px-2">✕</button>
                   )}
@@ -213,7 +213,7 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
 
             <div>
               <label className={lbl}>Observaciones</label>
-              <textarea className={inp} rows={2} value={form.observaciones ?? ''} onChange={(e) => set('observaciones', e.target.value)} />
+              <textarea className={inputClass} rows={2} value={form.observaciones ?? ''} onChange={(e) => set('observaciones', e.target.value)} />
             </div>
 
             <div className="flex justify-end gap-3 pt-2 border-t">

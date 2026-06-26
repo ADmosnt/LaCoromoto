@@ -7,6 +7,7 @@ import {
   getProductos, getGruposProductos, getInventario,
 } from '../api'
 import Alert from './Alert'
+import { inputClass, selectClass } from '../lib/styles'
 
 const emptyRow = () => ({
   grupo_filtro: '',
@@ -160,7 +161,6 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
   const inpNum = 'border border-gray-300 rounded px-2 py-1.5 text-sm w-full text-center focus:outline-none focus:ring-1 focus:ring-blue-500'
 
   return (
@@ -181,12 +181,12 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
             <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Fecha</label>
-                <input type="date" className={inp} value={fecha} onChange={(e) => setFecha(e.target.value)} />
+                <input type="date" className={inputClass} value={fecha} onChange={(e) => setFecha(e.target.value)} />
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-xs font-medium text-gray-700 mb-1">Nota (opcional)</label>
                 <input
-                  className={inp} value={nota} onChange={(e) => setNota(e.target.value)}
+                  className={inputClass} value={nota} onChange={(e) => setNota(e.target.value)}
                   placeholder="Ej: Factura #123, proveedor XYZ..."
                 />
               </div>

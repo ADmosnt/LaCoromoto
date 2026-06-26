@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createReporteVenta, getClientes, getClienteStock, getTasaHoy } from '../api'
 import Alert from '../components/Alert'
+import { inputClass, selectClass } from '../lib/styles'
 
 export default function ReporteVentaForm() {
   const nav = useNavigate()
@@ -93,7 +94,6 @@ export default function ReporteVentaForm() {
     }
   }
 
-  const inp = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
 
   return (
     <div className="max-w-3xl">
@@ -109,14 +109,14 @@ export default function ReporteVentaForm() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
-              <select className={`w-full ${inp}`} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
+              <select className={`w-full ${selectClass}`} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
                 <option value="">Seleccionar cliente...</option>
                 {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-              <input type="date" className={`w-full ${inp}`} value={fecha} onChange={(e) => setFecha(e.target.value)} />
+              <input type="date" className={inputClass} value={fecha} onChange={(e) => setFecha(e.target.value)} />
             </div>
           </div>
           <div className="mt-3">
@@ -125,7 +125,7 @@ export default function ReporteVentaForm() {
             </label>
             <input
               type="number" step="0.0001" min="0"
-              className={`w-48 ${inp}`}
+              className={`w-48 ${selectClass}`}
               placeholder={tasa ? Number(tasa.valor).toFixed(4) : 'Ingrese tasa...'}
               value={tasaManual}
               onChange={(e) => setTasaManual(e.target.value)}
@@ -161,7 +161,7 @@ export default function ReporteVentaForm() {
                           <td className="px-3 py-2">
                             <input
                               type="number" min={1} max={row.disponible}
-                              className={`w-24 text-center ${inp}`}
+                              className={`w-24 text-center ${selectClass}`}
                               value={row.cantidad_unidades}
                               onChange={(e) => setRow(i, 'cantidad_unidades', e.target.value)}
                             />
@@ -169,7 +169,7 @@ export default function ReporteVentaForm() {
                           <td className="px-3 py-2">
                             <input
                               type="number" step="0.01" min={0}
-                              className={`w-28 text-right ${inp}`}
+                              className={`w-28 text-right ${selectClass}`}
                               value={row.precio_usd_momento}
                               onChange={(e) => setRow(i, 'precio_usd_momento', e.target.value)}
                             />
@@ -189,7 +189,7 @@ export default function ReporteVentaForm() {
                 {stockDisponible.length > 0 && (
                   <div className="flex gap-2 items-center">
                     <select
-                      className={`flex-1 ${inp}`}
+                      className={`flex-1 ${selectClass}`}
                       value={productoAdd}
                       onChange={(e) => setProductoAdd(e.target.value)}
                     >

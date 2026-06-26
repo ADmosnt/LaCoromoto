@@ -9,6 +9,7 @@ import {
   getClientes, getProductos, getTasaHoy, getGruposProductos, getInventario,
 } from '../api'
 import Alert from './Alert'
+import { inputClass, selectClass } from '../lib/styles'
 
 const emptyRow = () => ({
   grupo_filtro: '',
@@ -198,7 +199,6 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
   const inpNum = 'border border-gray-300 rounded px-2 py-1.5 text-sm w-full text-center focus:outline-none focus:ring-1 focus:ring-blue-500'
 
   return (
@@ -216,9 +216,9 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
               <div className="sm:col-span-2">
                 <label className="block text-xs font-medium text-gray-700 mb-1">Cliente *</label>
                 {isEdit ? (
-                  <div className={`${inp} bg-gray-100 text-gray-600`}>{clienteNombre}</div>
+                  <div className={`${inputClass} bg-gray-100 text-gray-600`}>{clienteNombre}</div>
                 ) : (
-                  <select className={inp} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
+                  <select className={inputClass} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
                     <option value="">Seleccionar cliente...</option>
                     {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
                   </select>
@@ -226,7 +226,7 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Fecha</label>
-                <input type="date" className={inp} value={fecha} onChange={(e) => setFecha(e.target.value)} />
+                <input type="date" className={inputClass} value={fecha} onChange={(e) => setFecha(e.target.value)} />
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
@@ -238,14 +238,14 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                 <input
                   type="number" step="0.0001" min="0"
                   placeholder={tasa ? Number(tasa.valor).toFixed(4) : 'Ingrese tasa...'}
-                  className={inp}
+                  className={inputClass}
                   value={tasaManual}
                   onChange={(e) => setTasaManual(e.target.value)}
                 />
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-xs font-medium text-gray-700 mb-1">Nota</label>
-                <input className={inp} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Observaciones opcionales" />
+                <input className={inputClass} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Observaciones opcionales" />
               </div>
             </div>
           </div>
@@ -407,7 +407,7 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Motivo del cambio (opcional)</label>
               <input
-                className={inp} value={motivo}
+                className={inputClass} value={motivo}
                 onChange={(e) => setMotivo(e.target.value)}
                 placeholder="Ej: el cliente solicitó cambiar el precio de Mini Velón"
               />

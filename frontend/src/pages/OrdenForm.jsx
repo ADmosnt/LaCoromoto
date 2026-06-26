@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createOrden, getClientes, getProductos, getTasaHoy, getListasPrecios } from '../api'
 import Alert from '../components/Alert'
+import { inputClass, selectClass } from '../lib/styles'
 
 const emptyRow = () => ({ producto_id: '', descripcion: '', codigo: '', unidades_por_bulto: 1, precio_usd_momento: '', cantidad_unidades: '', precios: [] })
 
@@ -89,7 +90,6 @@ export default function OrdenForm() {
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
 
   return (
     <div className="max-w-4xl">
@@ -106,14 +106,14 @@ export default function OrdenForm() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
-              <select className={inp} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
+              <select className={inputClass} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
                 <option value="">Seleccionar cliente...</option>
                 {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-              <input type="date" className={inp} value={fecha} onChange={(e) => setFecha(e.target.value)} />
+              <input type="date" className={inputClass} value={fecha} onChange={(e) => setFecha(e.target.value)} />
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-3">
@@ -126,14 +126,14 @@ export default function OrdenForm() {
                 step="0.0001"
                 min="0"
                 placeholder={tasa ? Number(tasa.valor).toFixed(4) : 'Ingrese tasa...'}
-                className={inp}
+                className={inputClass}
                 value={tasaManual}
                 onChange={(e) => setTasaManual(e.target.value)}
               />
             </div>
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Nota</label>
-              <input className={inp} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Observaciones opcionales" />
+              <input className={inputClass} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Observaciones opcionales" />
             </div>
           </div>
         </div>
