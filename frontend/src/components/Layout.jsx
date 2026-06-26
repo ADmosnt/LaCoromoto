@@ -2,26 +2,30 @@ import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import GlobalSearch from './GlobalSearch'
+import {
+  LayoutDashboard, Users, Box, Warehouse, ClipboardList,
+  RotateCcw, Archive, UserCog, Settings, Package, LogOut,
+} from 'lucide-react'
 
 const adminNav = [
-  { to: '/dashboard', label: 'Dashboard' },
-  { to: '/clientes', label: 'Clientes' },
-  { to: '/productos', label: 'Productos' },
-  { to: '/inventario', label: 'Inventario Central' },
-  { to: '/ordenes', label: 'Órdenes / Historial' },
-  { to: '/devoluciones', label: 'Devoluciones' },
-  { to: '/stock', label: 'Stock en Consignación' },
+  { to: '/dashboard',  label: 'Dashboard',             icon: LayoutDashboard },
+  { to: '/clientes',   label: 'Clientes',               icon: Users },
+  { to: '/productos',  label: 'Productos',              icon: Box },
+  { to: '/inventario', label: 'Inventario Central',     icon: Warehouse },
+  { to: '/ordenes',    label: 'Órdenes / Historial',    icon: ClipboardList },
+  { to: '/devoluciones', label: 'Devoluciones',         icon: RotateCcw },
+  { to: '/stock',      label: 'Stock en Consignación',  icon: Archive },
 ]
 
 const clienteNav = [
-  { to: '/mis-ordenes', label: 'Mis Órdenes' },
+  { to: '/mis-ordenes', label: 'Mis Órdenes', icon: ClipboardList },
 ]
 
 const navLinkClass = ({ isActive }) =>
-  `block px-4 py-2.5 text-sm transition-colors ${
+  `flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
     isActive
-      ? 'bg-blue-600 text-white'
-      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+      ? 'bg-brand-600 text-white border-l-[3px] border-brand-400'
+      : 'text-gray-300 hover:bg-brand-800 hover:text-white border-l-[3px] border-transparent'
   }`
 
 export default function Layout() {
@@ -32,6 +36,7 @@ export default function Layout() {
 
   const isAdmin = user?.rol === 'admin'
   const navItems = isAdmin ? adminNav : clienteNav
+  const initial = user?.username?.[0]?.toUpperCase() ?? '?'
 
   const handleLogout = () => {
     logout()
@@ -46,55 +51,86 @@ export default function Layout() {
 
       <aside
         className={`
-          fixed inset-y-0 left-0 z-30 w-56 bg-gray-900 text-white flex flex-col flex-shrink-0
+          fixed inset-y-0 left-0 z-30 w-56 bg-brand-900 text-white flex flex-col flex-shrink-0
           transition-transform duration-200
           md:relative md:translate-x-0
           ${open ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
-        <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-          <h1 className="text-base font-bold leading-tight">
-            Sistema de<br />Consignación
-          </h1>
-          <button className="md:hidden text-gray-400 hover:text-white text-lg leading-none" onClick={close}>✕</button>
+        {/* Sidebar header */}
+        <div className="p-4 border-b border-brand-800 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Package size={20} className="text-brand-400 flex-shrink-0" />
+            <h1 className="text-sm font-bold leading-tight">La Coromoto</h1>
+          </div>
+          <button
+            className="md:hidden text-gray-400 hover:text-white text-lg leading-none"
+            onClick={close}
+          >
+            ✕
+          </button>
         </div>
 
         {isAdmin && <GlobalSearch onNavigate={close} />}
 
+        {/* Nav items */}
         <nav className="flex-1 overflow-y-auto py-2">
           {navItems.map((item) => (
             <NavLink key={item.to} to={item.to} className={navLinkClass} onClick={close}>
+              <item.icon size={16} className="flex-shrink-0" />
               {item.label}
             </NavLink>
           ))}
         </nav>
 
-        <div className="border-t border-gray-700">
+        {/* Bottom admin links */}
+        <div className="border-t border-brand-800">
           {isAdmin && (
             <>
-              <NavLink to="/usuarios" className={navLinkClass} onClick={close}>Usuarios</NavLink>
-              <NavLink to="/configuracion" className={navLinkClass} onClick={close}>Configuración</NavLink>
+              <NavLink to="/usuarios" className={navLinkClass} onClick={close}>
+                <UserCog size={16} className="flex-shrink-0" />
+                Usuarios
+              </NavLink>
+              <NavLink to="/configuracion" className={navLinkClass} onClick={close}>
+                <Settings size={16} className="flex-shrink-0" />
+                Configuración
+              </NavLink>
             </>
           )}
-          <div className="px-4 py-3 flex items-center justify-between">
-            <span className="text-xs text-gray-400 truncate">{user?.username}</span>
+
+          {/* User footer */}
+          <div className="px-4 py-3 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 rounded-full bg-brand-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                {initial}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-white truncate">{user?.username}</p>
+                <p className="text-xs text-gray-400 capitalize">{user?.rol}</p>
+              </div>
+            </div>
             <button
               onClick={handleLogout}
-              className="text-xs text-gray-400 hover:text-white ml-2 flex-shrink-0"
+              className="text-gray-400 hover:text-white flex-shrink-0"
               title="Cerrar sesión"
             >
-              Salir
+              <LogOut size={15} />
             </button>
           </div>
         </div>
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
+        {/* Mobile top bar */}
         <header className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 flex-shrink-0">
-          <button onClick={() => setOpen(true)} className="text-gray-600 hover:text-gray-900 text-xl leading-none" aria-label="Abrir menú">
+          <button
+            onClick={() => setOpen(true)}
+            className="text-gray-600 hover:text-gray-900 text-xl leading-none"
+            aria-label="Abrir menú"
+          >
             ☰
           </button>
-          <span className="font-semibold text-gray-800 text-sm">Sistema de Consignación</span>
+          <span className="font-semibold text-gray-800 text-sm">La Coromoto</span>
         </header>
 
         <main className="flex-1 overflow-y-auto">
