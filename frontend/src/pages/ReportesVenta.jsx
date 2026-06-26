@@ -2,11 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getReportesVenta, confirmarReporteVenta, getClientes } from '../api'
 import Alert from '../components/Alert'
-
-const statusBadge = {
-  pendiente: 'bg-yellow-100 text-yellow-700',
-  confirmado: 'bg-green-100 text-green-700',
-}
+import StatusBadge from '../components/ui/StatusBadge'
 
 export default function ReportesVenta() {
   const [reportes, setReportes] = useState([])
@@ -73,16 +69,14 @@ export default function ReportesVenta() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {reportes.map((r) => (
-                <tr key={r.id} className="hover:bg-gray-50">
+                <tr key={r.id} className="hover:bg-brand-50">
                   <td className="px-4 py-3 text-gray-500">#{r.id}</td>
                   <td className="px-4 py-3 font-medium">{r.cliente}</td>
                   <td className="px-4 py-3">{r.fecha}</td>
                   <td className="px-4 py-3 text-right">${Number(r.total_usd).toFixed(2)}</td>
                   <td className="px-4 py-3 text-right">Bs. {Number(r.total_bs).toFixed(2)}</td>
                   <td className="px-4 py-3 text-center">
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${statusBadge[r.status]}`}>
-                      {r.status}
-                    </span>
+                    <StatusBadge status={r.status} />
                   </td>
                   <td className="px-4 py-3 text-center space-x-2">
                     <Link to={`/reportes-venta/${r.id}`} className="text-blue-600 hover:underline text-xs">Ver</Link>

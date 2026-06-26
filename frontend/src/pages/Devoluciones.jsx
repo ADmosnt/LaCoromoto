@@ -2,6 +2,7 @@ import { useEffect, useState, Fragment } from 'react'
 import { getDevoluciones, getDevolucion, getClientes } from '../api'
 import Alert from '../components/Alert'
 import DevolucionModal from '../components/DevolucionModal'
+import StatusBadge from '../components/ui/StatusBadge'
 
 export default function Devoluciones() {
   const [devoluciones, setDevoluciones] = useState([])
@@ -76,7 +77,7 @@ export default function Devoluciones() {
               {devoluciones.map((d) => (
                 <Fragment key={d.id}>
                   <tr
-                    className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer select-none"
+                    className="border-b border-gray-100 hover:bg-brand-50 cursor-pointer select-none"
                     onClick={() => toggle(d.id)}
                   >
                     <td className="px-4 py-3 w-6 text-gray-400 text-xs">{expanded === d.id ? '▼' : '▶'}</td>
