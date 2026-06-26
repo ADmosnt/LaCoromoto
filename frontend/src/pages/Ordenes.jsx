@@ -6,6 +6,7 @@ import OrdenEdicionesModal from '../components/OrdenEdicionesModal'
 import OrdenesResumenModal from '../components/OrdenesResumenModal'
 import ReporteVentaModal from '../components/ReporteVentaModal'
 import { HelpTooltip } from '../components/ui/Tooltip'
+import StatusBadge from '../components/ui/StatusBadge'
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -25,21 +26,6 @@ function groupByMonth(ordenes) {
   return Object.entries(map).sort((a, b) => b[0].localeCompare(a[0]))
 }
 
-const statusBadge = {
-  activa: 'bg-green-100 text-green-700',
-  pendiente: 'bg-yellow-100 text-yellow-700',
-  parcial: 'bg-indigo-100 text-indigo-700',
-  confirmado: 'bg-blue-100 text-blue-700',
-  anulada: 'bg-red-100 text-red-700',
-}
-
-const statusLabel = {
-  activa: 'Activa',
-  pendiente: 'Pendiente',
-  parcial: 'Parcialmente reportada',
-  confirmado: 'Confirmado',
-  anulada: 'Anulada',
-}
 
 function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, onEditar, onVerEdiciones }) {
   const [detail, setDetail] = useState(null)
@@ -450,7 +436,7 @@ export default function Ordenes() {
               {items.map((o) => (
                 <div key={o.id} className="border-b border-gray-100 last:border-b-0">
                   <div
-                    className={`flex items-center gap-2 sm:gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 select-none ${o.status === 'anulada' ? 'opacity-60' : ''}`}
+                    className={`flex items-center gap-2 sm:gap-3 px-4 py-3 cursor-pointer hover:bg-brand-50 select-none ${o.status === 'anulada' ? 'opacity-60' : ''}`}
                     onClick={() => toggle(o.id)}
                   >
                     <input
@@ -476,9 +462,7 @@ export default function Ordenes() {
                         ✎
                       </span>
                     )}
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${statusBadge[o.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                      {statusLabel[o.status] ?? o.status}
-                    </span>
+                    <StatusBadge status={o.status} />
                     <span className={`text-sm font-medium flex-shrink-0 ${o.status === 'anulada' ? 'line-through text-gray-400' : ''}`}>
                       ${Number(o.total_usd).toFixed(2)}
                     </span>
