@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import GlobalSearch from './GlobalSearch'
+import AppHeader from './AppHeader'
 import {
   LayoutDashboard, Users, Box, Warehouse, ClipboardList,
   RotateCcw, Archive, UserCog, Settings, Package, LogOut,
@@ -132,6 +133,9 @@ export default function Layout() {
           </button>
           <span className="font-semibold text-gray-800 text-sm">La Coromoto</span>
         </header>
+
+        {/* Desktop fixed header */}
+        <AppHeader />
 
         <main className="flex-1 overflow-y-auto">
           {sessionWarning && (
