@@ -73,8 +73,8 @@ export default function Select({
             )}
             {options.map((opt) => (
               <RadixSelect.Item
-                key={opt.value}
-                value={opt.value}
+                key={String(opt.value)}
+                value={String(opt.value)}
                 className={cn(
                   'flex items-center justify-between px-3 py-2 text-sm rounded-md cursor-pointer outline-none',
                   'hover:bg-brand-50 focus:bg-brand-50',
