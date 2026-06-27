@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getReportesVenta, confirmarReporteVenta, getClientes } from '../api'
 import Alert from '../components/Alert'
+import PageHeader from '../components/PageHeader'
+import Select from '../components/ui/Select'
+import Table from '../components/ui/Table'
+import EmptyState from '../components/ui/EmptyState'
 import StatusBadge from '../components/ui/StatusBadge'
 
 export default function ReportesVenta() {
@@ -31,70 +35,68 @@ export default function ReportesVenta() {
 
   return (
     <div>
+      <PageHeader title="Reportes de Venta" />
       <Alert type="error" message={error} />
 
       <div className="bg-white rounded-lg shadow">
         <div className="p-4 border-b flex gap-3">
-          <select
+          <Select
+            nullable
+            noneLabel="Todos los clientes"
             value={clienteId}
-            onChange={(e) => setClienteId(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-          >
-            <option value="">Todos los clientes</option>
-            {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
-          </select>
-          <select
+            onChange={setClienteId}
+            options={clientes.map((c) => ({ value: String(c.id), label: c.razon_social }))}
+            className="w-56"
+          />
+          <Select
+            nullable
+            noneLabel="Todos los estados"
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-          >
-            <option value="">Todos los estados</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="confirmado">Confirmado</option>
-          </select>
+            onChange={setStatus}
+            options={[
+              { value: 'pendiente', label: 'Pendiente' },
+              { value: 'confirmado', label: 'Confirmado' },
+            ]}
+            className="w-44"
+          />
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
-              <tr>
-                <th className="px-4 py-3 text-left">ID</th>
-                <th className="px-4 py-3 text-left">Cliente</th>
-                <th className="px-4 py-3 text-left">Fecha</th>
-                <th className="px-4 py-3 text-right">Total USD</th>
-                <th className="px-4 py-3 text-right">Total Bs.</th>
-                <th className="px-4 py-3 text-center">Estado</th>
-                <th className="px-4 py-3 text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
+        {reportes.length === 0 ? (
+          <EmptyState message="No hay reportes registrados" />
+        ) : (
+          <Table borderless>
+            <Table.Head>
+              <Table.Row>
+                <Table.Th>ID</Table.Th>
+                <Table.Th>Cliente</Table.Th>
+                <Table.Th>Fecha</Table.Th>
+                <Table.Th align="right">Total USD</Table.Th>
+                <Table.Th align="right">Total Bs.</Table.Th>
+                <Table.Th align="center">Estado</Table.Th>
+                <Table.Th align="center">Acciones</Table.Th>
+              </Table.Row>
+            </Table.Head>
+            <Table.Body>
               {reportes.map((r) => (
-                <tr key={r.id} className="hover:bg-brand-50">
-                  <td className="px-4 py-3 text-gray-500">#{r.id}</td>
-                  <td className="px-4 py-3 font-medium">{r.cliente}</td>
-                  <td className="px-4 py-3">{r.fecha}</td>
-                  <td className="px-4 py-3 text-right">${Number(r.total_usd).toFixed(2)}</td>
-                  <td className="px-4 py-3 text-right">Bs. {Number(r.total_bs).toFixed(2)}</td>
-                  <td className="px-4 py-3 text-center">
-                    <StatusBadge status={r.status} />
-                  </td>
-                  <td className="px-4 py-3 text-center space-x-2">
+                <Table.Row key={r.id} className="hover:bg-brand-50">
+                  <Table.Td className="text-gray-500">#{r.id}</Table.Td>
+                  <Table.Td className="font-medium">{r.cliente}</Table.Td>
+                  <Table.Td>{r.fecha}</Table.Td>
+                  <Table.Td align="right">${Number(r.total_usd).toFixed(2)}</Table.Td>
+                  <Table.Td align="right">Bs. {Number(r.total_bs).toFixed(2)}</Table.Td>
+                  <Table.Td align="center"><StatusBadge status={r.status} /></Table.Td>
+                  <Table.Td align="center" className="space-x-2">
                     <Link to={`/reportes-venta/${r.id}`} className="text-brand-600 hover:underline text-xs">Ver</Link>
                     {r.status === 'pendiente' && (
                       <button onClick={() => handleConfirmar(r.id)} className="text-brand-600 hover:underline text-xs">
                         Confirmar
                       </button>
                     )}
-                  </td>
-                </tr>
+                  </Table.Td>
+                </Table.Row>
               ))}
-              {reportes.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-gray-400">No hay reportes registrados</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            </Table.Body>
+          </Table>
+        )}
       </div>
     </div>
   )
