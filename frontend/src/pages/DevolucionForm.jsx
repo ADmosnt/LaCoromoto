@@ -125,7 +125,7 @@ export default function DevolucionForm() {
                       <td className="px-3 py-2">
                         <input
                           type="number" min={0} max={row.disponible}
-                          className={`w-24 text-center ${inputClass}`}
+                          className="w-24 text-center border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                           value={row.cantidad_unidades}
                           onChange={(e) => setRow(i, e.target.value)}
                         />

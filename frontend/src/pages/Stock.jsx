@@ -128,12 +128,12 @@ export default function Stock() {
           </div>
 
           {modo === 'cliente' ? (
-            <select value={clienteId} onChange={(e) => setClienteId(e.target.value)} className={selectClass}>
+            <select value={clienteId} onChange={(e) => setClienteId(e.target.value)} className={`w-72 ${selectClass}`}>
               <option value="">Seleccionar cliente...</option>
               {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
             </select>
           ) : (
-            <select value={grupoId} onChange={(e) => setGrupoId(e.target.value)} className={selectClass}>
+            <select value={grupoId} onChange={(e) => setGrupoId(e.target.value)} className={`w-72 ${selectClass}`}>
               <option value="">Seleccionar grupo...</option>
               {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
             </select>
