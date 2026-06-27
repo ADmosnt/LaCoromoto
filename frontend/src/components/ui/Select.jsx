@@ -5,6 +5,7 @@ import { cn } from '../../lib/utils'
 const NONE = '__none__'
 
 export default function Select({
+  id,
   value,
   onChange,
   options = [],
@@ -24,6 +25,7 @@ export default function Select({
   return (
     <RadixSelect.Root value={radixValue} onValueChange={handleChange} disabled={disabled}>
       <RadixSelect.Trigger
+        id={id}
         className={cn(
           'flex items-center justify-between w-full border rounded-lg px-3 py-2.5 text-sm bg-white',
           'transition-colors cursor-pointer',

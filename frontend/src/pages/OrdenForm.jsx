@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createOrden, getClientes, getProductos, getTasaHoy, getListasPrecios } from '../api'
 import Alert from '../components/Alert'
-import { inputClass, selectClass } from '../lib/styles'
+import Button from '../components/ui/Button'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import FormField from '../components/ui/FormField'
 
 const emptyRow = () => ({ producto_id: '', descripcion: '', codigo: '', unidades_por_bulto: 1, precio_usd_momento: '', cantidad_unidades: '', precios: [] })
 
@@ -103,37 +106,34 @@ export default function OrdenForm() {
         <div className="bg-white rounded-lg shadow p-5">
           <h3 className="font-semibold text-gray-700 mb-3">Datos generales</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
-              <select className={`w-full ${selectClass}`} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
-                <option value="">Seleccionar cliente...</option>
-                {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-              <input type="date" className={inputClass} value={fecha} onChange={(e) => setFecha(e.target.value)} />
-            </div>
+            <FormField id="cliente" label="Cliente *" className="sm:col-span-2">
+              <Select
+                id="cliente"
+                value={clienteId}
+                onChange={setClienteId}
+                placeholder="Seleccionar cliente..."
+                options={clientes.map((c) => ({ value: String(c.id), label: c.razon_social }))}
+              />
+            </FormField>
+            <FormField id="fecha" label="Fecha">
+              <Input id="fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+            </FormField>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tasa BCV (Bs.) {tasa && <span className="text-xs text-gray-400 ml-1">BCV: {Number(tasa.valor).toFixed(4)}</span>}
-              </label>
-              <input
+            <FormField id="tasa" label={<>Tasa BCV (Bs.) {tasa && <span className="text-xs text-gray-400 ml-1">BCV: {Number(tasa.valor).toFixed(4)}</span>}</>}>
+              <Input
+                id="tasa"
                 type="number"
                 step="0.0001"
                 min="0"
                 placeholder={tasa ? Number(tasa.valor).toFixed(4) : 'Ingrese tasa...'}
-                className={inputClass}
                 value={tasaManual}
                 onChange={(e) => setTasaManual(e.target.value)}
               />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nota</label>
-              <input className={inputClass} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Observaciones opcionales" />
-            </div>
+            </FormField>
+            <FormField id="nota" label="Nota" className="sm:col-span-2">
+              <Input id="nota" value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Observaciones opcionales" />
+            </FormField>
           </div>
         </div>
 
@@ -161,7 +161,7 @@ export default function OrdenForm() {
                     <tr key={i}>
                       <td className="px-3 py-2">
                         <select
-                          className={`w-64 ${selectClass}`}
+                          className="w-64 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                           value={row.producto_id}
                           onChange={(e) => setRow(i, 'producto_id', e.target.value)}
                         >
@@ -171,10 +171,10 @@ export default function OrdenForm() {
                       </td>
                       <td className="px-3 py-2 text-center text-gray-500">{row.unidades_por_bulto}</td>
                       <td className="px-3 py-2">
-                        <input
+                        <Input
                           type="number"
                           min={1}
-                          className="w-24 text-center py-1.5 border border-gray-300 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                          className="w-24 text-center py-1.5"
                           value={row.cantidad_unidades}
                           onChange={(e) => setRow(i, 'cantidad_unidades', e.target.value)}
                         />
@@ -184,11 +184,11 @@ export default function OrdenForm() {
                       </td>
                       <td className="px-3 py-2">
                         <div className="flex flex-col items-end gap-1">
-                          <input
+                          <Input
                             type="number"
                             step="0.01"
                             min={0}
-                            className="w-28 text-right py-1.5 border border-gray-300 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                            className="w-28 text-right py-1.5"
                             value={row.precio_usd_momento === '' ? '' : (Number(row.precio_usd_momento) * upb).toFixed(2)}
                             onChange={(e) => {
                               const val = e.target.value
@@ -236,12 +236,8 @@ export default function OrdenForm() {
         </div>
 
         <div className="flex justify-end gap-3">
-          <button type="button" onClick={() => nav('/ordenes')} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
-            Cancelar
-          </button>
-          <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50">
-            {loading ? 'Creando...' : 'Crear Orden'}
-          </button>
+          <Button variant="secondary" type="button" onClick={() => nav('/ordenes')}>Cancelar</Button>
+          <Button type="submit" disabled={loading}>{loading ? 'Creando...' : 'Crear Orden'}</Button>
         </div>
       </form>
     </div>
