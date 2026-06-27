@@ -174,7 +174,7 @@ export default function OrdenForm() {
                         <input
                           type="number"
                           min={1}
-                          className={`w-24 text-center py-1.5 ${inputClass}`}
+                          className="w-24 text-center py-1.5 border border-gray-300 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                           value={row.cantidad_unidades}
                           onChange={(e) => setRow(i, 'cantidad_unidades', e.target.value)}
                         />
@@ -188,7 +188,7 @@ export default function OrdenForm() {
                             type="number"
                             step="0.01"
                             min={0}
-                            className={`w-28 text-right py-1.5 ${inputClass}`}
+                            className="w-28 text-right py-1.5 border border-gray-300 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                             value={row.precio_usd_momento === '' ? '' : (Number(row.precio_usd_momento) * upb).toFixed(2)}
                             onChange={(e) => {
                               const val = e.target.value

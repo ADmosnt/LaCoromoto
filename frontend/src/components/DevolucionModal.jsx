@@ -238,7 +238,7 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
                           <td className="px-3 py-2 text-center">
                             <input
                               type="text" inputMode="numeric"
-                              className={`w-16 text-center py-1 ${inputClass}`}
+                              className="w-16 text-center py-1 border border-gray-300 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                               value={row.bultos}
                               onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRowField(i, 'bultos', e.target.value) }}
                             />
@@ -246,7 +246,7 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
                           <td className="px-3 py-2 text-center">
                             <input
                               type="text" inputMode="numeric"
-                              className={`w-16 text-center py-1 ${inputClass}`}
+                              className="w-16 text-center py-1 border border-gray-300 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                               value={row.sueltas}
                               onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRowField(i, 'sueltas', e.target.value) }}
                             />

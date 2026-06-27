@@ -198,7 +198,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                         <td className="px-3 py-2 text-center">
                           <input
                             type="number" min={0} max={Math.floor(row.restante / upb)}
-                            className={`w-16 text-center ${inputClass}`}
+                            className="w-16 text-center border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                             value={row.bultos}
                             onChange={(e) => setRowField(i, 'bultos', e.target.value)}
                           />
@@ -206,7 +206,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                         <td className="px-3 py-2 text-center">
                           <input
                             type="number" min={0} max={upb - 1}
-                            className={`w-16 text-center ${inputClass}`}
+                            className="w-16 text-center border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                             value={row.sueltas}
                             onChange={(e) => setRowField(i, 'sueltas', e.target.value)}
                           />
@@ -217,7 +217,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                         {!isCliente && (
                           <td className="px-3 py-2 text-right">
                             <PrecioInput
-                              className={`w-24 text-right ${inputClass}`}
+                              className="w-24 text-right border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                               value={row.precio_bulto}
                               onChange={(v) => setRowField(i, 'precio_bulto', v)}
                             />

@@ -121,7 +121,7 @@ export default function ProductoForm() {
                     step="0.01"
                     min="0"
                     placeholder="0.00"
-                    className={`w-32 py-1.5 ${inputClass}`}
+                    className="w-32 py-1.5 border border-gray-300 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                     value={getPrecio(l.id)}
                     onChange={(e) => setPrecio(l.id, e.target.value)}
                   />
