@@ -119,7 +119,7 @@ export default function Clientes() {
               </Table.Head>
               <Table.Body>
                 {clientes.map((c) => (
-                  <Table.Row key={c.id}>
+                  <Table.Row key={c.id} className="hover:bg-gray-50">
                     <Table.Td><span className="font-mono text-xs">{c.codigo}</span></Table.Td>
                     <Table.Td><span className="font-medium">{c.razon_social}</span></Table.Td>
                     <Table.Td>{c.rif}</Table.Td>
