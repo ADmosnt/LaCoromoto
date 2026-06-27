@@ -161,8 +161,6 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
     }
   }
 
-  const inpNum = 'border border-gray-300 rounded px-2 py-1.5 text-sm w-full text-center focus:outline-none focus:ring-1 focus:ring-brand-500'
-
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent
@@ -251,14 +249,14 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                           </td>
                           <td className="px-3 py-2">
                             <input
-                              type="number" min={0} className={inpNum}
+                              type="number" min={0} className={`w-full text-center py-1.5 ${inputClass}`}
                               value={row.bultos}
                               onChange={(e) => setRow(i, 'bultos', e.target.value)}
                             />
                           </td>
                           <td className="px-3 py-2">
                             <input
-                              type="number" min={0} max={upb - 1} className={inpNum}
+                              type="number" min={0} max={upb - 1} className={`w-full text-center py-1.5 ${inputClass}`}
                               value={row.sueltas}
                               onChange={(e) => setRow(i, 'sueltas', e.target.value)}
                             />

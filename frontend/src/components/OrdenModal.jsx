@@ -199,8 +199,6 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
     }
   }
 
-  const inpNum = 'border border-gray-300 rounded px-2 py-1.5 text-sm w-full text-center focus:outline-none focus:ring-1 focus:ring-brand-500'
-
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent
@@ -337,7 +335,7 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                         <td className="px-3 py-2">
                           <input
                             type="text" inputMode="numeric"
-                            className={inpNum}
+                            className={`w-full text-center py-1.5 ${inputClass}`}
                             value={row.bultos}
                             onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRow(i, 'bultos', e.target.value) }}
                           />
@@ -345,7 +343,7 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                         <td className="px-3 py-2">
                           <input
                             type="text" inputMode="numeric"
-                            className={inpNum}
+                            className={`w-full text-center py-1.5 ${inputClass}`}
                             value={row.sueltas}
                             onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRow(i, 'sueltas', e.target.value) }}
                           />

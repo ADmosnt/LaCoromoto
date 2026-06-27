@@ -158,7 +158,6 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
 
   const inpRO = 'w-full border border-gray-200 rounded-md px-3 py-2 text-sm bg-gray-100 text-gray-600'
   const lbl = 'block text-sm font-medium text-gray-700 mb-1'
-  const inpNum = 'border border-gray-300 rounded px-2 py-1 text-sm w-16 text-center focus:outline-none focus:ring-1 focus:ring-brand-500'
 
   const mostrarDetalle = isEdit || Boolean(ordenId)
 
@@ -239,7 +238,7 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
                           <td className="px-3 py-2 text-center">
                             <input
                               type="text" inputMode="numeric"
-                              className={inpNum}
+                              className={`w-16 text-center py-1 ${inputClass}`}
                               value={row.bultos}
                               onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRowField(i, 'bultos', e.target.value) }}
                             />
@@ -247,7 +246,7 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
                           <td className="px-3 py-2 text-center">
                             <input
                               type="text" inputMode="numeric"
-                              className={inpNum}
+                              className={`w-16 text-center py-1 ${inputClass}`}
                               value={row.sueltas}
                               onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRowField(i, 'sueltas', e.target.value) }}
                             />
@@ -275,7 +274,7 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
                     type="checkbox"
-                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-brand-500"
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                     checked={reingresar}
                     onChange={(e) => setReingresar(e.target.checked)}
                   />
