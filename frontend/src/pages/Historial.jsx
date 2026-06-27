@@ -66,7 +66,7 @@ export default function Historial() {
           <select
             value={clienteId}
             onChange={(e) => setClienteId(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
             <option value="">Todos</option>
             {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
@@ -78,7 +78,7 @@ export default function Historial() {
             type="date"
             value={fechaDesde}
             onChange={(e) => setFechaDesde(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
         <div>
@@ -87,7 +87,7 @@ export default function Historial() {
             type="date"
             value={fechaHasta}
             onChange={(e) => setFechaHasta(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
         <button

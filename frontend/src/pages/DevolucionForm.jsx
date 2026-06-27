@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createDevolucion, getClientes, getClienteStock, getOrdenes } from '../api'
 import Alert from '../components/Alert'
+import { inputClass } from '../lib/styles'
 
 export default function DevolucionForm() {
   const nav = useNavigate()
@@ -60,8 +61,6 @@ export default function DevolucionForm() {
     }
   }
 
-  const inp = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
-
   return (
     <div className="max-w-2xl">
       <div className="flex items-center gap-3 mb-6">
@@ -75,7 +74,7 @@ export default function DevolucionForm() {
         <div className="bg-white rounded-lg shadow p-5 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
-            <select className={`w-full ${inp}`} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
+            <select className={`w-full ${inputClass}`} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
               <option value="">Seleccionar cliente...</option>
               {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
             </select>
@@ -84,12 +83,12 @@ export default function DevolucionForm() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-              <input type="date" className={`w-full ${inp}`} value={fecha} onChange={(e) => setFecha(e.target.value)} />
+              <input type="date" className={`w-full ${inputClass}`} value={fecha} onChange={(e) => setFecha(e.target.value)} />
             </div>
             {ordenes.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Orden origen (opcional)</label>
-                <select className={`w-full ${inp}`} value={ordenOrigenId} onChange={(e) => setOrdenOrigenId(e.target.value)}>
+                <select className={`w-full ${inputClass}`} value={ordenOrigenId} onChange={(e) => setOrdenOrigenId(e.target.value)}>
                   <option value="">Sin orden específica</option>
                   {ordenes.map((o) => <option key={o.id} value={o.id}>#{o.numero_orden} — {o.fecha_emision}</option>)}
                 </select>
@@ -99,7 +98,7 @@ export default function DevolucionForm() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nota</label>
-            <input className={`w-full ${inp}`} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Motivo de la devolución..." />
+            <input className={`w-full ${inputClass}`} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Motivo de la devolución..." />
           </div>
         </div>
 
@@ -126,7 +125,7 @@ export default function DevolucionForm() {
                       <td className="px-3 py-2">
                         <input
                           type="number" min={0} max={row.disponible}
-                          className={`w-24 text-center ${inp}`}
+                          className={`w-24 text-center ${inputClass}`}
                           value={row.cantidad_unidades}
                           onChange={(e) => setRow(i, e.target.value)}
                         />

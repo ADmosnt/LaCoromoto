@@ -110,8 +110,8 @@ export default function ProductoCombobox({
   }
 
   const inputClass = size === 'small'
-    ? 'border border-gray-300 rounded px-2 py-1.5 pr-7 text-sm w-full focus:outline-none focus:ring-1 focus:ring-blue-500'
-    : 'w-full border border-gray-300 rounded-md px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+    ? 'border border-gray-300 rounded px-2 py-1.5 pr-7 text-sm w-full focus:outline-none focus:ring-1 focus:ring-brand-500'
+    : 'w-full border border-gray-300 rounded-md px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
 
   const dropdown = open && (limitedList.length > 0 || (q.length > 0 && !isShowingSelectedLabel)) && createPortal(
     <div ref={listRef} style={dropStyle}>

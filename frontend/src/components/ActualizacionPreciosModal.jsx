@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
+import { inputClass } from '../lib/styles'
 import { HelpTooltip } from './ui/Tooltip'
 import PrecioInput, { parsePrecio } from './ui/PrecioInput'
 import { getListasPrecios, getGruposProductos, ajustePrecios } from '../api'
@@ -86,8 +87,6 @@ export default function ActualizacionPreciosModal({ open, onClose, onSaved }) {
     ? `${signo}${valor}${tipo === 'porcentaje' ? '%' : ' USD'} — ${listaLabel}${grupoId ? ` / ${grupoLabel}` : ''}`
     : null
 
-  const inp = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full'
-
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent size="xl" title={
@@ -105,14 +104,14 @@ export default function ActualizacionPreciosModal({ open, onClose, onSaved }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Lista de precios *</label>
-            <select className={inp} value={listaId} onChange={(e) => setListaId(e.target.value)}>
+            <select className={inputClass} value={listaId} onChange={(e) => setListaId(e.target.value)}>
               <option value="">Seleccionar lista...</option>
               {listas.map((l) => <option key={l.id} value={l.id}>{l.nombre}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Grupo de productos</label>
-            <select className={inp} value={grupoId} onChange={(e) => setGrupoId(e.target.value)}>
+            <select className={inputClass} value={grupoId} onChange={(e) => setGrupoId(e.target.value)}>
               <option value="">Todos los grupos</option>
               {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
             </select>
@@ -151,7 +150,7 @@ export default function ActualizacionPreciosModal({ open, onClose, onSaved }) {
               <PrecioInput
                 allowNegative
                 placeholder={tipo === 'porcentaje' ? 'Ej: 10 o -5' : 'Ej: 0.50 o -1.00'}
-                className={`${inp} pl-8`}
+                className={`${inputClass} pl-8`}
                 value={valor}
                 onChange={setValor}
                 onKeyDown={(e) => e.key === 'Enter' && handlePreview()}

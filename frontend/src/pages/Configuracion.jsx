@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { HelpTooltip } from '../components/ui/Tooltip'
+import { inputClass } from '../lib/styles'
 import {
   getConfig, updateConfig,
   getTasas, saveTasa, scrapeTasa,
@@ -226,8 +227,6 @@ export default function Configuracion() {
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
-
   return (
     <div>
       <h2 className="text-xl font-bold text-gray-800 mb-6">Configuración</h2>
@@ -239,19 +238,19 @@ export default function Configuracion() {
           <form onSubmit={saveConfig} className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nombre / Razón Social</label>
-              <input className={inp} value={config.nombre} onChange={(e) => setConfig({ ...config, nombre: e.target.value })} required />
+              <input className={inputClass} value={config.nombre} onChange={(e) => setConfig({ ...config, nombre: e.target.value })} required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">RIF</label>
-              <input className={inp} value={config.rif} onChange={(e) => setConfig({ ...config, rif: e.target.value })} required />
+              <input className={inputClass} value={config.rif} onChange={(e) => setConfig({ ...config, rif: e.target.value })} required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-              <textarea className={inp} rows={2} value={config.direccion} onChange={(e) => setConfig({ ...config, direccion: e.target.value })} required />
+              <textarea className={inputClass} rows={2} value={config.direccion} onChange={(e) => setConfig({ ...config, direccion: e.target.value })} required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
-              <input className={inp} value={config.ciudad} onChange={(e) => setConfig({ ...config, ciudad: e.target.value })} required />
+              <input className={inputClass} value={config.ciudad} onChange={(e) => setConfig({ ...config, ciudad: e.target.value })} required />
             </div>
             <button type="submit" className="w-full bg-blue-600 text-white text-sm py-2 rounded-md hover:bg-blue-700">Guardar</button>
           </form>
@@ -334,26 +333,26 @@ export default function Configuracion() {
           <form onSubmit={handleChangePassword} className="space-y-3">
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Contraseña actual *</label>
-              <input type="password" className={inp} required
+              <input type="password" className={inputClass} required
                 value={pwForm.current_password}
                 onChange={(e) => setPwForm({ ...pwForm, current_password: e.target.value })} />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Nuevo usuario (dejar en blanco para no cambiar)</label>
-              <input className={inp} placeholder={user?.username}
+              <input className={inputClass} placeholder={user?.username}
                 value={pwForm.new_username}
                 onChange={(e) => setPwForm({ ...pwForm, new_username: e.target.value })} />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Nueva contraseña (dejar en blanco para no cambiar)</label>
-              <input type="password" className={inp}
+              <input type="password" className={inputClass}
                 value={pwForm.new_password}
                 onChange={(e) => setPwForm({ ...pwForm, new_password: e.target.value })} />
             </div>
             {pwForm.new_password && (
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Confirmar nueva contraseña</label>
-                <input type="password" className={inp}
+                <input type="password" className={inputClass}
                   value={pwForm.confirm_password}
                   onChange={(e) => setPwForm({ ...pwForm, confirm_password: e.target.value })} />
               </div>

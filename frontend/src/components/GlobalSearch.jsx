@@ -100,7 +100,7 @@ export default function GlobalSearch({ onNavigate }) {
           onFocus={() => setOpen(true)}
           onKeyDown={onKeyDown}
           placeholder="Buscar cliente o producto..."
-          className="w-full bg-gray-800 text-white placeholder-gray-400 text-sm rounded-md pl-8 pr-3 py-1.5 border border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full bg-gray-800 text-white placeholder-gray-400 text-sm rounded-md pl-8 pr-3 py-1.5 border border-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-400 focus:border-brand-400"
         />
       </div>
 

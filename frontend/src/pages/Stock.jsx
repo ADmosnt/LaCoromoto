@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { getClientes, getClienteStock, getGruposClientes, getGrupoStock, getOrden } from '../api'
 import { HelpTooltip } from '../components/ui/Tooltip'
 import ReporteVentaModal from '../components/ReporteVentaModal'
+import { selectClass } from '../lib/styles'
 
 const statusBadge = {
   activa: 'bg-green-100 text-green-700',
@@ -32,8 +33,6 @@ const agingLabel = (dias) => {
   if (dias === 1) return '1 día'
   return `${dias} días`
 }
-
-const sel = 'border border-gray-300 rounded-md px-3 py-2 text-sm w-72 focus:outline-none focus:ring-2 focus:ring-blue-500'
 
 export default function Stock() {
   const [modo, setModo] = useState('cliente') // 'cliente' | 'grupo'
@@ -129,12 +128,12 @@ export default function Stock() {
           </div>
 
           {modo === 'cliente' ? (
-            <select value={clienteId} onChange={(e) => setClienteId(e.target.value)} className={sel}>
+            <select value={clienteId} onChange={(e) => setClienteId(e.target.value)} className={selectClass}>
               <option value="">Seleccionar cliente...</option>
               {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
             </select>
           ) : (
-            <select value={grupoId} onChange={(e) => setGrupoId(e.target.value)} className={sel}>
+            <select value={grupoId} onChange={(e) => setGrupoId(e.target.value)} className={selectClass}>
               <option value="">Seleccionar grupo...</option>
               {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
             </select>

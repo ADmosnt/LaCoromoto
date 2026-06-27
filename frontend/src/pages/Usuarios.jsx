@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { getUsuarios, createUsuario, updateUsuario, deleteUsuario, getClientes } from '../api'
+import { inputClass } from '../lib/styles'
 import { Dialog, DialogContent } from '../components/ui/Dialog'
 import Alert from '../components/Alert'
 
@@ -38,7 +39,6 @@ function UsuarioModal({ open, onClose, onSaved, clientes }) {
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
   const lbl = 'block text-sm font-medium text-gray-700 mb-1'
 
   return (
@@ -48,15 +48,15 @@ function UsuarioModal({ open, onClose, onSaved, clientes }) {
         <form onSubmit={submit} className="space-y-4">
           <div>
             <label className={lbl}>Nombre de usuario *</label>
-            <input className={inp} value={username} onChange={(e) => setUsername(e.target.value)} required autoFocus />
+            <input className={inputClass} value={username} onChange={(e) => setUsername(e.target.value)} required autoFocus />
           </div>
           <div>
             <label className={lbl}>Contraseña *</label>
-            <input type="password" className={inp} value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input type="password" className={inputClass} value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
           <div>
             <label className={lbl}>Rol</label>
-            <select className={inp} value={rol} onChange={(e) => setRol(e.target.value)}>
+            <select className={inputClass} value={rol} onChange={(e) => setRol(e.target.value)}>
               <option value="cliente">Cliente</option>
               <option value="admin">Administrador</option>
             </select>
@@ -64,7 +64,7 @@ function UsuarioModal({ open, onClose, onSaved, clientes }) {
           {rol === 'cliente' && (
             <div>
               <label className={lbl}>Cliente asociado *</label>
-              <select className={inp} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required={rol === 'cliente'}>
+              <select className={inputClass} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required={rol === 'cliente'}>
                 <option value="">Seleccionar cliente...</option>
                 {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
               </select>

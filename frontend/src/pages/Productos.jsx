@@ -85,12 +85,12 @@ export default function Productos() {
             placeholder="Buscar por descripción o código..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
           <select
             value={grupoId}
             onChange={(e) => setGrupoId(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
             <option value="">Todos los grupos</option>
             {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}

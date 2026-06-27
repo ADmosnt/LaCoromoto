@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createEntrada, getProductos } from '../api'
 import Alert from '../components/Alert'
+import { inputClass } from '../lib/styles'
 
 export default function EntradaInventarioForm() {
   const nav = useNavigate()
@@ -40,8 +41,6 @@ export default function EntradaInventarioForm() {
     }
   }
 
-  const inp = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
-
   const upb = producto?.unidades_por_bulto || 1
   const cant = Number(cantidad) || 0
   const bultos = Math.floor(cant / upb)
@@ -60,7 +59,7 @@ export default function EntradaInventarioForm() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Producto *</label>
           <select
-            className={`w-full ${inp}`}
+            className={`w-full ${inputClass}`}
             value={productoId}
             onChange={(e) => setProductoId(e.target.value)}
             required
@@ -83,7 +82,7 @@ export default function EntradaInventarioForm() {
             <input
               type="number"
               min={1}
-              className={`w-full ${inp}`}
+              className={`w-full ${inputClass}`}
               value={cantidad}
               onChange={(e) => setCantidad(e.target.value)}
               required
@@ -96,7 +95,7 @@ export default function EntradaInventarioForm() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
             <input
               type="date"
-              className={`w-full ${inp}`}
+              className={`w-full ${inputClass}`}
               value={fecha}
               onChange={(e) => setFecha(e.target.value)}
             />
@@ -107,7 +106,7 @@ export default function EntradaInventarioForm() {
           <label className="block text-sm font-medium text-gray-700 mb-1">Nota (opcional)</label>
           <input
             type="text"
-            className={`w-full ${inp}`}
+            className={`w-full ${inputClass}`}
             value={nota}
             onChange={(e) => setNota(e.target.value)}
             placeholder="Ej: Factura #123, proveedor XYZ..."

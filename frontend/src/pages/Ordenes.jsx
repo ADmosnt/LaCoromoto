@@ -7,6 +7,7 @@ import OrdenesResumenModal from '../components/OrdenesResumenModal'
 import ReporteVentaModal from '../components/ReporteVentaModal'
 import { HelpTooltip } from '../components/ui/Tooltip'
 import StatusBadge from '../components/ui/StatusBadge'
+import { selectClass } from '../lib/styles'
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -293,8 +294,6 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
   )
 }
 
-const sel = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
-
 export default function Ordenes() {
   const [ordenes, setOrdenes] = useState([])
   const [clientes, setClientes] = useState([])
@@ -388,12 +387,12 @@ export default function Ordenes() {
         <div>
           <label className="block text-xs text-gray-500 mb-1">{modo === 'cliente' ? 'Cliente' : 'Grupo'}</label>
           {modo === 'cliente' ? (
-            <select value={clienteId} onChange={(e) => setClienteId(e.target.value)} className={sel}>
+            <select value={clienteId} onChange={(e) => setClienteId(e.target.value)} className={selectClass}>
               <option value="">Todos</option>
               {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
             </select>
           ) : (
-            <select value={grupoId} onChange={(e) => setGrupoId(e.target.value)} className={sel}>
+            <select value={grupoId} onChange={(e) => setGrupoId(e.target.value)} className={selectClass}>
               <option value="">Todos</option>
               {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
             </select>
@@ -401,11 +400,11 @@ export default function Ordenes() {
         </div>
         <div>
           <label className="block text-xs text-gray-500 mb-1">Desde</label>
-          <input type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} className={sel} />
+          <input type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} className={selectClass} />
         </div>
         <div>
           <label className="block text-xs text-gray-500 mb-1">Hasta</label>
-          <input type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} className={sel} />
+          <input type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} className={selectClass} />
         </div>
         <button
           onClick={() => { setClienteId(''); setGrupoId(''); setFechaDesde(''); setFechaHasta('') }}
