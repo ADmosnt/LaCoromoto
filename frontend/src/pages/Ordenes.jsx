@@ -7,7 +7,11 @@ import OrdenesResumenModal from '../components/OrdenesResumenModal'
 import ReporteVentaModal from '../components/ReporteVentaModal'
 import { HelpTooltip } from '../components/ui/Tooltip'
 import StatusBadge from '../components/ui/StatusBadge'
-import { selectClass } from '../lib/styles'
+import Button from '../components/ui/Button'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import EmptyState from '../components/ui/EmptyState'
+import PageHeader from '../components/PageHeader'
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -354,14 +358,9 @@ export default function Ordenes() {
 
   return (
     <div>
-      <div className="flex items-center justify-end mb-6 flex-wrap gap-3">
-        <button
-          onClick={() => setModalOpen(true)}
-          className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-md"
-        >
-          + Nueva orden
-        </button>
-      </div>
+      <PageHeader title="Órdenes de Despacho">
+        <Button onClick={() => setModalOpen(true)}>+ Nueva orden</Button>
+      </PageHeader>
 
       <div className="bg-white rounded-lg shadow p-4 mb-4 flex flex-wrap gap-3 items-end">
         <div>
@@ -386,24 +385,30 @@ export default function Ordenes() {
         <div>
           <label className="block text-xs text-gray-500 mb-1">{modo === 'cliente' ? 'Cliente' : 'Grupo'}</label>
           {modo === 'cliente' ? (
-            <select value={clienteId} onChange={(e) => setClienteId(e.target.value)} className={selectClass}>
-              <option value="">Todos</option>
-              {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
-            </select>
+            <Select
+              nullable
+              noneLabel="Todos"
+              value={clienteId}
+              onChange={setClienteId}
+              options={clientes.map((c) => ({ value: String(c.id), label: c.razon_social }))}
+            />
           ) : (
-            <select value={grupoId} onChange={(e) => setGrupoId(e.target.value)} className={selectClass}>
-              <option value="">Todos</option>
-              {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
-            </select>
+            <Select
+              nullable
+              noneLabel="Todos"
+              value={grupoId}
+              onChange={setGrupoId}
+              options={grupos.map((g) => ({ value: String(g.id), label: g.nombre }))}
+            />
           )}
         </div>
         <div>
           <label className="block text-xs text-gray-500 mb-1">Desde</label>
-          <input type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} className={selectClass} />
+          <Input type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} />
         </div>
         <div>
           <label className="block text-xs text-gray-500 mb-1">Hasta</label>
-          <input type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} className={selectClass} />
+          <Input type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} />
         </div>
         <button
           onClick={() => { setClienteId(''); setGrupoId(''); setFechaDesde(''); setFechaHasta('') }}
@@ -414,7 +419,7 @@ export default function Ordenes() {
       </div>
 
       {meses.length === 0 && (
-        <div className="bg-white rounded-lg shadow p-8 text-center text-gray-400">No hay órdenes registradas</div>
+        <EmptyState message="No hay órdenes registradas" />
       )}
 
       {meses.map(([key, items]) => {
