@@ -221,7 +221,7 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                         <tr key={i}>
                           <td className="px-3 py-2">
                             <select
-                              className="border border-gray-200 rounded px-2 py-1 text-xs w-full mb-1 text-gray-500 bg-gray-50"
+                              className={`w-full mb-1 text-xs text-gray-500 bg-gray-50 ${selectClass}`}
                               value={row.grupo_filtro}
                               onChange={(e) => setRow(i, 'grupo_filtro', e.target.value)}
                             >

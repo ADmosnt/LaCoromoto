@@ -305,7 +305,7 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                         <td className="px-3 py-2">
                           {/* Grupo filter */}
                           <select
-                            className="border border-gray-200 rounded px-2 py-1 text-xs w-full mb-1 text-gray-500 bg-gray-50"
+                            className={`w-full mb-1 text-xs text-gray-500 bg-gray-50 ${selectClass}`}
                             value={row.grupo_filtro}
                             onChange={(e) => setRow(i, 'grupo_filtro', e.target.value)}
                           >

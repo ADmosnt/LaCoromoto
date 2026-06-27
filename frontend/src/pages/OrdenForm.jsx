@@ -161,7 +161,7 @@ export default function OrdenForm() {
                     <tr key={i}>
                       <td className="px-3 py-2">
                         <select
-                          className="border border-gray-300 rounded px-2 py-1.5 text-sm w-64"
+                          className={`w-64 ${selectClass}`}
                           value={row.producto_id}
                           onChange={(e) => setRow(i, 'producto_id', e.target.value)}
                         >
@@ -174,7 +174,7 @@ export default function OrdenForm() {
                         <input
                           type="number"
                           min={1}
-                          className="border border-gray-300 rounded px-2 py-1.5 text-sm w-24 text-center"
+                          className={`w-24 text-center py-1.5 ${inputClass}`}
                           value={row.cantidad_unidades}
                           onChange={(e) => setRow(i, 'cantidad_unidades', e.target.value)}
                         />
@@ -188,7 +188,7 @@ export default function OrdenForm() {
                             type="number"
                             step="0.01"
                             min={0}
-                            className="border border-gray-300 rounded px-2 py-1.5 text-sm w-28 text-right"
+                            className={`w-28 text-right py-1.5 ${inputClass}`}
                             value={row.precio_usd_momento === '' ? '' : (Number(row.precio_usd_momento) * upb).toFixed(2)}
                             onChange={(e) => {
                               const val = e.target.value
