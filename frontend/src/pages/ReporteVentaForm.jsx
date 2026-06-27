@@ -199,9 +199,10 @@ export default function ReporteVentaForm() {
                 {stockDisponible.length > 0 && (
                   <div className="flex gap-2 items-center">
                     <Select
+                      nullable
+                      noneLabel="Agregar producto..."
                       value={productoAdd}
                       onChange={setProductoAdd}
-                      placeholder="Agregar producto..."
                       options={stockDisponible.map((s) => ({
                         value: String(s.producto_id),
                         label: `${s.descripcion} — ${s.cantidad_unidades} uds disponibles`,
