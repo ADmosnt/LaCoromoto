@@ -94,7 +94,7 @@ export default function OrdenForm() {
     <div className="max-w-4xl">
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => nav('/ordenes')} className="text-gray-500 hover:text-gray-700 text-sm">← Volver</button>
-        <h2 className="text-xl font-bold text-gray-800">Nueva Orden de Despacho</h2>
+        <h2 className="font-display text-2xl font-bold text-ink tracking-tight">Nueva Orden de Despacho</h2>
       </div>
 
       <Alert type="error" message={error} />
@@ -225,7 +225,7 @@ export default function OrdenForm() {
               </tbody>
             </table>
           </div>
-          <button type="button" onClick={addRow} className="mt-3 text-sm text-blue-600 hover:underline">+ Agregar producto</button>
+          <button type="button" onClick={addRow} className="mt-3 text-sm text-brand-600 hover:underline">+ Agregar producto</button>
 
           <div className="mt-4 flex flex-col items-end border-t pt-4 gap-1">
             <p className="text-sm font-bold">Total USD: <span className="text-lg">${totalUsd.toFixed(2)}</span></p>
@@ -239,7 +239,7 @@ export default function OrdenForm() {
           <button type="button" onClick={() => nav('/ordenes')} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
             Cancelar
           </button>
-          <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+          <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50">
             {loading ? 'Creando...' : 'Crear Orden'}
           </button>
         </div>

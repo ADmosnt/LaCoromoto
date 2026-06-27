@@ -74,7 +74,7 @@ function UsuarioModal({ open, onClose, onSaved, clientes }) {
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
               Cancelar
             </button>
-            <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+            <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50">
               {loading ? 'Creando...' : 'Crear Usuario'}
             </button>
           </div>
@@ -111,16 +111,15 @@ export default function Usuarios() {
 
   const rolBadge = {
     admin: 'bg-purple-100 text-purple-700',
-    cliente: 'bg-blue-100 text-blue-700',
+    cliente: 'bg-brand-100 text-brand-700',
   }
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h2 className="text-xl font-bold text-gray-800">Usuarios</h2>
+      <div className="flex items-center justify-end mb-6 flex-wrap gap-3">
         <button
           onClick={() => setModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+          className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-md"
         >
           + Nuevo usuario
         </button>

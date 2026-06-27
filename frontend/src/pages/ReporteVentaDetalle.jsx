@@ -35,13 +35,13 @@ export default function ReporteVentaDetalle() {
     <div className="max-w-3xl">
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <button onClick={() => nav('/reportes-venta')} className="text-gray-500 hover:text-gray-700 text-sm">← Volver</button>
-        <h2 className="text-xl font-bold text-gray-800">Reporte de Venta #{reporte.id}</h2>
+        <h2 className="font-display text-2xl font-bold text-ink tracking-tight">Reporte de Venta #{reporte.id}</h2>
         <StatusBadge status={reporte.status} />
         {isPendiente && (
           <div className="ml-auto">
             <button
               onClick={handleConfirmar}
-              className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md"
+              className="bg-brand-600 hover:bg-brand-700 text-white text-sm px-4 py-2 rounded-md"
             >
               Confirmar reporte
             </button>

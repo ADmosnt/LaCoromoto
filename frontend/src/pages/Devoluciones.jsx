@@ -37,11 +37,10 @@ export default function Devoluciones() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h2 className="text-xl font-bold text-gray-800">Devoluciones</h2>
+      <div className="flex items-center justify-end mb-6 flex-wrap gap-3">
         <button
           onClick={() => setModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+          className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-md"
         >
           + Nueva devolución
         </button>

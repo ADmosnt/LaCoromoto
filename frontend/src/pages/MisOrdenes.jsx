@@ -62,7 +62,7 @@ function PanelDetalle({ ordenId, onRefresh }) {
         </div>
       )}
       {isConfirmado && (
-        <div className="mb-2 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1">
+        <div className="mb-2 text-xs text-brand-700 bg-brand-50 border border-brand-200 rounded px-2 py-1">
           Venta confirmada.
         </div>
       )}
@@ -96,11 +96,11 @@ function PanelDetalle({ ordenId, onRefresh }) {
         </table>
       </div>
       <div className="flex gap-2 flex-wrap">
-        <button onClick={handlePDF} className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded">
+        <button onClick={handlePDF} className="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded">
           Descargar PDF
         </button>
         {isActiva && (
-          <button onClick={() => setReporteOpen(true)} className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded">
+          <button onClick={() => setReporteOpen(true)} className="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded">
             Registrar Reporte de Venta
           </button>
         )}
@@ -133,7 +133,6 @@ export default function MisOrdenes() {
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-gray-800 mb-6">Mis Órdenes</h2>
       <Alert type="error" message={error} />
 
       {grupos.length === 0 && (
@@ -151,7 +150,7 @@ export default function MisOrdenes() {
                   onClick={() => toggle(o.id)}
                 >
                   <span className="text-gray-400 text-xs w-3 flex-shrink-0">{expanded === o.id ? '▼' : '▶'}</span>
-                  <span className="font-mono text-xs text-blue-600 w-24 flex-shrink-0">{o.numero_orden}</span>
+                  <span className="font-mono text-xs text-brand-600 w-24 flex-shrink-0">{o.numero_orden}</span>
                   <span className="text-xs text-gray-500 flex-shrink-0">{o.fecha_emision}</span>
                   <StatusBadge status={o.status} />
                   <span className="ml-auto text-sm font-medium">${Number(o.total_usd).toFixed(2)}</span>

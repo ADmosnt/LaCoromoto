@@ -59,18 +59,17 @@ export default function Productos() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h2 className="text-xl font-bold text-gray-800">Productos</h2>
+      <div className="flex items-center justify-end mb-6 flex-wrap gap-3">
         <div className="flex gap-2">
           <button
             onClick={() => setPreciosModalOpen(true)}
-            className="border border-blue-400 text-blue-600 hover:bg-blue-50 text-sm font-medium px-4 py-2 rounded-md"
+            className="border border-brand-400 text-brand-600 hover:bg-brand-50 text-sm font-medium px-4 py-2 rounded-md"
           >
             Actualizar precios masivo
           </button>
           <button
             onClick={openNew}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+            className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-md"
           >
             + Nuevo producto
           </button>
@@ -123,7 +122,7 @@ export default function Productos() {
                     ))}
                   </td>
                   <td className="px-4 py-3 text-center space-x-2">
-                    <button onClick={() => openEdit(p.id)} className="text-blue-600 hover:underline text-xs">Editar</button>
+                    <button onClick={() => openEdit(p.id)} className="text-brand-600 hover:underline text-xs">Editar</button>
                     <button onClick={() => handleDelete(p.id, p.descripcion)} className="text-red-500 hover:underline text-xs">Desactivar</button>
                   </td>
                 </tr>
@@ -172,7 +171,7 @@ export default function Productos() {
                       <td className="px-4 py-3 text-center">
                         <button
                           onClick={() => handleReactivar(p.id, p.descripcion)}
-                          className="text-green-600 hover:underline text-xs font-medium"
+                          className="text-brand-600 hover:underline text-xs font-medium"
                         >
                           Reactivar
                         </button>

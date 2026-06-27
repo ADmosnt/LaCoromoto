@@ -38,7 +38,7 @@ export function HelpTooltip({ text, side }) {
       <button
         type="button"
         tabIndex={-1}
-        className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-500 text-[10px] font-bold hover:bg-gray-300 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 ml-1 cursor-help leading-none flex-shrink-0"
+        className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-500 text-[10px] font-bold hover:bg-gray-300 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ml-1 cursor-help leading-none flex-shrink-0"
         aria-label="Ayuda"
       >
         ?

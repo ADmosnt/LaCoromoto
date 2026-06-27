@@ -389,7 +389,7 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                 </tbody>
               </table>
             </div>
-            <button type="button" onClick={addRow} className="mt-2 text-sm text-blue-600 hover:underline">
+            <button type="button" onClick={addRow} className="mt-2 text-sm text-brand-600 hover:underline">
               + Agregar producto
             </button>
 
@@ -416,7 +416,7 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
               Cancelar
             </button>
-            <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+            <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50">
               {loading ? (isEdit ? 'Guardando...' : 'Creando...') : (isEdit ? 'Guardar cambios' : 'Crear Orden')}
             </button>
           </div>

@@ -123,7 +123,7 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
               <button type="button" onClick={() => setStep('form')} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
                 ← Volver a editar
               </button>
-              <button type="button" onClick={doSave} disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+              <button type="button" onClick={doSave} disabled={loading} className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50">
                 {loading ? 'Guardando...' : (isEdit ? 'Confirmar y guardar' : 'Confirmar y crear')}
               </button>
             </div>
@@ -194,7 +194,7 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
                   )}
                 </div>
               ))}
-              <button type="button" onClick={addTel} className="text-sm text-blue-600 hover:underline">+ Agregar teléfono</button>
+              <button type="button" onClick={addTel} className="text-sm text-brand-600 hover:underline">+ Agregar teléfono</button>
             </div>
 
             {listas.length > 0 && (
@@ -220,7 +220,7 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
               <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
                 Cancelar
               </button>
-              <button type="submit" className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">
+              <button type="submit" className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700">
                 Revisar →
               </button>
             </div>

@@ -50,7 +50,7 @@ export default function EntradaInventarioForm() {
     <div className="max-w-lg">
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => nav('/inventario')} className="text-gray-500 hover:text-gray-700 text-sm">← Volver</button>
-        <h2 className="text-xl font-bold text-gray-800">Registrar Entrada al Almacén</h2>
+        <h2 className="font-display text-2xl font-bold text-ink tracking-tight">Registrar Entrada al Almacén</h2>
       </div>
 
       <Alert type="error" message={error} />
@@ -124,7 +124,7 @@ export default function EntradaInventarioForm() {
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50"
           >
             {loading ? 'Guardando...' : 'Registrar entrada'}
           </button>

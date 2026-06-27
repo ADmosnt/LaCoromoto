@@ -61,11 +61,10 @@ export default function Clientes() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h2 className="text-xl font-bold text-gray-800">Clientes</h2>
+      <div className="flex items-center justify-end mb-6 flex-wrap gap-3">
         <button
           onClick={openNew}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+          className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-md"
         >
           + Nuevo cliente
         </button>
@@ -122,7 +121,7 @@ export default function Clientes() {
                   <td className="px-4 py-3 text-gray-600">{c.telefonos?.join(', ')}</td>
                   <td className="px-4 py-3 text-center space-x-2">
                     <button onClick={() => navigate(`/clientes/${c.id}`)} className="text-purple-600 hover:underline text-xs">Ver ficha</button>
-                    <button onClick={() => openEdit(c.id)} className="text-blue-600 hover:underline text-xs">Editar</button>
+                    <button onClick={() => openEdit(c.id)} className="text-brand-600 hover:underline text-xs">Editar</button>
                     <button onClick={() => handleDelete(c.id, c.razon_social)} className="text-red-500 hover:underline text-xs">Desactivar</button>
                   </td>
                 </tr>
@@ -173,7 +172,7 @@ export default function Clientes() {
                       <td className="px-4 py-3 text-center">
                         <button
                           onClick={() => handleReactivar(c.id, c.razon_social)}
-                          className="text-green-600 hover:underline text-xs font-medium"
+                          className="text-brand-600 hover:underline text-xs font-medium"
                         >
                           Reactivar
                         </button>

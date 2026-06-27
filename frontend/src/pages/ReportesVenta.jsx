@@ -31,7 +31,6 @@ export default function ReportesVenta() {
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-gray-800 mb-6">Reportes de Venta</h2>
       <Alert type="error" message={error} />
 
       <div className="bg-white rounded-lg shadow">
@@ -79,9 +78,9 @@ export default function ReportesVenta() {
                     <StatusBadge status={r.status} />
                   </td>
                   <td className="px-4 py-3 text-center space-x-2">
-                    <Link to={`/reportes-venta/${r.id}`} className="text-blue-600 hover:underline text-xs">Ver</Link>
+                    <Link to={`/reportes-venta/${r.id}`} className="text-brand-600 hover:underline text-xs">Ver</Link>
                     {r.status === 'pendiente' && (
-                      <button onClick={() => handleConfirmar(r.id)} className="text-green-600 hover:underline text-xs">
+                      <button onClick={() => handleConfirmar(r.id)} className="text-brand-600 hover:underline text-xs">
                         Confirmar
                       </button>
                     )}

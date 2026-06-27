@@ -59,8 +59,8 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Left brand panel */}
-      <div className="bg-brand-900 text-white flex flex-col items-center justify-center md:w-[45%] px-10 py-8 md:py-0 min-h-[96px] md:min-h-screen">
-        <div className="flex flex-col items-center gap-3 md:gap-5">
+      <div className="bg-brand-900 text-white flex flex-col md:w-[45%] px-10 py-8 md:py-0 min-h-[120px] md:min-h-screen">
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 md:gap-6">
           <span className="bg-maiz-400 text-brand-900 font-display font-extrabold rounded-2xl flex items-center justify-center w-14 h-14 md:w-20 md:h-20 text-2xl md:text-4xl">
             LC
           </span>
@@ -69,7 +69,7 @@ export default function Login() {
             <p className="text-maiz-400 text-xs md:text-sm mt-1.5 uppercase tracking-[0.18em]">Consignaciones</p>
           </div>
         </div>
-        <p className="text-brand-200 text-xs mt-auto pt-6 hidden md:block">© 2026 La Coromoto</p>
+        <p className="text-brand-200 text-xs text-center pb-1 hidden md:block">© 2026 La Coromoto</p>
       </div>
 
       {/* Right form panel */}

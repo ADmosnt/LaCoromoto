@@ -34,9 +34,9 @@ export default function ConsolidadoGrupoModal({ open, onClose, grupoId, grupoNom
                 { label: 'Productos en consignación', value: data.stock_consolidado.length },
                 { label: 'Total unidades', value: totalUds },
               ].map((s) => (
-                <div key={s.label} className="bg-blue-50 rounded-lg px-4 py-3 text-center">
+                <div key={s.label} className="bg-brand-50 rounded-lg px-4 py-3 text-center">
                   <p className="text-xs text-gray-500">{s.label}</p>
-                  <p className="text-2xl font-bold text-blue-700">{s.value}</p>
+                  <p className="text-2xl font-bold text-brand-700">{s.value}</p>
                 </div>
               ))}
             </div>
@@ -76,12 +76,12 @@ export default function ConsolidadoGrupoModal({ open, onClose, grupoId, grupoNom
                           <td className="px-3 py-2 text-center text-gray-500">{prod.unidades_por_bulto}</td>
                           <td className="px-3 py-2 text-center font-medium">{prod.total_bultos}</td>
                           <td className="px-3 py-2 text-center text-gray-600">{prod.total_sueltas}</td>
-                          <td className="px-3 py-2 text-center font-bold text-blue-700">{prod.total_unidades}</td>
+                          <td className="px-3 py-2 text-center font-bold text-brand-700">{prod.total_unidades}</td>
                           <td className="px-3 py-2 text-center text-gray-500">{prod.clientes_con_stock}</td>
                         </tr>
                         {expanded === prod.producto_id && (
                           <tr>
-                            <td colSpan={7} className="bg-blue-50 px-6 py-2 border-b border-blue-100">
+                            <td colSpan={7} className="bg-brand-50 px-6 py-2 border-b border-brand-100">
                               <p className="text-xs text-gray-500 uppercase font-medium mb-1">Distribución por cliente</p>
                               <table className="text-xs w-full max-w-lg">
                                 <thead className="text-gray-400">
@@ -100,7 +100,7 @@ export default function ConsolidadoGrupoModal({ open, onClose, grupoId, grupoNom
                                       <td className="py-1.5 pr-4 font-mono text-gray-400">{pc.codigo}</td>
                                       <td className="py-1.5 pr-4 text-center">{pc.bultos}</td>
                                       <td className="py-1.5 pr-4 text-center">{pc.sueltas}</td>
-                                      <td className="py-1.5 text-center font-semibold text-blue-700">{pc.cantidad_unidades}</td>
+                                      <td className="py-1.5 text-center font-semibold text-brand-700">{pc.cantidad_unidades}</td>
                                     </tr>
                                   ))}
                                 </tbody>
@@ -114,7 +114,7 @@ export default function ConsolidadoGrupoModal({ open, onClose, grupoId, grupoNom
                   <tfoot className="bg-gray-50 border-t-2 border-gray-300">
                     <tr>
                       <td colSpan={5} className="px-3 py-2 text-right text-xs font-semibold text-gray-600">Total unidades del grupo:</td>
-                      <td className="px-3 py-2 text-center font-bold text-blue-700">{totalUds}</td>
+                      <td className="px-3 py-2 text-center font-bold text-brand-700">{totalUds}</td>
                       <td></td>
                     </tr>
                   </tfoot>

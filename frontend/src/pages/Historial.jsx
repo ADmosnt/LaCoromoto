@@ -57,7 +57,6 @@ export default function Historial() {
 
   return (
     <div>
-      <PageHeader title="Historial de Órdenes" />
       <Alert type="error" message={error} />
 
       <div className="bg-white rounded-lg shadow p-4 mb-4 flex flex-wrap gap-3 items-end">
@@ -133,7 +132,7 @@ export default function Historial() {
                   {items.map((o) => (
                     <tr key={o.id} className={`hover:bg-gray-50 ${o.status === 'anulada' ? 'opacity-50' : ''}`}>
                       <td className="px-4 py-2">
-                        <Link to={`/ordenes/${o.id}`} className="text-blue-600 hover:underline font-mono text-xs">
+                        <Link to={`/ordenes/${o.id}`} className="text-brand-600 hover:underline font-mono text-xs">
                           {o.numero_orden}
                         </Link>
                       </td>
@@ -162,10 +161,10 @@ export default function Historial() {
       })}
 
       {grandTotal > 0 && (
-        <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-4 flex justify-end">
+        <div className="mt-2 bg-brand-50 border border-brand-200 rounded-lg p-4 flex justify-end">
           <div className="text-right">
-            <p className="text-xs text-blue-600 uppercase font-medium">Total acumulado (órdenes activas)</p>
-            <p className="text-2xl font-bold text-blue-800">${grandTotal.toFixed(2)}</p>
+            <p className="text-xs text-brand-600 uppercase font-medium">Total acumulado (órdenes activas)</p>
+            <p className="text-2xl font-bold text-brand-800">${grandTotal.toFixed(2)}</p>
           </div>
         </div>
       )}

@@ -5,7 +5,6 @@ import OrdenModal from '../components/OrdenModal'
 import DevolucionModal from '../components/DevolucionModal'
 import KpiCard from '../components/ui/KpiCard'
 import StatusBadge from '../components/ui/StatusBadge'
-import Button from '../components/ui/Button'
 import TasaBoard from '../components/ui/TasaBoard'
 import { Users, Box, TrendingUp, CheckCircle } from 'lucide-react'
 import {
@@ -41,22 +40,24 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h2 className="font-display text-2xl font-bold text-ink mb-6 tracking-tight">Dashboard</h2>
-
       {/* Quick actions */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <Button onClick={() => setOrdenModalOpen(true)} className="w-full justify-center py-3">
+        <button onClick={() => setOrdenModalOpen(true)}
+          className="w-full py-3 rounded-lg text-sm font-medium bg-brand-600 text-white shadow-sm hover:bg-brand-700 transition-colors">
           + Nueva Orden
-        </Button>
-        <Button variant="ghost" onClick={() => setDevModalOpen(true)} className="w-full justify-center py-3 border-brick-500/40 text-brick-500 hover:bg-brick-500/5">
+        </button>
+        <button onClick={() => setDevModalOpen(true)}
+          className="w-full py-3 rounded-lg text-sm font-medium bg-brick-500 text-white shadow-sm hover:bg-brick-600 transition-colors">
           + Nueva Devolución
-        </Button>
-        <Button variant="secondary" onClick={() => navigate('/ordenes')} className="w-full justify-center py-3">
+        </button>
+        <button onClick={() => navigate('/ordenes')}
+          className="w-full py-3 rounded-lg text-sm font-medium bg-white text-ink border border-gray-200 shadow-sm hover:border-brand-300 hover:bg-brand-50 transition-colors">
           Ver Órdenes
-        </Button>
-        <Button variant="secondary" onClick={() => navigate('/stock')} className="w-full justify-center py-3">
+        </button>
+        <button onClick={() => navigate('/stock')}
+          className="w-full py-3 rounded-lg text-sm font-medium bg-white text-ink border border-gray-200 shadow-sm hover:border-brand-300 hover:bg-brand-50 transition-colors">
           Stock Consignación
-        </Button>
+        </button>
       </div>
 
       {data?.tasa_hoy && (

@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import GlobalSearch from './GlobalSearch'
 import AppHeader from './AppHeader'
+import { resolveTitle } from '../lib/routeLabels'
 import {
   LayoutDashboard, Users, Box, Warehouse, ClipboardList,
   RotateCcw, Archive, UserCog, Settings, LogOut,
@@ -44,6 +45,7 @@ export default function Layout() {
   const [open, setOpen] = useState(false)
   const { user, logout, sessionWarning, resetTimer } = useAuth()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const close = () => setOpen(false)
 
   const isAdmin = user?.rol === 'admin'
@@ -145,8 +147,7 @@ export default function Layout() {
           >
             ☰
           </button>
-          <Monograma />
-          <span className="font-display font-bold text-ink text-sm">La Coromoto</span>
+          <span className="font-display font-bold text-ink text-base tracking-tight">{resolveTitle(pathname)}</span>
         </header>
 
         {/* Desktop fixed header */}

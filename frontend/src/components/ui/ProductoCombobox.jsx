@@ -122,7 +122,7 @@ export default function ProductoCombobox({
               key={p.id}
               onMouseDown={(e) => { e.preventDefault(); select(p) }}
               onMouseEnter={() => setHighlight(idx)}
-              className={`px-3 py-1.5 cursor-pointer flex items-baseline gap-2 ${idx === highlight ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+              className={`px-3 py-1.5 cursor-pointer flex items-baseline gap-2 ${idx === highlight ? 'bg-brand-50' : 'hover:bg-gray-50'}`}
             >
               <span className="font-mono text-xs text-gray-500 flex-shrink-0">{p.codigo}</span>
               <span className="text-gray-800">{p.descripcion}</span>
