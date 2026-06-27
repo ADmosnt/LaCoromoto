@@ -4,30 +4,38 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Marca "almacén": verde pino profundo, el color de las puertas de
+        // depósito y las cajas de mercado. Reemplaza el índigo genérico.
         brand: {
-          50:  '#eef2ff',
-          100: '#e0e7ff',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#1e1b4b',
+          50:  '#eef4f0',
+          100: '#d4e6db',
+          200: '#a9cdb7',
+          400: '#4e8568',
+          500: '#2f6b4f',
+          600: '#1f4d3a',
+          700: '#173b2d',
+          800: '#102b21',
+          900: '#0a1f18',
         },
-        status: {
-          'pending-bg':   '#fef9c3',
-          'pending-text': '#854d0e',
-          'confirmed-bg':   '#dcfce7',
-          'confirmed-text': '#166534',
-          'active-bg':   '#e0e7ff',
-          'active-text': '#3730a3',
-          'returned-bg':   '#ffedd5',
-          'returned-text': '#9a3412',
-          'partial-bg':  '#ede9fe',
-          'partial-text':'#5b21b6',
-          'voided-bg':   '#fee2e2',
-          'voided-text': '#991b1b',
+        // Acento "maíz": el amarillo de la harina y los abastos. Reservado
+        // para la tasa del día y acciones de mayor jerarquía.
+        maiz: {
+          400: '#f0b542',
+          500: '#e0991a',
+          600: '#b97610',
         },
+        // Rojo "ladrillo" para acciones destructivas / saldos negativos.
+        brick: {
+          500: '#b4451f',
+          600: '#962f12',
+        },
+        paper: '#f5f3ef',
+        ink: '#211f1a',
+      },
+      fontFamily: {
+        sans: ['IBM Plex Sans Variable', 'system-ui', 'sans-serif'],
+        display: ['Bricolage Grotesque', 'system-ui', 'sans-serif'],
+        mono: ['IBM Plex Mono', 'ui-monospace', 'monospace'],
       },
       keyframes: {
         'accordion-down': { from: { height: '0' }, to: { height: 'var(--radix-accordion-content-height)' } },

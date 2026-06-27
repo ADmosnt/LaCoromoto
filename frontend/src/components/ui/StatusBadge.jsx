@@ -1,10 +1,13 @@
+// Colores por "temperatura de atención", derivados de la paleta de marca:
+// neutro = inactivo, maíz = requiere acción, pino = avanzando/cerrado,
+// ladrillo = anulado. Una sola fuente de verdad para los estados de orden.
 const CONFIG = {
-  activa:    { label: 'Activa',                bg: '#e0e7ff', text: '#3730a3' },
-  pendiente: { label: 'Pendiente',             bg: '#fef9c3', text: '#854d0e' },
-  parcial:   { label: 'Parcialmente reportada', bg: '#ede9fe', text: '#5b21b6' },
-  confirmado:{ label: 'Confirmado',            bg: '#dcfce7', text: '#166534' },
-  anulada:   { label: 'Anulada',               bg: '#fee2e2', text: '#991b1b' },
-  devuelta:  { label: 'Devuelta',              bg: '#ffedd5', text: '#9a3412' },
+  activa:     { label: 'Activa',                 bg: '#e7ebf0', text: '#3a4a63' },
+  pendiente:  { label: 'Pendiente',              bg: '#fbeccb', text: '#8a5a06' },
+  parcial:    { label: 'Parcialmente reportada', bg: '#dcebe1', text: '#1f4d3a' },
+  confirmado: { label: 'Confirmado',             bg: '#cbe7d1', text: '#15603a' },
+  anulada:    { label: 'Anulada',                bg: '#f4d9cf', text: '#8a2f12' },
+  devuelta:   { label: 'Devuelta',               bg: '#f0e1cf', text: '#7a4a1e' },
 }
 
 export default function StatusBadge({ status }) {

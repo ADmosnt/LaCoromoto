@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { authLogin, recoverPassword } from '../api'
 import { useAuth } from '../context/AuthContext'
 import Alert from '../components/Alert'
-import { Package } from 'lucide-react'
 import { inputClass } from '../lib/styles'
 
 export default function Login() {
@@ -62,16 +61,15 @@ export default function Login() {
       {/* Left brand panel */}
       <div className="bg-brand-900 text-white flex flex-col items-center justify-center md:w-[45%] px-10 py-8 md:py-0 min-h-[96px] md:min-h-screen">
         <div className="flex flex-col items-center gap-3 md:gap-5">
-          <div className="bg-brand-800 rounded-2xl p-4 md:p-5">
-            <Package size={32} className="text-brand-400 md:hidden" />
-            <Package size={48} className="text-brand-400 hidden md:block" />
-          </div>
+          <span className="bg-maiz-400 text-brand-900 font-display font-extrabold rounded-2xl flex items-center justify-center w-14 h-14 md:w-20 md:h-20 text-2xl md:text-4xl">
+            LC
+          </span>
           <div className="text-center">
-            <h1 className="text-xl md:text-3xl font-bold tracking-tight">La Coromoto</h1>
-            <p className="text-brand-400 text-sm md:text-base mt-1">Sistema de Consignaciones</p>
+            <h1 className="font-display text-2xl md:text-4xl font-bold tracking-tight">La Coromoto</h1>
+            <p className="text-maiz-400 text-xs md:text-sm mt-1.5 uppercase tracking-[0.18em]">Consignaciones</p>
           </div>
         </div>
-        <p className="text-brand-800 text-xs mt-auto pt-6 hidden md:block">© 2026 La Coromoto</p>
+        <p className="text-brand-200 text-xs mt-auto pt-6 hidden md:block">© 2026 La Coromoto</p>
       </div>
 
       {/* Right form panel */}
@@ -79,7 +77,7 @@ export default function Login() {
         <div className="w-full max-w-sm">
           {mode === 'login' ? (
             <>
-              <h2 className="text-2xl font-bold text-gray-800 mb-1">Bienvenido</h2>
+              <h2 className="font-display text-3xl font-bold text-ink mb-1 tracking-tight">Bienvenido</h2>
               <p className="text-sm text-gray-500 mb-6">Inicia sesión para continuar</p>
               <Alert type="error" message={error} />
               <form onSubmit={submit} className="space-y-4">
@@ -117,7 +115,7 @@ export default function Login() {
             </div>
           ) : (
             <>
-              <h2 className="text-xl font-bold text-gray-800 mb-1">Recuperar contraseña</h2>
+              <h2 className="font-display text-2xl font-bold text-ink mb-1 tracking-tight">Recuperar contraseña</h2>
               <p className="text-sm text-gray-500 mb-5">Ingresa tu usuario y el código de recuperación que guardaste.</p>
               <Alert type="error" message={recError} />
               <form onSubmit={submitRecover} className="space-y-3">

@@ -5,8 +5,19 @@ import GlobalSearch from './GlobalSearch'
 import AppHeader from './AppHeader'
 import {
   LayoutDashboard, Users, Box, Warehouse, ClipboardList,
-  RotateCcw, Archive, UserCog, Settings, Package, LogOut,
+  RotateCcw, Archive, UserCog, Settings, LogOut,
 } from 'lucide-react'
+
+// Monograma de marca: tejita maíz con las iniciales en pino. Más propio que
+// un ícono de stock, y reusable en sidebar, barra móvil y login.
+function Monograma({ size = 'md' }) {
+  const dims = size === 'lg' ? 'w-12 h-12 text-lg rounded-xl' : 'w-8 h-8 text-sm rounded-lg'
+  return (
+    <span className={`bg-maiz-400 text-brand-900 font-display font-extrabold flex items-center justify-center flex-shrink-0 ${dims}`}>
+      LC
+    </span>
+  )
+}
 
 const adminNav = [
   { to: '/dashboard',  label: 'Dashboard',             icon: LayoutDashboard },
@@ -25,7 +36,7 @@ const clienteNav = [
 const navLinkClass = ({ isActive }) =>
   `flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
     isActive
-      ? 'bg-brand-600 text-white border-l-[3px] border-brand-400'
+      ? 'bg-brand-700 text-white border-l-[3px] border-maiz-400'
       : 'text-gray-300 hover:bg-brand-800 hover:text-white border-l-[3px] border-transparent'
   }`
 
@@ -45,7 +56,7 @@ export default function Layout() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-paper">
       {open && (
         <div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={close} />
       )}
@@ -60,9 +71,12 @@ export default function Layout() {
       >
         {/* Sidebar header */}
         <div className="p-4 border-b border-brand-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Package size={20} className="text-brand-400 flex-shrink-0" />
-            <h1 className="text-sm font-bold leading-tight">La Coromoto</h1>
+          <div className="flex items-center gap-2.5">
+            <Monograma />
+            <div className="leading-tight">
+              <h1 className="font-display text-base font-bold">La Coromoto</h1>
+              <p className="text-[10px] uppercase tracking-[0.14em] text-brand-200">Consignaciones</p>
+            </div>
           </div>
           <button
             className="md:hidden text-gray-400 hover:text-white text-lg leading-none"
@@ -102,7 +116,7 @@ export default function Layout() {
           {/* User footer */}
           <div className="px-4 py-3 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
-              <div className="w-7 h-7 rounded-full bg-brand-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
+              <div className="w-7 h-7 rounded-full bg-brand-700 border border-brand-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
                 {initial}
               </div>
               <div className="min-w-0">
@@ -131,7 +145,8 @@ export default function Layout() {
           >
             ☰
           </button>
-          <span className="font-semibold text-gray-800 text-sm">La Coromoto</span>
+          <Monograma />
+          <span className="font-display font-bold text-ink text-sm">La Coromoto</span>
         </header>
 
         {/* Desktop fixed header */}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { getTasaHoy } from '../api'
+import TasaBoard from './ui/TasaBoard'
 
 const ROUTE_LABELS = {
   '/dashboard':    'Dashboard',
@@ -54,22 +55,15 @@ export default function AppHeader() {
         {crumbs.map((crumb, i) => (
           <span key={i} className="flex items-center gap-1.5">
             {i > 0 && <span className="text-gray-300">/</span>}
-            <span className={i === crumbs.length - 1 ? 'font-semibold text-gray-800' : 'text-gray-400'}>
+            <span className={i === crumbs.length - 1 ? 'font-display font-bold text-ink' : 'text-gray-400'}>
               {crumb.label}
             </span>
           </span>
         ))}
       </nav>
 
-      {/* BCV chip */}
-      {tasa && (
-        <div className="flex items-center gap-2 bg-brand-50 border border-brand-100 rounded-lg px-3 py-1.5">
-          <span className="text-xs text-brand-600 font-medium">
-            Bs. {Number(tasa.valor).toFixed(2)}
-          </span>
-          <span className="text-xs text-gray-400">hoy</span>
-        </div>
-      )}
+      {/* Firma: tasa del día */}
+      {tasa && <TasaBoard valor={tasa.valor} />}
     </header>
   )
 }
