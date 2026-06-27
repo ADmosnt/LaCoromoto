@@ -198,7 +198,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                         <td className="px-3 py-2 text-center">
                           <input
                             type="number" min={0} max={Math.floor(row.restante / upb)}
-                            className={`w-16 text-center ${selectClass}`}
+                            className={`w-16 text-center ${inputClass}`}
                             value={row.bultos}
                             onChange={(e) => setRowField(i, 'bultos', e.target.value)}
                           />
@@ -206,7 +206,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                         <td className="px-3 py-2 text-center">
                           <input
                             type="number" min={0} max={upb - 1}
-                            className={`w-16 text-center ${selectClass}`}
+                            className={`w-16 text-center ${inputClass}`}
                             value={row.sueltas}
                             onChange={(e) => setRowField(i, 'sueltas', e.target.value)}
                           />
@@ -217,7 +217,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                         {!isCliente && (
                           <td className="px-3 py-2 text-right">
                             <PrecioInput
-                              className={`w-24 text-right ${selectClass}`}
+                              className={`w-24 text-right ${inputClass}`}
                               value={row.precio_bulto}
                               onChange={(v) => setRowField(i, 'precio_bulto', v)}
                             />

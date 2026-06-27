@@ -158,7 +158,7 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
 
   const inpRO = 'w-full border border-gray-200 rounded-md px-3 py-2 text-sm bg-gray-100 text-gray-600'
   const lbl = 'block text-sm font-medium text-gray-700 mb-1'
-  const inpNum = 'border border-gray-300 rounded px-2 py-1 text-sm w-16 text-center focus:outline-none focus:ring-1 focus:ring-blue-500'
+  const inpNum = 'border border-gray-300 rounded px-2 py-1 text-sm w-16 text-center focus:outline-none focus:ring-1 focus:ring-brand-500'
 
   const mostrarDetalle = isEdit || Boolean(ordenId)
 
@@ -178,7 +178,7 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
             {isEdit ? (
               <div className={inpRO}>{clienteNombre}</div>
             ) : (
-              <select className={inputClass} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
+              <select className={`w-full ${selectClass}`} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
                 <option value="">Seleccionar cliente...</option>
                 {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
               </select>
@@ -196,7 +196,7 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
               {ordenes.length === 0 ? (
                 <p className="text-sm text-gray-400 py-1">Este cliente no tiene órdenes activas.</p>
               ) : (
-                <select className={inputClass} value={ordenId} onChange={(e) => setOrdenId(e.target.value)} required>
+                <select className={`w-full ${selectClass}`} value={ordenId} onChange={(e) => setOrdenId(e.target.value)} required>
                   <option value="">Seleccionar orden...</option>
                   {ordenes.map((o) => (
                     <option key={o.id} value={o.id}>#{o.numero_orden} — {o.fecha_emision}</option>
@@ -275,7 +275,7 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
                     type="checkbox"
-                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-brand-500"
                     checked={reingresar}
                     onChange={(e) => setReingresar(e.target.checked)}
                   />

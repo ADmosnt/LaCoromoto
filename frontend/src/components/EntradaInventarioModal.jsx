@@ -161,7 +161,7 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
     }
   }
 
-  const inpNum = 'border border-gray-300 rounded px-2 py-1.5 text-sm w-full text-center focus:outline-none focus:ring-1 focus:ring-blue-500'
+  const inpNum = 'border border-gray-300 rounded px-2 py-1.5 text-sm w-full text-center focus:outline-none focus:ring-1 focus:ring-brand-500'
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>

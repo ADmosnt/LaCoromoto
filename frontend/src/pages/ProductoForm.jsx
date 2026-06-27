@@ -103,7 +103,7 @@ export default function ProductoForm() {
 
         <div>
           <label className={lbl}>Grupo</label>
-          <select className={inputClass} value={form.grupo_id} onChange={(e) => set('grupo_id', e.target.value)}>
+          <select className={`w-full ${selectClass}`} value={form.grupo_id} onChange={(e) => set('grupo_id', e.target.value)}>
             <option value="">Sin grupo</option>
             {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
           </select>
@@ -121,7 +121,7 @@ export default function ProductoForm() {
                     step="0.01"
                     min="0"
                     placeholder="0.00"
-                    className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     value={getPrecio(l.id)}
                     onChange={(e) => setPrecio(l.id, e.target.value)}
                   />

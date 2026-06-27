@@ -90,7 +90,6 @@ export default function OrdenForm() {
     }
   }
 
-
   return (
     <div className="max-w-4xl">
       <div className="flex items-center gap-3 mb-6">
@@ -106,7 +105,7 @@ export default function OrdenForm() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
-              <select className={inputClass} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
+              <select className={`w-full ${selectClass}`} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
                 <option value="">Seleccionar cliente...</option>
                 {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
               </select>

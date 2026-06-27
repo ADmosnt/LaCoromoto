@@ -155,14 +155,14 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={lbl}>Zona</label>
-                <select className={inputClass} value={form.zona_id} onChange={(e) => set('zona_id', e.target.value)}>
+                <select className={`w-full ${selectClass}`} value={form.zona_id} onChange={(e) => set('zona_id', e.target.value)}>
                   <option value="">Sin zona</option>
                   {zonas.map((z) => <option key={z.id} value={z.id}>{z.nombre}</option>)}
                 </select>
               </div>
               <div>
                 <label className={lbl}>Grupo</label>
-                <select className={inputClass} value={form.grupo_id} onChange={(e) => set('grupo_id', e.target.value)}>
+                <select className={`w-full ${selectClass}`} value={form.grupo_id} onChange={(e) => set('grupo_id', e.target.value)}>
                   <option value="">Sin grupo</option>
                   {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
                 </select>

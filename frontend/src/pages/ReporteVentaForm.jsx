@@ -125,7 +125,7 @@ export default function ReporteVentaForm() {
             </label>
             <input
               type="number" step="0.0001" min="0"
-              className={`w-48 ${selectClass}`}
+              className={`w-48 ${inputClass}`}
               placeholder={tasa ? Number(tasa.valor).toFixed(4) : 'Ingrese tasa...'}
               value={tasaManual}
               onChange={(e) => setTasaManual(e.target.value)}
@@ -161,7 +161,7 @@ export default function ReporteVentaForm() {
                           <td className="px-3 py-2">
                             <input
                               type="number" min={1} max={row.disponible}
-                              className={`w-24 text-center ${selectClass}`}
+                              className={`w-24 text-center ${inputClass}`}
                               value={row.cantidad_unidades}
                               onChange={(e) => setRow(i, 'cantidad_unidades', e.target.value)}
                             />
@@ -169,7 +169,7 @@ export default function ReporteVentaForm() {
                           <td className="px-3 py-2">
                             <input
                               type="number" step="0.01" min={0}
-                              className={`w-28 text-right ${selectClass}`}
+                              className={`w-28 text-right ${inputClass}`}
                               value={row.precio_usd_momento}
                               onChange={(e) => setRow(i, 'precio_usd_momento', e.target.value)}
                             />

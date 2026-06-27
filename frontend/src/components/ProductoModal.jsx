@@ -191,7 +191,7 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
 
             <div>
               <label className={lbl}>Grupo</label>
-              <select className={inputClass} value={form.grupo_id} onChange={(e) => set('grupo_id', e.target.value)}>
+              <select className={`w-full ${selectClass}`} value={form.grupo_id} onChange={(e) => set('grupo_id', e.target.value)}>
                 <option value="">Sin grupo</option>
                 {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
               </select>
@@ -207,7 +207,7 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
                       <span className="text-sm text-gray-600 flex-1">{l.nombre}</span>
                       <PrecioInput
                         placeholder="0.00"
-                        className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         value={getPrecio(l.id)}
                         onChange={(v) => setPrecio(l.id, v)}
                       />
