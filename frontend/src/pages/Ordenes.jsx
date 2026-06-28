@@ -5,13 +5,19 @@ import OrdenModal from '../components/OrdenModal'
 import OrdenEdicionesModal from '../components/OrdenEdicionesModal'
 import OrdenesResumenModal from '../components/OrdenesResumenModal'
 import OrdenDetailPanel from '../components/OrdenDetailPanel'
-import StatusBadge from '../components/ui/StatusBadge'
+import StatusBadge, { STATUS_CONFIG } from '../components/ui/StatusBadge'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Select from '../components/ui/Select'
 import Table from '../components/ui/Table'
 import EmptyState from '../components/ui/EmptyState'
 import { labelMes, groupByMonth } from '../lib/fechas'
+
+// Etiqueta de estado más larga. Se usa como "sizer" invisible para que la
+// columna de estado reserve siempre el mismo ancho en todas las tablas de mes,
+// haya o no órdenes "Parcialmente reportada" en ese mes.
+const STATUS_SIZER = Object.values(STATUS_CONFIG)
+  .reduce((a, c) => (c.label.length > a.length ? c.label : a), '')
 
 export default function Ordenes() {
   const [ordenes, setOrdenes] = useState([])
@@ -193,7 +199,16 @@ export default function Ordenes() {
                           )}
                         </Table.Td>
                         <Table.Td className="w-px">
-                          <StatusBadge status={o.status} />
+                          {/* Sizer invisible: fija el ancho de la columna al del badge más
+                              largo, para que todas las tablas de mes lo alineen igual. */}
+                          <span className="grid justify-items-start">
+                            <span aria-hidden className="invisible col-start-1 row-start-1 text-xs font-medium px-2.5 py-0.5 rounded-full whitespace-nowrap">
+                              {STATUS_SIZER}
+                            </span>
+                            <span className="col-start-1 row-start-1">
+                              <StatusBadge status={o.status} />
+                            </span>
+                          </span>
                         </Table.Td>
                         <Table.Td
                           align="right"
