@@ -14,7 +14,7 @@ import {
 function Monograma({ size = 'md' }) {
   const dims = size === 'lg' ? 'w-12 h-12 text-lg rounded-xl' : 'w-8 h-8 text-sm rounded-lg'
   return (
-    <span className={`bg-maiz-400 text-brand-900 font-display font-extrabold flex items-center justify-center flex-shrink-0 ${dims}`}>
+    <span className={`bg-llama-400 text-brand-900 font-display font-extrabold flex items-center justify-center flex-shrink-0 ${dims}`}>
       LC
     </span>
   )
@@ -37,7 +37,7 @@ const clienteNav = [
 const navLinkClass = ({ isActive }) =>
   `flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
     isActive
-      ? 'bg-brand-700 text-white border-l-[3px] border-maiz-400'
+      ? 'bg-brand-700 text-white border-l-[3px] border-llama-400'
       : 'text-gray-300 hover:bg-brand-800 hover:text-white border-l-[3px] border-transparent'
   }`
 

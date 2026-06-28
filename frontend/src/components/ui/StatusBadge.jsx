@@ -1,12 +1,7 @@
-// Colores por "temperatura de atención", derivados de la paleta de marca:
-// neutro = inactivo, maíz = requiere acción, pino = avanzando/cerrado,
-// ladrillo = anulado. Una sola fuente de verdad para los estados de orden.
-// Se exporta para que cualquier otro elemento de estado (p. ej. los banners
-// del panel de detalle de una orden) derive sus colores de aquí.
 export const STATUS_CONFIG = {
   activa:     { label: 'Activa',                 bg: '#e7ebf0', text: '#3a4a63' },
   pendiente:  { label: 'Pendiente',              bg: '#fbeccb', text: '#8a5a06' },
-  parcial:    { label: 'Parcialmente reportada', bg: '#dcebe1', text: '#1f4d3a' },
+  parcial:    { label: 'Parcialmente reportada', bg: '#ead8f2', text: '#653480' },
   confirmado: { label: 'Confirmado',             bg: '#cbe7d1', text: '#15603a' },
   anulada:    { label: 'Anulada',                bg: '#f4d9cf', text: '#8a2f12' },
   devuelta:   { label: 'Devuelta',               bg: '#f0e1cf', text: '#7a4a1e' },

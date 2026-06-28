@@ -107,8 +107,8 @@ export default function Dashboard() {
               <YAxis tickFormatter={fmt} tick={{ fontSize: 11 }} width={60} />
               <Tooltip formatter={(v) => [`$${Number(v).toFixed(2)}`, undefined]} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="despachos" name="Despachos"           fill="#e0991a" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="ventas"    name="Ventas confirmadas"  fill="#1f4d3a" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="despachos" name="Despachos"           fill="#4a82bc" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="ventas"    name="Ventas confirmadas"  fill="#653480" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

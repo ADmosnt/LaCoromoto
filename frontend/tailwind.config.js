@@ -4,34 +4,29 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Marca "almacén": verde pino profundo, el color de las puertas de
-        // depósito y las cajas de mercado. Reemplaza el índigo genérico.
         brand: {
-          50:  '#eef4f0',
-          100: '#d4e6db',
-          200: '#a9cdb7',
-          300: '#7aae93',
-          400: '#4e8568',
-          500: '#2f6b4f',
-          600: '#1f4d3a',
-          700: '#173b2d',
-          800: '#102b21',
-          900: '#0a1f18',
+          50:  '#f6f0fa',
+          100: '#ead8f2',
+          200: '#d4b1e4',
+          300: '#ba86d0',
+          400: '#9d5fb8',
+          500: '#7e4199',
+          600: '#653480',
+          700: '#4e2865',
+          800: '#391d4b',
+          900: '#271235',
         },
-        // Acento "maíz": el amarillo de la harina y los abastos. Reservado
-        // para la tasa del día y acciones de mayor jerarquía.
-        maiz: {
-          400: '#f0b542',
-          500: '#e0991a',
-          600: '#b97610',
+        llama: {
+          400: '#6a9fd4',
+          500: '#4a82bc',
+          600: '#356aa0',
         },
-        // Rojo "ladrillo" para acciones destructivas / saldos negativos.
         brick: {
           500: '#b4451f',
           600: '#962f12',
         },
-        paper: '#f5f3ef',
-        ink: '#211f1a',
+        paper: '#f5f2ed',
+        ink: '#1e1b26',
       },
       fontFamily: {
         sans: ['IBM Plex Sans Variable', 'system-ui', 'sans-serif'],

@@ -28,15 +28,18 @@ Tres bloques de trabajo, en orden cronológico:
 ## 1. Identidad "Almacén" (tokens, tipografía, firma)
 
 ### Paleta (`tailwind.config.js`)
-Reemplaza el índigo genérico. **`brand` ahora es verde pino, no índigo.**
+**`brand` = ciruela (morado cálido), `llama` = azul acero (base de llama de vela).**
+Diseñada para una empresa de velas/parafina. No usa los defaults de Tailwind
+(`purple`, `blue`, `indigo`): los shades tienen subtono rojo (cera teñida) y
+el azul es un steel-blue cálido (llama), no el `blue-500` genérico.
 
 | Token | Uso |
 |---|---|
-| `brand-50..900` | Verde pino (puertas de depósito / cajas de mercado). Color primario. |
-| `maiz-400/500/600` | Ámbar maíz. **Reservado** para la tasa del día y acentos de alta jerarquía. No usar como primario. |
+| `brand-50..900` | Ciruela / morado cálido de cera teñida. Color primario. |
+| `llama-400/500/600` | Azul acero de la base de una llama de vela. Tasa del día, monograma, acentos. |
 | `brick-500/600` | Rojo ladrillo para destructivas / negativos. |
-| `paper` (`#f5f3ef`) | Fondo de la app (cálido). |
-| `ink` (`#211f1a`) | Texto principal. |
+| `paper` (`#f5f2ed`) | Fondo de la app (marfil cera). |
+| `ink` (`#1e1b26`) | Texto principal (oscuro con tinte púrpura). |
 
 ### Tipografía (`index.css`)
 Tres familias con rol fijo (self-hosted vía `@fontsource`):
@@ -47,13 +50,13 @@ Tres familias con rol fijo (self-hosted vía `@fontsource`):
 `@fontsource/inter` fue **eliminado**. No reintroducir Inter.
 
 ### Elemento de firma: `components/ui/TasaBoard.jsx`
-La tasa BCV del día tratada como un tablero de cambio (fondo pino, cifra mono
-ámbar, punto "del día"). Se alimenta desde `AppHeader` → `getTasaHoy()` →
+La tasa BCV del día tratada como un tablero de cambio (fondo ciruela, cifra mono
+azul llama, punto "del día"). Se alimenta desde `AppHeader` → `getTasaHoy()` →
 `GET /api/tasas/hoy` (que cae al scraper `services/bcv_scraper.py` si no hay
 tasa de hoy). Variantes `sm` (header) y `lg` (Dashboard).
 
 ### Marca
-- Monograma "LC" (maíz sobre pino) en sidebar/login/móvil — reemplaza el ícono `Package`.
+- Monograma "LC" (llama sobre ciruela) en sidebar/login/móvil — reemplaza el ícono `Package`.
 - Favicon SVG con el monograma en `public/favicon.svg` + `<title>` "La Coromoto · Consignaciones".
 
 ### Barrido de color
@@ -147,7 +150,7 @@ legacy `bg-gray-200`; es un detalle pendiente, no se tocó en este refactor.
 
 ## Convenciones a respetar (para superpowers)
 
-- `brand` = **verde pino**, no índigo. `maiz` solo para la tasa/acentos. No reintroducir Inter ni el ícono `Package`.
+- `brand` = **ciruela** (morado cálido), no verde ni índigo. `llama` (azul acero) solo para la tasa/acentos. No reintroducir Inter ni el ícono `Package`.
 - **No reintroducir `PageHeader`** ni títulos `<h2>` en páginas de primer nivel; el header los dibuja vía `routeLabels`.
 - Botón de acción de cabecera → dentro del toolbar de la página con `ml-auto`.
 - Colores de estado de orden → siempre desde `StatusBadge.STATUS_CONFIG`.
