@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent } from './ui/Dialog'
-import { inputClass } from '../lib/styles'
+import Button from './ui/Button'
+import Select from './ui/Select'
+import FormField from './ui/FormField'
 import { HelpTooltip } from './ui/Tooltip'
 import PrecioInput, { parsePrecio } from './ui/PrecioInput'
 import { getListasPrecios, getGruposProductos, ajustePrecios } from '../api'
@@ -102,20 +104,25 @@ export default function ActualizacionPreciosModal({ open, onClose, onSaved }) {
 
         {/* Controls */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Lista de precios *</label>
-            <select className={inputClass} value={listaId} onChange={(e) => setListaId(e.target.value)}>
-              <option value="">Seleccionar lista...</option>
-              {listas.map((l) => <option key={l.id} value={l.id}>{l.nombre}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Grupo de productos</label>
-            <select className={inputClass} value={grupoId} onChange={(e) => setGrupoId(e.target.value)}>
-              <option value="">Todos los grupos</option>
-              {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
-            </select>
-          </div>
+          <FormField id="lista" label="Lista de precios *">
+            <Select
+              id="lista"
+              placeholder="Seleccionar lista..."
+              value={listaId}
+              onChange={setListaId}
+              options={listas.map((l) => ({ value: String(l.id), label: l.nombre }))}
+            />
+          </FormField>
+          <FormField id="grupo" label="Grupo de productos">
+            <Select
+              id="grupo"
+              nullable
+              noneLabel="Todos los grupos"
+              value={grupoId}
+              onChange={setGrupoId}
+              options={grupos.map((g) => ({ value: String(g.id), label: g.nombre }))}
+            />
+          </FormField>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
               Tipo de ajuste
@@ -150,7 +157,7 @@ export default function ActualizacionPreciosModal({ open, onClose, onSaved }) {
               <PrecioInput
                 allowNegative
                 placeholder={tipo === 'porcentaje' ? 'Ej: 10 o -5' : 'Ej: 0.50 o -1.00'}
-                className={`${inputClass} pl-8`}
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition pl-8"
                 value={valor}
                 onChange={setValor}
                 onKeyDown={(e) => e.key === 'Enter' && handlePreview()}
@@ -215,17 +222,14 @@ export default function ActualizacionPreciosModal({ open, onClose, onSaved }) {
         )}
 
         <div className="flex justify-end gap-3 pt-4 border-t mt-4">
-          <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
-            Cancelar
-          </button>
-          <button
+          <Button variant="secondary" type="button" onClick={onClose}>Cancelar</Button>
+          <Button
             type="button"
             onClick={handleApply}
             disabled={applying || !preview || preview.total === 0}
-            className="px-5 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
             {applying ? 'Aplicando...' : preview ? `Aplicar ${preview.total} cambio${preview.total !== 1 ? 's' : ''}` : 'Aplicar cambios'}
-          </button>
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
