@@ -131,6 +131,20 @@ versiones `'1'` y `'2'` (el backend exporta v2). No volver a restringir a `'1'`.
 
 ---
 
+## 6. Refactor de Órdenes (componentización + tabla real)
+
+Tras una revisión de código, partí `pages/Ordenes.jsx` (era ~530 líneas):
+
+- **`lib/fechas.js`** (nuevo) — `MESES`, `labelMes`, `groupByMonth(items, dateField='fecha_emision')` (utilidades puras compartibles).
+- **`components/OrdenDetailPanel.jsx`** (nuevo) — el panel de detalle expandible, antes incrustado en `Ordenes.jsx`. Incluye `StatusNotice` + `STATUS_NOTICE`. El cálculo de `devueltoMap`/`reportadoMap` ya **no** es un IIFE en el JSX: está en un `useMemo([detail])`.
+- **`pages/Ordenes.jsx`** ahora solo gestiona filtros, carga y el mapeo de la lista. `meses` y `grandTotal` están en `useMemo([ordenes])`.
+- **La lista de órdenes usa el componente `Table`** (no `<div>` con flex). Esto arregla el desfase de columnas: la `<table>` real alinea columnas entre filas de forma nativa, sobrevive a anchos variables (la píldora "Parcialmente reportada" ya no descuadra el total), y la columna del icono "✎" reserva su espacio aunque esté vacía. El truco de columnas: celdas de contenido fijo con `w-px whitespace-nowrap`, y la celda de cliente con `w-full max-w-0` + `truncate`. La fecha es `hidden sm:table-cell` (en móvil la celda no reserva espacio, a diferencia de un grid con px fijos).
+- El detalle expandido va en una fila `<tr><td colSpan={8}>` siguiente a cada fila de orden (patrón estándar de tabla expandible).
+- El checkbox de selección usa `accent-brand-600` (antes `accent-blue-600`, fuera de paleta).
+
+**Nota:** la tabla de productos *dentro* de `OrdenDetailPanel` sigue con su header
+legacy `bg-gray-200`; es un detalle pendiente, no se tocó en este refactor.
+
 ## Convenciones a respetar (para superpowers)
 
 - `brand` = **verde pino**, no índigo. `maiz` solo para la tasa/acentos. No reintroducir Inter ni el ícono `Package`.
@@ -139,3 +153,4 @@ versiones `'1'` y `'2'` (el backend exporta v2). No volver a restringir a `'1'`.
 - Colores de estado de orden → siempre desde `StatusBadge.STATUS_CONFIG`.
 - `Button` tiene variantes: `primary | secondary | danger | ghost | purple`.
 - Cifras numéricas en tablas dependen de `tnum` global (no romper `font-feature-settings`).
+- Para datos tabulares usar el componente `Table` (alineación nativa), no `<div>` con flex/grid de px fijos. `OrdenDetailPanel` vive en `components/`, las utilidades de fecha en `lib/fechas.js`.
