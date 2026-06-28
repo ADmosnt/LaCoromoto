@@ -5,7 +5,10 @@ import {
   getGruposProductos, getListasPrecios,
 } from '../api'
 import Alert from '../components/Alert'
-import { inputClass, selectClass } from '../lib/styles'
+import Button from '../components/ui/Button'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import FormField from '../components/ui/FormField'
 
 const emptyForm = {
   codigo: '', descripcion: '', unidades_por_bulto: 1,
@@ -72,8 +75,6 @@ export default function ProductoForm() {
     }
   }
 
-  const lbl = 'block text-sm font-medium text-gray-700 mb-1'
-
   return (
     <div className="max-w-xl">
       <div className="flex items-center gap-3 mb-6">
@@ -85,43 +86,43 @@ export default function ProductoForm() {
 
       <form onSubmit={submit} className="bg-white rounded-lg shadow p-6 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className={lbl}>Código *</label>
-            <input className={inputClass} value={form.codigo} onChange={(e) => set('codigo', e.target.value)} required disabled={isEdit} />
-          </div>
-          <div>
-            <label className={lbl}>Unidades por bulto *</label>
-            <input type="number" min={1} className={inputClass} value={form.unidades_por_bulto}
+          <FormField id="codigo" label="Código *">
+            <Input id="codigo" value={form.codigo} onChange={(e) => set('codigo', e.target.value)} required disabled={isEdit} />
+          </FormField>
+          <FormField id="unidades_por_bulto" label="Unidades por bulto *">
+            <Input id="unidades_por_bulto" type="number" min={1} value={form.unidades_por_bulto}
               onChange={(e) => set('unidades_por_bulto', parseInt(e.target.value) || 1)} required />
-          </div>
+          </FormField>
         </div>
 
-        <div>
-          <label className={lbl}>Descripción *</label>
-          <input className={inputClass} value={form.descripcion} onChange={(e) => set('descripcion', e.target.value)} required />
-        </div>
+        <FormField id="descripcion" label="Descripción *">
+          <Input id="descripcion" value={form.descripcion} onChange={(e) => set('descripcion', e.target.value)} required />
+        </FormField>
 
-        <div>
-          <label className={lbl}>Grupo</label>
-          <select className={`w-full ${selectClass}`} value={form.grupo_id} onChange={(e) => set('grupo_id', e.target.value)}>
-            <option value="">Sin grupo</option>
-            {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
-          </select>
-        </div>
+        <FormField id="grupo_id" label="Grupo">
+          <Select
+            id="grupo_id"
+            nullable
+            noneLabel="Sin grupo"
+            value={form.grupo_id}
+            onChange={(val) => set('grupo_id', val)}
+            options={grupos.map((g) => ({ value: String(g.id), label: g.nombre }))}
+          />
+        </FormField>
 
         {listas.length > 0 && (
           <div>
-            <label className={lbl}>Precios por lista (USD)</label>
+            <p className="text-sm font-medium text-gray-700 mb-2">Precios por lista (USD)</p>
             <div className="space-y-2">
               {listas.map((l) => (
                 <div key={l.id} className="flex items-center gap-3">
                   <span className="text-sm text-gray-600 w-36">{l.nombre}</span>
-                  <input
+                  <Input
                     type="number"
                     step="0.01"
                     min="0"
                     placeholder="0.00"
-                    className="w-32 py-1.5 border border-gray-300 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                    className="w-32 py-1.5"
                     value={getPrecio(l.id)}
                     onChange={(e) => setPrecio(l.id, e.target.value)}
                   />
@@ -132,12 +133,8 @@ export default function ProductoForm() {
         )}
 
         <div className="flex justify-end gap-3 pt-2">
-          <button type="button" onClick={() => nav('/productos')} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
-            Cancelar
-          </button>
-          <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50">
-            {loading ? 'Guardando...' : 'Guardar'}
-          </button>
+          <Button variant="secondary" type="button" onClick={() => nav('/productos')}>Cancelar</Button>
+          <Button type="submit" disabled={loading}>{loading ? 'Guardando...' : 'Guardar'}</Button>
         </div>
       </form>
     </div>
