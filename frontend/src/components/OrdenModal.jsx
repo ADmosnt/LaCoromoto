@@ -9,7 +9,9 @@ import {
   getClientes, getProductos, getTasaHoy, getGruposProductos, getInventario,
 } from '../api'
 import Alert from './Alert'
-import { inputClass, selectClass } from '../lib/styles'
+import Button from './ui/Button'
+import Input from './ui/Input'
+import Select from './ui/Select'
 
 const emptyRow = () => ({
   grupo_filtro: '',
@@ -214,17 +216,20 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
               <div className="sm:col-span-2">
                 <label className="block text-xs font-medium text-gray-700 mb-1">Cliente *</label>
                 {isEdit ? (
-                  <div className={`${inputClass} bg-gray-100 text-gray-600`}>{clienteNombre}</div>
+                  <div className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-600">{clienteNombre}</div>
                 ) : (
-                  <select className={`w-full ${selectClass}`} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
-                    <option value="">Seleccionar cliente...</option>
-                    {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
-                  </select>
+                  <Select
+                    placeholder="Seleccionar cliente..."
+                    value={clienteId}
+                    onChange={setClienteId}
+                    options={clientes.map((c) => ({ value: String(c.id), label: c.razon_social }))}
+                    className="w-full"
+                  />
                 )}
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Fecha</label>
-                <input type="date" className={inputClass} value={fecha} onChange={(e) => setFecha(e.target.value)} />
+                <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
@@ -233,17 +238,16 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                   Tasa BCV {tasa && <span className="text-gray-400 ml-1">(BCV: {Number(tasa.valor).toFixed(4)})</span>}
                   <HelpTooltip text="Tipo de cambio del Banco Central de Venezuela al momento del despacho. Se usa para calcular el total en bolívares." />
                 </label>
-                <input
+                <Input
                   type="number" step="0.0001" min="0"
                   placeholder={tasa ? Number(tasa.valor).toFixed(4) : 'Ingrese tasa...'}
-                  className={inputClass}
                   value={tasaManual}
                   onChange={(e) => setTasaManual(e.target.value)}
                 />
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-xs font-medium text-gray-700 mb-1">Nota</label>
-                <input className={inputClass} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Observaciones opcionales" />
+                <Input value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Observaciones opcionales" />
               </div>
             </div>
           </div>
@@ -305,7 +309,7 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                         <td className="px-3 py-2">
                           {/* Grupo filter */}
                           <select
-                            className={`w-full mb-1 text-xs text-gray-500 bg-gray-50 ${selectClass}`}
+                            className="w-full mb-1 text-xs text-gray-500 bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition"
                             value={row.grupo_filtro}
                             onChange={(e) => setRow(i, 'grupo_filtro', e.target.value)}
                           >
@@ -333,17 +337,17 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                           )}
                         </td>
                         <td className="px-3 py-2">
-                          <input
+                          <Input
                             type="text" inputMode="numeric"
-                            className={`w-full text-center py-1.5 ${inputClass}`}
+                            className="w-full text-center py-1.5"
                             value={row.bultos}
                             onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRow(i, 'bultos', e.target.value) }}
                           />
                         </td>
                         <td className="px-3 py-2">
-                          <input
+                          <Input
                             type="text" inputMode="numeric"
-                            className={`w-full text-center py-1.5 ${inputClass}`}
+                            className="w-full text-center py-1.5"
                             value={row.sueltas}
                             onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRow(i, 'sueltas', e.target.value) }}
                           />
@@ -404,8 +408,8 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
           {isEdit && (
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Motivo del cambio (opcional)</label>
-              <input
-                className={inputClass} value={motivo}
+              <Input
+                value={motivo}
                 onChange={(e) => setMotivo(e.target.value)}
                 placeholder="Ej: el cliente solicitó cambiar el precio de Mini Velón"
               />
@@ -413,12 +417,10 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
           )}
 
           <div className="flex justify-end gap-3 pt-2 border-t">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
-              Cancelar
-            </button>
-            <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50">
+            <Button variant="secondary" type="button" onClick={onClose}>Cancelar</Button>
+            <Button type="submit" disabled={loading}>
               {loading ? (isEdit ? 'Guardando...' : 'Creando...') : (isEdit ? 'Guardar cambios' : 'Crear Orden')}
-            </button>
+            </Button>
           </div>
         </form>
       </DialogContent>
