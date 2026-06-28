@@ -3,7 +3,8 @@ import { toast } from 'sonner'
 import { getClientes, getClienteStock, getGruposClientes, getGrupoStock, getOrden } from '../api'
 import { HelpTooltip } from '../components/ui/Tooltip'
 import ReporteVentaModal from '../components/ReporteVentaModal'
-import { selectClass } from '../lib/styles'
+import Select from '../components/ui/Select'
+import PageHeader from '../components/PageHeader'
 
 const statusBadge = {
   activa: 'bg-green-100 text-green-700',
@@ -106,6 +107,7 @@ export default function Stock() {
 
   return (
     <div>
+      <PageHeader title="Stock en Consignación" />
       <div className="bg-white rounded-lg shadow">
         <div className="p-4 border-b flex flex-wrap items-center gap-3">
           <div className="inline-flex rounded-md border border-gray-300 overflow-hidden text-sm">
@@ -126,15 +128,21 @@ export default function Stock() {
           </div>
 
           {modo === 'cliente' ? (
-            <select value={clienteId} onChange={(e) => setClienteId(e.target.value)} className={`w-72 ${selectClass}`}>
-              <option value="">Seleccionar cliente...</option>
-              {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
-            </select>
+            <Select
+              placeholder="Seleccionar cliente..."
+              value={clienteId}
+              onChange={setClienteId}
+              options={clientes.map((c) => ({ value: String(c.id), label: c.razon_social }))}
+              className="w-72"
+            />
           ) : (
-            <select value={grupoId} onChange={(e) => setGrupoId(e.target.value)} className={`w-72 ${selectClass}`}>
-              <option value="">Seleccionar grupo...</option>
-              {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
-            </select>
+            <Select
+              placeholder="Seleccionar grupo..."
+              value={grupoId}
+              onChange={setGrupoId}
+              options={grupos.map((g) => ({ value: String(g.id), label: g.nombre }))}
+              className="w-72"
+            />
           )}
         </div>
 
