@@ -4,7 +4,10 @@ import { Dialog, DialogContent } from './ui/Dialog'
 import { HelpTooltip } from './ui/Tooltip'
 import { createDevolucion, updateDevolucion, getClientes, getOrdenes, getOrden, getDevolucion } from '../api'
 import Alert from './Alert'
-import { inputClass, selectClass } from '../lib/styles'
+import Button from './ui/Button'
+import Input from './ui/Input'
+import Select from './ui/Select'
+import FormField from './ui/FormField'
 
 export default function DevolucionModal({ open, onClose, onSaved, devolucionId }) {
   const isEdit = Boolean(devolucionId)
@@ -157,7 +160,6 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
   }
 
   const inpRO = 'w-full border border-gray-200 rounded-md px-3 py-2 text-sm bg-gray-100 text-gray-600'
-  const lbl = 'block text-sm font-medium text-gray-700 mb-1'
 
   const mostrarDetalle = isEdit || Boolean(ordenId)
 
@@ -173,41 +175,43 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
         <form onSubmit={submit} className="space-y-4">
 
           <div>
-            <label className={lbl}>Cliente *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
             {isEdit ? (
               <div className={inpRO}>{clienteNombre}</div>
             ) : (
-              <select className={`w-full ${selectClass}`} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
-                <option value="">Seleccionar cliente...</option>
-                {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
-              </select>
+              <Select
+                placeholder="Seleccionar cliente..."
+                value={clienteId}
+                onChange={setClienteId}
+                options={clientes.map((c) => ({ value: String(c.id), label: c.razon_social }))}
+              />
             )}
           </div>
 
           {isEdit ? (
             <div>
-              <label className={lbl}>Orden de origen</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Orden de origen</label>
               <div className={inpRO}>#{ordenNumero}</div>
             </div>
           ) : clienteId && (
             <div>
-              <label className={lbl}>Orden de origen *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Orden de origen *</label>
               {ordenes.length === 0 ? (
                 <p className="text-sm text-gray-400 py-1">Este cliente no tiene órdenes activas.</p>
               ) : (
-                <select className={`w-full ${selectClass}`} value={ordenId} onChange={(e) => setOrdenId(e.target.value)} required>
-                  <option value="">Seleccionar orden...</option>
-                  {ordenes.map((o) => (
-                    <option key={o.id} value={o.id}>#{o.numero_orden} — {o.fecha_emision}</option>
-                  ))}
-                </select>
+                <Select
+                  placeholder="Seleccionar orden..."
+                  value={ordenId}
+                  onChange={setOrdenId}
+                  options={ordenes.map((o) => ({ value: String(o.id), label: `#${o.numero_orden} — ${o.fecha_emision}` }))}
+                />
               )}
             </div>
           )}
 
           {rows.length > 0 && (
             <div>
-              <label className={lbl}>Unidades a devolver</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Unidades a devolver</label>
               <div className="overflow-x-auto rounded-lg border border-gray-200">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
@@ -265,10 +269,9 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
 
           {mostrarDetalle && (
             <>
-              <div>
-                <label className={lbl}>Nota / Motivo</label>
-                <input className={inputClass} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Ej: Producto en mal estado..." />
-              </div>
+              <FormField id="nota" label="Nota / Motivo">
+                <Input id="nota" value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Ej: Producto en mal estado..." />
+              </FormField>
 
               <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
                 <label className="flex items-start gap-2 cursor-pointer">
@@ -295,12 +298,10 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
           )}
 
           <div className="flex justify-end gap-3 pt-2 border-t">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
-              Cancelar
-            </button>
-            <button type="submit" disabled={loading || (!isEdit && !ordenId)} className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50">
+            <Button variant="secondary" type="button" onClick={onClose}>Cancelar</Button>
+            <Button type="submit" disabled={loading || (!isEdit && !ordenId)}>
               {loading ? 'Guardando...' : (isEdit ? 'Guardar cambios' : 'Registrar Devolución')}
-            </button>
+            </Button>
           </div>
         </form>
       </DialogContent>
