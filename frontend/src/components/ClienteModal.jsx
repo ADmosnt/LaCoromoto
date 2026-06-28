@@ -38,7 +38,7 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
     if (isEdit) {
       getCliente(clienteId).then((r) => {
         const c = r.data
-        setForm({ ...c, telefonos: c.telefonos?.length ? c.telefonos : [''], zona_id: c.zona_id ?? '', grupo_id: c.grupo_id ?? '' })
+        setForm({ ...c, telefonos: c.telefonos?.length ? c.telefonos : [''], zona_id: c.zona_id != null ? String(c.zona_id) : '', grupo_id: c.grupo_id != null ? String(c.grupo_id) : '' })
       })
     } else {
       setForm(emptyForm)
@@ -91,7 +91,7 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
     </div>
   )
 
-  const tareaClass = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition'
+  const tareaClass = 'w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition'
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>

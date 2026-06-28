@@ -157,7 +157,7 @@ export default function ActualizacionPreciosModal({ open, onClose, onSaved }) {
               <PrecioInput
                 allowNegative
                 placeholder={tipo === 'porcentaje' ? 'Ej: 10 o -5' : 'Ej: 0.50 o -1.00'}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition pl-8"
+                className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition pl-8"
                 value={valor}
                 onChange={setValor}
                 onKeyDown={(e) => e.key === 'Enter' && handlePreview()}

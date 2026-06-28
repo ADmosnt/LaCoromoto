@@ -37,7 +37,7 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
           lista_id: p.lista_id,
           precio_bulto_str: String(Number(p.precio_usd) * upb),
         }))
-        setForm({ ...r.data, grupo_id: r.data.grupo_id ?? '', precios })
+        setForm({ ...r.data, grupo_id: r.data.grupo_id != null ? String(r.data.grupo_id) : '', precios })
       })
     } else {
       setForm(emptyForm)
