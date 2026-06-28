@@ -110,8 +110,8 @@ export default function ProductoCombobox({
   }
 
   const inputClass = size === 'small'
-    ? 'border border-gray-300 rounded px-2 py-1.5 pr-7 text-sm w-full focus:outline-none focus:ring-1 focus:ring-blue-500'
-    : 'w-full border border-gray-300 rounded-md px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+    ? 'border border-gray-300 rounded px-2 py-1.5 pr-7 text-sm w-full focus:outline-none focus:ring-1 focus:ring-brand-500'
+    : 'w-full border border-gray-300 rounded-md px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
 
   const dropdown = open && (limitedList.length > 0 || (q.length > 0 && !isShowingSelectedLabel)) && createPortal(
     <div ref={listRef} style={dropStyle}>
@@ -122,7 +122,7 @@ export default function ProductoCombobox({
               key={p.id}
               onMouseDown={(e) => { e.preventDefault(); select(p) }}
               onMouseEnter={() => setHighlight(idx)}
-              className={`px-3 py-1.5 cursor-pointer flex items-baseline gap-2 ${idx === highlight ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+              className={`px-3 py-1.5 cursor-pointer flex items-baseline gap-2 ${idx === highlight ? 'bg-brand-50' : 'hover:bg-gray-50'}`}
             >
               <span className="font-mono text-xs text-gray-500 flex-shrink-0">{p.codigo}</span>
               <span className="text-gray-800">{p.descripcion}</span>

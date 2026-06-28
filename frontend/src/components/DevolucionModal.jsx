@@ -155,10 +155,10 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
   const inpRO = 'w-full border border-gray-200 rounded-md px-3 py-2 text-sm bg-gray-100 text-gray-600'
   const lbl = 'block text-sm font-medium text-gray-700 mb-1'
-  const inpNum = 'border border-gray-300 rounded px-2 py-1 text-sm w-16 text-center focus:outline-none focus:ring-1 focus:ring-blue-500'
+  const inpNum = 'border border-gray-300 rounded px-2 py-1 text-sm w-16 text-center focus:outline-none focus:ring-1 focus:ring-brand-500'
 
   const mostrarDetalle = isEdit || Boolean(ordenId)
 
@@ -275,7 +275,7 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
                     type="checkbox"
-                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                     checked={reingresar}
                     onChange={(e) => setReingresar(e.target.checked)}
                   />
@@ -299,7 +299,7 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
               Cancelar
             </button>
-            <button type="submit" disabled={loading || (!isEdit && !ordenId)} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+            <button type="submit" disabled={loading || (!isEdit && !ordenId)} className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50">
               {loading ? 'Guardando...' : (isEdit ? 'Guardar cambios' : 'Registrar Devolución')}
             </button>
           </div>

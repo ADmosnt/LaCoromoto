@@ -160,8 +160,8 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
-  const inpNum = 'border border-gray-300 rounded px-2 py-1.5 text-sm w-full text-center focus:outline-none focus:ring-1 focus:ring-blue-500'
+  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
+  const inpNum = 'border border-gray-300 rounded px-2 py-1.5 text-sm w-full text-center focus:outline-none focus:ring-1 focus:ring-brand-500'
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -278,12 +278,12 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                   </tbody>
                 </table>
               </div>
-              <button type="button" onClick={addRow} className="mt-2 text-sm text-blue-600 hover:underline">
+              <button type="button" onClick={addRow} className="mt-2 text-sm text-brand-600 hover:underline">
                 + Agregar producto
               </button>
               {totalUds > 0 && (
                 <p className="mt-2 text-right text-sm font-semibold text-gray-700">
-                  Total a ingresar: <span className="text-blue-700">{totalUds} unidades</span>
+                  Total a ingresar: <span className="text-brand-700">{totalUds} unidades</span>
                   {' · '}
                   <span className="text-gray-500">{validRows.length} producto{validRows.length !== 1 ? 's' : ''}</span>
                 </p>
@@ -296,7 +296,7 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                 Cancelar
               </button>
               <button type="submit"
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700">
                 Revisar y confirmar →
               </button>
             </div>
@@ -317,7 +317,7 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                 </div>
                 <div>
                   <span className="text-gray-500">Total: </span>
-                  <span className="font-bold text-blue-700">{totalUds} uds</span>
+                  <span className="font-bold text-brand-700">{totalUds} uds</span>
                   <span className="text-gray-500 ml-1">en {validRows.length} producto{validRows.length !== 1 ? 's' : ''}</span>
                 </div>
               </div>
@@ -356,7 +356,7 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                           </div>
                         </td>
                         <td className="px-3 py-2 text-center text-gray-500">{stockActual} uds</td>
-                        <td className="px-3 py-2 text-center font-bold text-blue-700">{resultante} uds</td>
+                        <td className="px-3 py-2 text-center font-bold text-brand-700">{resultante} uds</td>
                       </tr>
                     )
                   })}
@@ -370,7 +370,7 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                 ← Volver y corregir
               </button>
               <button type="button" onClick={submit} disabled={loading}
-                className="px-5 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 font-medium">
+                className="px-5 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50 font-medium">
                 {loading ? 'Guardando...' : (isEdit ? 'Confirmar cambios' : 'Confirmar ingreso')}
               </button>
             </div>

@@ -3,6 +3,31 @@ export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
+      colors: {
+        brand: {
+          50:  '#f6f0fa',
+          100: '#ead8f2',
+          200: '#d4b1e4',
+          300: '#ba86d0',
+          400: '#9d5fb8',
+          500: '#7e4199',
+          600: '#653480',
+          700: '#4e2865',
+          800: '#391d4b',
+          900: '#271235',
+        },
+        llama: {
+          400: '#6a9fd4',
+          500: '#4a82bc',
+          600: '#356aa0',
+        },
+        brick: {
+          500: '#b4451f',
+          600: '#962f12',
+        },
+        paper: '#f5f2ed',
+        ink: '#1e1b26',
+      },
       keyframes: {
         'accordion-down': { from: { height: '0' }, to: { height: 'var(--radix-accordion-content-height)' } },
         'accordion-up': { from: { height: 'var(--radix-accordion-content-height)' }, to: { height: '0' } },

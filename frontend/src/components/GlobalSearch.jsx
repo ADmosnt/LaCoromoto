@@ -100,7 +100,7 @@ export default function GlobalSearch({ onNavigate }) {
           onFocus={() => setOpen(true)}
           onKeyDown={onKeyDown}
           placeholder="Buscar cliente o producto..."
-          className="w-full bg-gray-800 text-white placeholder-gray-400 text-sm rounded-md pl-8 pr-3 py-1.5 border border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full bg-gray-800 text-white placeholder-gray-400 text-sm rounded-md pl-8 pr-3 py-1.5 border border-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500"
         />
       </div>
 
@@ -127,7 +127,7 @@ export default function GlobalSearch({ onNavigate }) {
                     key={`c-${c.id}`}
                     onMouseEnter={() => setHighlight(flatIdx)}
                     onClick={() => selectItem(flat[flatIdx])}
-                    className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between gap-2 ${active ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                    className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between gap-2 ${active ? 'bg-brand-50' : 'hover:bg-gray-50'}`}
                   >
                     <span className="font-medium truncate">{c.razon_social}</span>
                     <span className="font-mono text-xs text-gray-400 flex-shrink-0">{c.codigo}</span>
@@ -150,7 +150,7 @@ export default function GlobalSearch({ onNavigate }) {
                     key={`p-${p.id}`}
                     onMouseEnter={() => setHighlight(flatIdx)}
                     onClick={() => selectItem(flat[flatIdx])}
-                    className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between gap-2 ${active ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                    className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between gap-2 ${active ? 'bg-brand-50' : 'hover:bg-gray-50'}`}
                   >
                     <span className="font-medium truncate">{p.descripcion}</span>
                     <span className="font-mono text-xs text-gray-400 flex-shrink-0">{p.codigo}</span>

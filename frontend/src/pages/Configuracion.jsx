@@ -45,7 +45,7 @@ function CatalogSection({ title, items, onCreate, onUpdate, onDelete }) {
             ) : (
               <>
                 <span className="flex-1 text-sm">{item.nombre}</span>
-                <button onClick={() => { setEditId(item.id); setEditVal(item.nombre) }} className="text-xs text-blue-600 hover:underline">Editar</button>
+                <button onClick={() => { setEditId(item.id); setEditVal(item.nombre) }} className="text-xs text-brand-600 hover:underline">Editar</button>
                 <button onClick={() => onDelete(item.id)} className="text-xs text-red-500 hover:underline">Eliminar</button>
               </>
             )}
@@ -61,7 +61,7 @@ function CatalogSection({ title, items, onCreate, onUpdate, onDelete }) {
           placeholder="Nombre..."
           className="flex-1 border rounded px-2 py-1.5 text-sm"
         />
-        <button onClick={handleCreate} className="bg-blue-600 text-white text-sm px-3 py-1.5 rounded hover:bg-blue-700">+</button>
+        <button onClick={handleCreate} className="bg-brand-600 text-white text-sm px-3 py-1.5 rounded hover:bg-brand-700">+</button>
       </div>
     </div>
   )
@@ -226,7 +226,7 @@ export default function Configuracion() {
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
 
   return (
     <div>
@@ -253,7 +253,7 @@ export default function Configuracion() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
               <input className={inp} value={config.ciudad} onChange={(e) => setConfig({ ...config, ciudad: e.target.value })} required />
             </div>
-            <button type="submit" className="w-full bg-blue-600 text-white text-sm py-2 rounded-md hover:bg-blue-700">Guardar</button>
+            <button type="submit" className="w-full bg-brand-600 text-white text-sm py-2 rounded-md hover:bg-brand-700">Guardar</button>
           </form>
         </div>
 
@@ -270,12 +270,12 @@ export default function Configuracion() {
               <input type="number" step="0.0001" min={0} placeholder="Bs. por USD"
                 className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full sm:flex-1"
                 value={tasaValor} onChange={(e) => setTasaValor(e.target.value)} />
-              <button onClick={saveTasaHandler} className="bg-blue-600 text-white text-sm px-4 py-1.5 rounded hover:bg-blue-700 w-full sm:w-auto shrink-0">
+              <button onClick={saveTasaHandler} className="bg-brand-600 text-white text-sm px-4 py-1.5 rounded hover:bg-brand-700 w-full sm:w-auto shrink-0">
                 Guardar
               </button>
             </div>
             <button onClick={handleScrape} disabled={scraping}
-              className="w-full border border-blue-300 text-blue-600 text-sm py-2 rounded hover:bg-blue-50 disabled:opacity-50">
+              className="w-full border border-brand-300 text-brand-600 text-sm py-2 rounded hover:bg-brand-50 disabled:opacity-50">
               {scraping ? 'Consultando BCV...' : '↻ Obtener tasa del BCV automáticamente'}
             </button>
           </div>
@@ -359,7 +359,7 @@ export default function Configuracion() {
               </div>
             )}
             <button type="submit" disabled={pwLoading}
-              className="w-full bg-blue-600 text-white text-sm py-2 rounded-md hover:bg-blue-700 disabled:opacity-50">
+              className="w-full bg-brand-600 text-white text-sm py-2 rounded-md hover:bg-brand-700 disabled:opacity-50">
               {pwLoading ? 'Guardando...' : 'Guardar cambios'}
             </button>
           </form>

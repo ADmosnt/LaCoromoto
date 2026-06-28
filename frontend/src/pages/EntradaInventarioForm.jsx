@@ -40,7 +40,7 @@ export default function EntradaInventarioForm() {
     }
   }
 
-  const inp = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  const inp = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
 
   const upb = producto?.unidades_por_bulto || 1
   const cant = Number(cantidad) || 0
@@ -125,7 +125,7 @@ export default function EntradaInventarioForm() {
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50"
           >
             {loading ? 'Guardando...' : 'Registrar entrada'}
           </button>

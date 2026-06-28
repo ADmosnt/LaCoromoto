@@ -65,7 +65,7 @@ export default function Clientes() {
         <h2 className="text-xl font-bold text-gray-800">Clientes</h2>
         <button
           onClick={openNew}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+          className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-md"
         >
           + Nuevo cliente
         </button>
@@ -79,12 +79,12 @@ export default function Clientes() {
             placeholder="Buscar por nombre, código o RIF..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
           <select
             value={grupoId}
             onChange={(e) => { setGrupoId(e.target.value); setConsolidadoOpen(false) }}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
             <option value="">Todos los grupos</option>
             {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
@@ -122,7 +122,7 @@ export default function Clientes() {
                   <td className="px-4 py-3 text-gray-600">{c.telefonos?.join(', ')}</td>
                   <td className="px-4 py-3 text-center space-x-2">
                     <button onClick={() => navigate(`/clientes/${c.id}`)} className="text-purple-600 hover:underline text-xs">Ver ficha</button>
-                    <button onClick={() => openEdit(c.id)} className="text-blue-600 hover:underline text-xs">Editar</button>
+                    <button onClick={() => openEdit(c.id)} className="text-brand-600 hover:underline text-xs">Editar</button>
                     <button onClick={() => handleDelete(c.id, c.razon_social)} className="text-red-500 hover:underline text-xs">Desactivar</button>
                   </td>
                 </tr>

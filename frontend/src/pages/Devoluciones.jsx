@@ -40,7 +40,7 @@ export default function Devoluciones() {
         <h2 className="text-xl font-bold text-gray-800">Devoluciones</h2>
         <button
           onClick={() => setModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+          className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-md"
         >
           + Nueva devolución
         </button>
@@ -53,7 +53,7 @@ export default function Devoluciones() {
           <select
             value={clienteId}
             onChange={(e) => setClienteId(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
             <option value="">Todos los clientes</option>
             {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}

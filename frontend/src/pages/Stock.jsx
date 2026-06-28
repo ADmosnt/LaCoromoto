@@ -7,8 +7,8 @@ import ReporteVentaModal from '../components/ReporteVentaModal'
 const statusBadge = {
   activa: 'bg-green-100 text-green-700',
   pendiente: 'bg-yellow-100 text-yellow-700',
-  parcial: 'bg-blue-100 text-blue-700',
-  confirmado: 'bg-blue-100 text-blue-700',
+  parcial: 'bg-brand-100 text-brand-700',
+  confirmado: 'bg-brand-100 text-brand-700',
 }
 
 const statusLabel = {
@@ -33,7 +33,7 @@ const agingLabel = (dias) => {
   return `${dias} días`
 }
 
-const sel = 'border border-gray-300 rounded-md px-3 py-2 text-sm w-72 focus:outline-none focus:ring-2 focus:ring-blue-500'
+const sel = 'border border-gray-300 rounded-md px-3 py-2 text-sm w-72 focus:outline-none focus:ring-2 focus:ring-brand-500'
 
 export default function Stock() {
   const [modo, setModo] = useState('cliente') // 'cliente' | 'grupo'
@@ -115,14 +115,14 @@ export default function Stock() {
             <button
               type="button"
               onClick={() => cambiarModo('cliente')}
-              className={`px-3 py-2 font-medium ${modo === 'cliente' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+              className={`px-3 py-2 font-medium ${modo === 'cliente' ? 'bg-brand-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
             >
               Por cliente
             </button>
             <button
               type="button"
               onClick={() => cambiarModo('grupo')}
-              className={`px-3 py-2 font-medium border-l border-gray-300 ${modo === 'grupo' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+              className={`px-3 py-2 font-medium border-l border-gray-300 ${modo === 'grupo' ? 'bg-brand-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
             >
               Por grupo
             </button>
@@ -142,14 +142,14 @@ export default function Stock() {
         </div>
 
         {modo === 'cliente' && cliente && (
-          <div className="px-5 py-3 bg-blue-50 border-b text-sm">
+          <div className="px-5 py-3 bg-brand-50 border-b text-sm">
             <span className="font-medium">{cliente.razon_social}</span>
             {cliente.rif && <span className="text-gray-500 ml-3">RIF: {cliente.rif}</span>}
             {cliente.zona && <span className="text-gray-500 ml-3">Zona: {cliente.zona}</span>}
           </div>
         )}
         {modo === 'grupo' && grupo && (
-          <div className="px-5 py-3 bg-blue-50 border-b text-sm">
+          <div className="px-5 py-3 bg-brand-50 border-b text-sm">
             <span className="font-medium">Grupo: {grupo.nombre}</span>
             <span className="text-gray-500 ml-3">
               {clientes.filter((c) => String(c.grupo_id) === String(grupo.id)).length} clientes
@@ -204,7 +204,7 @@ export default function Stock() {
                   </tr>
                   {expanded === s.id && s.ordenes?.length > 0 && (
                     <tr>
-                      <td colSpan={8} className="px-8 py-2 bg-blue-50 border-b border-blue-100">
+                      <td colSpan={8} className="px-8 py-2 bg-brand-50 border-b border-brand-100">
                         <p className="text-xs text-gray-500 mb-1 font-medium uppercase">Órdenes de origen</p>
                         <table className="text-xs w-full max-w-xl">
                           <thead className="text-gray-500">
@@ -216,12 +216,12 @@ export default function Stock() {
                               <th className="py-1 text-left">Estado</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-blue-100">
+                          <tbody className="divide-y divide-brand-100">
                             {s.ordenes.map((o) => {
                               const upb = s.unidades_por_bulto || 1
                               return (
                                 <tr key={o.id}>
-                                  <td className="py-1.5 pr-4 font-mono font-medium text-blue-700">{o.numero_orden}</td>
+                                  <td className="py-1.5 pr-4 font-mono font-medium text-brand-700">{o.numero_orden}</td>
                                   {modo === 'grupo' && <td className="py-1.5 pr-4 text-gray-700">{o.cliente}</td>}
                                   <td className="py-1.5 pr-4 text-gray-600">{o.fecha_emision}</td>
                                   <td className="py-1.5 pr-4 text-center">
@@ -261,7 +261,7 @@ export default function Stock() {
               <tfoot className="bg-gray-50 border-t-2 border-gray-300">
                 <tr>
                   <td colSpan={6} className="px-4 py-3 text-right font-semibold">Total unidades en consignación:</td>
-                  <td className="px-4 py-3 text-center font-bold text-blue-700">{totalUds}</td>
+                  <td className="px-4 py-3 text-center font-bold text-brand-700">{totalUds}</td>
                   <td></td>
                 </tr>
               </tfoot>
@@ -293,7 +293,7 @@ export default function Stock() {
               <tbody>
                 {ordenesReportando.map((o) => (
                   <tr key={o.id} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
-                    <td className="px-4 py-3 font-mono text-xs text-blue-600">{o.numero_orden}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-brand-600">{o.numero_orden}</td>
                     {modo === 'grupo' && <td className="px-4 py-3">{o.cliente}</td>}
                     <td className="px-4 py-3 text-gray-500">{o.fecha_emision}</td>
                     <td className="px-4 py-3">
@@ -305,7 +305,7 @@ export default function Stock() {
                     <td className="px-4 py-3 text-right">
                       <button
                         onClick={() => abrirReporte(o.id)}
-                        className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded"
+                        className="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded"
                       >
                         Registrar reporte
                       </button>

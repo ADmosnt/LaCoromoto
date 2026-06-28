@@ -8,7 +8,7 @@ const statusBadge = {
   activa:     'bg-green-100 text-green-700',
   pendiente:  'bg-yellow-100 text-yellow-700',
   anulada:    'bg-red-100 text-red-600',
-  confirmado: 'bg-blue-100 text-blue-700',
+  confirmado: 'bg-brand-100 text-brand-700',
 }
 
 const agingClass = (dias) => {
@@ -78,7 +78,7 @@ export default function ClienteDetalle() {
         </button>
         <button
           onClick={() => setEditOpen(true)}
-          className="border border-blue-400 text-blue-600 hover:bg-blue-50 text-sm font-medium px-4 py-2 rounded-md"
+          className="border border-brand-400 text-brand-600 hover:bg-brand-50 text-sm font-medium px-4 py-2 rounded-md"
         >
           Editar datos del cliente
         </button>
@@ -134,7 +134,7 @@ export default function ClienteDetalle() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
         {[
-          { label: 'Uds. en consignación', value: totalStockUds, color: 'text-blue-700' },
+          { label: 'Uds. en consignación', value: totalStockUds, color: 'text-brand-700' },
           { label: 'Órdenes activas',       value: activeOrders.length, color: 'text-green-700' },
           { label: 'Reportes pendientes',   value: pendingReports.length, color: pendingReports.length > 0 ? 'text-yellow-600' : 'text-gray-600' },
           { label: 'Devoluciones',          value: devoluciones.length, color: 'text-gray-600' },
@@ -155,7 +155,7 @@ export default function ClienteDetalle() {
               onClick={() => setActiveTab(t.id)}
               className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                 activeTab === t.id
-                  ? 'border-blue-600 text-blue-600'
+                  ? 'border-brand-600 text-brand-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -215,7 +215,7 @@ export default function ClienteDetalle() {
               <tbody className="divide-y divide-gray-100">
                 {ordenes.map((o) => (
                   <tr key={o.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-mono font-medium text-blue-700">{o.numero_orden}</td>
+                    <td className="px-4 py-3 font-mono font-medium text-brand-700">{o.numero_orden}</td>
                     <td className="px-4 py-3 text-gray-600">{o.fecha_emision}</td>
                     <td className="px-4 py-3 text-right font-medium">${Number(o.total_usd).toFixed(2)}</td>
                     <td className="px-4 py-3 text-center">
@@ -225,7 +225,7 @@ export default function ClienteDetalle() {
                     </td>
                     <td className="px-4 py-3 text-center">
                       {o.reporte_id
-                        ? <Link to={`/reportes-venta/${o.reporte_id}`} className="text-xs text-blue-600 hover:underline">Ver reporte</Link>
+                        ? <Link to={`/reportes-venta/${o.reporte_id}`} className="text-xs text-brand-600 hover:underline">Ver reporte</Link>
                         : <span className="text-xs text-gray-400">—</span>
                       }
                     </td>
@@ -254,7 +254,7 @@ export default function ClienteDetalle() {
                 {reportes.map((r) => (
                   <tr key={r.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
-                      <Link to={`/reportes-venta/${r.id}`} className="text-blue-600 hover:underline text-xs font-medium">#{r.id}</Link>
+                      <Link to={`/reportes-venta/${r.id}`} className="text-brand-600 hover:underline text-xs font-medium">#{r.id}</Link>
                     </td>
                     <td className="px-4 py-3 text-gray-600">{r.fecha}</td>
                     <td className="px-4 py-3 text-right font-medium">${Number(r.total_usd).toFixed(2)}</td>

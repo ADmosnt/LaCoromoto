@@ -93,7 +93,7 @@ export default function ReporteVentaForm() {
     }
   }
 
-  const inp = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  const inp = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
 
   return (
     <div className="max-w-3xl">
@@ -204,7 +204,7 @@ export default function ReporteVentaForm() {
                       type="button"
                       onClick={addProducto}
                       disabled={!productoAdd}
-                      className="px-3 py-2 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 disabled:opacity-40"
+                      className="px-3 py-2 text-sm bg-brand-50 text-brand-700 border border-brand-200 rounded-md hover:bg-brand-100 disabled:opacity-40"
                     >
                       Agregar
                     </button>
@@ -232,7 +232,7 @@ export default function ReporteVentaForm() {
 
         <div className="flex justify-end gap-3">
           <button type="button" onClick={() => nav('/reportes-venta')} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
-          <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+          <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50">
             {loading ? 'Guardando...' : 'Crear Reporte'}
           </button>
         </div>

@@ -86,7 +86,7 @@ export default function ActualizacionPreciosModal({ open, onClose, onSaved }) {
     ? `${signo}${valor}${tipo === 'porcentaje' ? '%' : ' USD'} — ${listaLabel}${grupoId ? ` / ${grupoLabel}` : ''}`
     : null
 
-  const inp = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full'
+  const inp = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 w-full'
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -126,14 +126,14 @@ export default function ActualizacionPreciosModal({ open, onClose, onSaved }) {
               <button
                 type="button"
                 onClick={() => setTipo('porcentaje')}
-                className={`flex-1 py-2 rounded-md text-sm font-medium border transition-colors ${tipo === 'porcentaje' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}
+                className={`flex-1 py-2 rounded-md text-sm font-medium border transition-colors ${tipo === 'porcentaje' ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}
               >
                 % Porcentaje
               </button>
               <button
                 type="button"
                 onClick={() => setTipo('monto')}
-                className={`flex-1 py-2 rounded-md text-sm font-medium border transition-colors ${tipo === 'monto' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}
+                className={`flex-1 py-2 rounded-md text-sm font-medium border transition-colors ${tipo === 'monto' ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}
               >
                 $ Monto fijo
               </button>
@@ -164,7 +164,7 @@ export default function ActualizacionPreciosModal({ open, onClose, onSaved }) {
           type="button"
           onClick={handlePreview}
           disabled={loading || !listaId || !valor}
-          className="w-full border border-blue-400 text-blue-600 text-sm py-2 rounded-md hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed mb-5 font-medium"
+          className="w-full border border-brand-400 text-brand-600 text-sm py-2 rounded-md hover:bg-brand-50 disabled:opacity-50 disabled:cursor-not-allowed mb-5 font-medium"
         >
           {loading ? 'Calculando...' : '🔍 Vista previa de cambios'}
         </button>
@@ -223,7 +223,7 @@ export default function ActualizacionPreciosModal({ open, onClose, onSaved }) {
             type="button"
             onClick={handleApply}
             disabled={applying || !preview || preview.total === 0}
-            className="px-5 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            className="px-5 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
             {applying ? 'Aplicando...' : preview ? `Aplicar ${preview.total} cambio${preview.total !== 1 ? 's' : ''}` : 'Aplicar cambios'}
           </button>

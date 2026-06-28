@@ -20,7 +20,7 @@ const clienteNav = [
 const navLinkClass = ({ isActive }) =>
   `block px-4 py-2.5 text-sm transition-colors ${
     isActive
-      ? 'bg-blue-600 text-white'
+      ? 'bg-brand-600 text-white'
       : 'text-gray-300 hover:bg-gray-700 hover:text-white'
   }`
 

@@ -29,7 +29,7 @@ const statusBadge = {
   activa: 'bg-green-100 text-green-700',
   pendiente: 'bg-yellow-100 text-yellow-700',
   parcial: 'bg-indigo-100 text-indigo-700',
-  confirmado: 'bg-blue-100 text-blue-700',
+  confirmado: 'bg-brand-100 text-brand-700',
   anulada: 'bg-red-100 text-red-700',
 }
 
@@ -136,7 +136,7 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
         </div>
       )}
       {isConfirmado && (
-        <div className="mb-2 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1">
+        <div className="mb-2 text-xs text-brand-700 bg-brand-50 border border-brand-200 rounded px-2 py-1">
           Venta confirmada. Stock descontado.
         </div>
       )}
@@ -169,7 +169,7 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
                   <th className="px-3 py-2 text-center">Despachado</th>
                   {hayDevolucion && <th className="px-3 py-2 text-center text-orange-700">Devuelto</th>}
                   {hayDevolucion && <th className="px-3 py-2 text-center">Neto</th>}
-                  {hayReporte && <th className="px-3 py-2 text-center text-blue-700">Reportado</th>}
+                  {hayReporte && <th className="px-3 py-2 text-center text-brand-700">Reportado</th>}
                   {hayReporte && <th className="px-3 py-2 text-center">Pendiente</th>}
                   <th className="px-3 py-2 text-right">Precio/Bulto</th>
                   <th className="px-3 py-2 text-right">Total USD</th>
@@ -201,7 +201,7 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
                         </td>
                       )}
                       {hayReporte && (
-                        <td className="px-3 py-2 text-center text-blue-600">
+                        <td className="px-3 py-2 text-center text-brand-600">
                           {reportado > 0 ? `${reportado} uds` : '—'}
                         </td>
                       )}
@@ -259,7 +259,7 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
             <span className="inline-flex items-center gap-1">
               <button
                 onClick={() => setReporteModalOpen(true)}
-                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded"
+                className="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded"
               >
                 Registrar Reporte de Venta
               </button>
@@ -271,7 +271,7 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
               <button
                 onClick={handleConfirmar}
                 disabled={confirmando}
-                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded disabled:opacity-50"
+                className="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded disabled:opacity-50"
               >
                 {confirmando ? 'Confirmando...' : 'Confirmar Venta'}
               </button>
@@ -307,7 +307,7 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
   )
 }
 
-const sel = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+const sel = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
 
 export default function Ordenes() {
   const [ordenes, setOrdenes] = useState([])
@@ -373,7 +373,7 @@ export default function Ordenes() {
         <h2 className="text-xl font-bold text-gray-800">Órdenes de Despacho</h2>
         <button
           onClick={() => setModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+          className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-md"
         >
           + Nueva orden
         </button>
@@ -386,14 +386,14 @@ export default function Ordenes() {
             <button
               type="button"
               onClick={() => cambiarModo('cliente')}
-              className={`px-3 py-2 font-medium ${modo === 'cliente' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+              className={`px-3 py-2 font-medium ${modo === 'cliente' ? 'bg-brand-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
             >
               Cliente
             </button>
             <button
               type="button"
               onClick={() => cambiarModo('grupo')}
-              className={`px-3 py-2 font-medium border-l border-gray-300 ${modo === 'grupo' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+              className={`px-3 py-2 font-medium border-l border-gray-300 ${modo === 'grupo' ? 'bg-brand-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
             >
               Grupo
             </button>
@@ -459,13 +459,13 @@ export default function Ordenes() {
                       disabled={o.status === 'anulada'}
                       onClick={(e) => e.stopPropagation()}
                       onChange={() => toggleSelect(o.id)}
-                      className="flex-shrink-0 w-4 h-4 accent-blue-600 disabled:opacity-30"
+                      className="flex-shrink-0 w-4 h-4 accent-brand-600 disabled:opacity-30"
                       title={o.status === 'anulada' ? 'No se pueden incluir órdenes anuladas' : 'Seleccionar para resumen general'}
                     />
                     <span className="text-gray-400 text-xs w-3 flex-shrink-0">
                       {expanded === o.id ? '▼' : '▶'}
                     </span>
-                    <span className="font-mono text-xs text-blue-600 w-24 flex-shrink-0">{o.numero_orden}</span>
+                    <span className="font-mono text-xs text-brand-600 w-24 flex-shrink-0">{o.numero_orden}</span>
                     <span className="flex-1 font-medium text-sm truncate min-w-0">{o.cliente}</span>
                     <span className="text-xs text-gray-500 flex-shrink-0 hidden sm:block">{o.fecha_emision}</span>
                     {o.ediciones_count > 0 && (
@@ -501,10 +501,10 @@ export default function Ordenes() {
       })}
 
       {grandTotal > 0 && (
-        <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-4 flex justify-end">
+        <div className="mt-2 bg-brand-50 border border-brand-200 rounded-lg p-4 flex justify-end">
           <div className="text-right">
-            <p className="text-xs text-blue-600 uppercase font-medium">Total acumulado (órdenes activas)</p>
-            <p className="text-2xl font-bold text-blue-800">${grandTotal.toFixed(2)}</p>
+            <p className="text-xs text-brand-600 uppercase font-medium">Total acumulado (órdenes activas)</p>
+            <p className="text-2xl font-bold text-brand-800">${grandTotal.toFixed(2)}</p>
           </div>
         </div>
       )}
@@ -516,7 +516,7 @@ export default function Ordenes() {
           </span>
           <button
             onClick={() => setResumenOpen(true)}
-            className="text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-full font-medium"
+            className="text-sm bg-brand-600 hover:bg-brand-700 px-3 py-1.5 rounded-full font-medium"
           >
             Generar resumen general
           </button>

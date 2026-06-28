@@ -89,7 +89,7 @@ export default function OrdenForm() {
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
 
   return (
     <div className="max-w-4xl">
@@ -226,7 +226,7 @@ export default function OrdenForm() {
               </tbody>
             </table>
           </div>
-          <button type="button" onClick={addRow} className="mt-3 text-sm text-blue-600 hover:underline">+ Agregar producto</button>
+          <button type="button" onClick={addRow} className="mt-3 text-sm text-brand-600 hover:underline">+ Agregar producto</button>
 
           <div className="mt-4 flex flex-col items-end border-t pt-4 gap-1">
             <p className="text-sm font-bold">Total USD: <span className="text-lg">${totalUsd.toFixed(2)}</span></p>
@@ -240,7 +240,7 @@ export default function OrdenForm() {
           <button type="button" onClick={() => nav('/ordenes')} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
             Cancelar
           </button>
-          <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+          <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50">
             {loading ? 'Creando...' : 'Crear Orden'}
           </button>
         </div>

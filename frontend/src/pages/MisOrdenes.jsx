@@ -7,7 +7,7 @@ import ReporteVentaModal from '../components/ReporteVentaModal'
 const statusBadge = {
   activa: 'bg-green-100 text-green-700',
   pendiente: 'bg-yellow-100 text-yellow-700',
-  confirmado: 'bg-blue-100 text-blue-700',
+  confirmado: 'bg-brand-100 text-brand-700',
   anulada: 'bg-red-100 text-red-700',
 }
 const statusLabel = { activa: 'Activa', pendiente: 'Pendiente', confirmado: 'Confirmado', anulada: 'Anulada' }
@@ -69,7 +69,7 @@ function PanelDetalle({ ordenId, onRefresh }) {
         </div>
       )}
       {isConfirmado && (
-        <div className="mb-2 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1">
+        <div className="mb-2 text-xs text-brand-700 bg-brand-50 border border-brand-200 rounded px-2 py-1">
           Venta confirmada.
         </div>
       )}
@@ -107,7 +107,7 @@ function PanelDetalle({ ordenId, onRefresh }) {
           Descargar PDF
         </button>
         {isActiva && (
-          <button onClick={() => setReporteOpen(true)} className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded">
+          <button onClick={() => setReporteOpen(true)} className="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded">
             Registrar Reporte de Venta
           </button>
         )}
@@ -158,7 +158,7 @@ export default function MisOrdenes() {
                   onClick={() => toggle(o.id)}
                 >
                   <span className="text-gray-400 text-xs w-3 flex-shrink-0">{expanded === o.id ? '▼' : '▶'}</span>
-                  <span className="font-mono text-xs text-blue-600 w-24 flex-shrink-0">{o.numero_orden}</span>
+                  <span className="font-mono text-xs text-brand-600 w-24 flex-shrink-0">{o.numero_orden}</span>
                   <span className="text-xs text-gray-500 flex-shrink-0">{o.fecha_emision}</span>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${statusBadge[o.status] ?? 'bg-gray-100 text-gray-600'}`}>
                     {statusLabel[o.status] ?? o.status}

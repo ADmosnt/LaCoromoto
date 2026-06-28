@@ -71,7 +71,7 @@ export default function ProductoForm() {
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
   const lbl = 'block text-sm font-medium text-gray-700 mb-1'
 
   return (
@@ -121,7 +121,7 @@ export default function ProductoForm() {
                     step="0.01"
                     min="0"
                     placeholder="0.00"
-                    className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     value={getPrecio(l.id)}
                     onChange={(e) => setPrecio(l.id, e.target.value)}
                   />
@@ -135,7 +135,7 @@ export default function ProductoForm() {
           <button type="button" onClick={() => nav('/productos')} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
             Cancelar
           </button>
-          <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+          <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50">
             {loading ? 'Guardando...' : 'Guardar'}
           </button>
         </div>

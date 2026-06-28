@@ -55,7 +55,7 @@ export default function Login() {
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
@@ -77,7 +77,7 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)} required />
               </div>
               <button type="submit" disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-md disabled:opacity-50">
+                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-medium py-2 rounded-md disabled:opacity-50">
                 {loading ? 'Entrando...' : 'Entrar'}
               </button>
             </form>
@@ -93,7 +93,7 @@ export default function Login() {
               <h2 className="text-lg font-bold text-gray-800 mb-2">Contraseña restablecida</h2>
               <p className="text-sm text-gray-500 mb-5">Ya puedes iniciar sesión con tu nueva contraseña.</p>
               <button onClick={() => { setMode('login'); setRecDone(false); setRecForm({ username: '', recovery_code: '', new_password: '', confirm: '' }) }}
-                className="w-full bg-blue-600 text-white text-sm font-medium py-2 rounded-md hover:bg-blue-700">
+                className="w-full bg-brand-600 text-white text-sm font-medium py-2 rounded-md hover:bg-brand-700">
                 Ir al inicio de sesión
               </button>
             </div>
@@ -125,7 +125,7 @@ export default function Login() {
                   onChange={(e) => setRecForm({ ...recForm, confirm: e.target.value })} required />
               </div>
               <button type="submit" disabled={recLoading}
-                className="w-full bg-blue-600 text-white font-medium py-2 rounded-md hover:bg-blue-700 disabled:opacity-50">
+                className="w-full bg-brand-600 text-white font-medium py-2 rounded-md hover:bg-brand-700 disabled:opacity-50">
                 {recLoading ? 'Verificando...' : 'Restablecer contraseña'}
               </button>
             </form>
