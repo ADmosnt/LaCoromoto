@@ -7,7 +7,8 @@ import {
   getProductos, getGruposProductos, getInventario,
 } from '../api'
 import Alert from './Alert'
-import { inputClass, selectClass } from '../lib/styles'
+import Button from './ui/Button'
+import Input from './ui/Input'
 
 const emptyRow = () => ({
   grupo_filtro: '',
@@ -179,14 +180,11 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
             <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Fecha</label>
-                <input type="date" className={inputClass} value={fecha} onChange={(e) => setFecha(e.target.value)} />
+                <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-xs font-medium text-gray-700 mb-1">Nota (opcional)</label>
-                <input
-                  className={inputClass} value={nota} onChange={(e) => setNota(e.target.value)}
-                  placeholder="Ej: Factura #123, proveedor XYZ..."
-                />
+                <Input value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Ej: Factura #123, proveedor XYZ..." />
               </div>
             </div>
 
@@ -221,7 +219,7 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                         <tr key={i}>
                           <td className="px-3 py-2">
                             <select
-                              className={`w-full mb-1 text-xs text-gray-500 bg-gray-50 ${selectClass}`}
+                              className="w-full mb-1 text-xs text-gray-500 bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition"
                               value={row.grupo_filtro}
                               onChange={(e) => setRow(i, 'grupo_filtro', e.target.value)}
                             >
@@ -248,15 +246,17 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                             )}
                           </td>
                           <td className="px-3 py-2">
-                            <input
-                              type="number" min={0} className={`w-full text-center py-1.5 ${inputClass}`}
+                            <Input
+                              type="number" min={0}
+                              className="w-full text-center py-1.5"
                               value={row.bultos}
                               onChange={(e) => setRow(i, 'bultos', e.target.value)}
                             />
                           </td>
                           <td className="px-3 py-2">
-                            <input
-                              type="number" min={0} max={upb - 1} className={`w-full text-center py-1.5 ${inputClass}`}
+                            <Input
+                              type="number" min={0} max={upb - 1}
+                              className="w-full text-center py-1.5"
                               value={row.sueltas}
                               onChange={(e) => setRow(i, 'sueltas', e.target.value)}
                             />
@@ -289,14 +289,8 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
             </div>
 
             <div className="flex justify-end gap-3 pt-2 border-t">
-              <button type="button" onClick={onClose}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
-                Cancelar
-              </button>
-              <button type="submit"
-                className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700">
-                Revisar y confirmar →
-              </button>
+              <Button variant="secondary" type="button" onClick={onClose}>Cancelar</Button>
+              <Button type="submit">Revisar y confirmar →</Button>
             </div>
           </form>
         )}
@@ -363,14 +357,12 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
             </div>
 
             <div className="flex justify-end gap-3 pt-2 border-t">
-              <button type="button" onClick={() => setStep('form')} disabled={loading}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50">
+              <Button variant="secondary" type="button" onClick={() => setStep('form')} disabled={loading}>
                 ← Volver y corregir
-              </button>
-              <button type="button" onClick={submit} disabled={loading}
-                className="px-5 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50 font-medium">
+              </Button>
+              <Button type="button" onClick={submit} disabled={loading}>
                 {loading ? 'Guardando...' : (isEdit ? 'Confirmar cambios' : 'Confirmar ingreso')}
-              </button>
+              </Button>
             </div>
           </div>
         )}
