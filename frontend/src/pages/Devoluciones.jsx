@@ -6,7 +6,6 @@ import StatusBadge from '../components/ui/StatusBadge'
 import Button from '../components/ui/Button'
 import Select from '../components/ui/Select'
 import EmptyState from '../components/ui/EmptyState'
-import PageHeader from '../components/PageHeader'
 
 export default function Devoluciones() {
   const [devoluciones, setDevoluciones] = useState([])
@@ -41,14 +40,10 @@ export default function Devoluciones() {
 
   return (
     <div>
-      <PageHeader title="Devoluciones">
-        <Button onClick={() => setModalOpen(true)}>+ Nueva devolución</Button>
-      </PageHeader>
-
       <Alert type="error" message={error} />
 
       <div className="bg-white rounded-lg shadow">
-        <div className="p-4 border-b">
+        <div className="p-4 border-b flex flex-wrap gap-3 items-center">
           <Select
             nullable
             noneLabel="Todos los clientes"
@@ -57,6 +52,7 @@ export default function Devoluciones() {
             options={clientes.map((c) => ({ value: String(c.id), label: c.razon_social }))}
             className="w-56"
           />
+          <Button onClick={() => setModalOpen(true)} className="ml-auto">+ Nueva devolución</Button>
         </div>
         {devoluciones.length === 0 ? (
           <EmptyState message="No hay devoluciones registradas" />

@@ -1,7 +1,9 @@
 // Colores por "temperatura de atención", derivados de la paleta de marca:
 // neutro = inactivo, maíz = requiere acción, pino = avanzando/cerrado,
 // ladrillo = anulado. Una sola fuente de verdad para los estados de orden.
-const CONFIG = {
+// Se exporta para que cualquier otro elemento de estado (p. ej. los banners
+// del panel de detalle de una orden) derive sus colores de aquí.
+export const STATUS_CONFIG = {
   activa:     { label: 'Activa',                 bg: '#e7ebf0', text: '#3a4a63' },
   pendiente:  { label: 'Pendiente',              bg: '#fbeccb', text: '#8a5a06' },
   parcial:    { label: 'Parcialmente reportada', bg: '#dcebe1', text: '#1f4d3a' },
@@ -11,7 +13,7 @@ const CONFIG = {
 }
 
 export default function StatusBadge({ status }) {
-  const cfg = CONFIG[status] ?? { label: status, bg: '#f3f4f6', text: '#374151' }
+  const cfg = STATUS_CONFIG[status] ?? { label: status, bg: '#f3f4f6', text: '#374151' }
   return (
     <span
       style={{ backgroundColor: cfg.bg, color: cfg.text }}

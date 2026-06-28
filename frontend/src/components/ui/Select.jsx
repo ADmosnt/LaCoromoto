@@ -58,7 +58,7 @@ export default function Select({
             'duration-150',
           )}
         >
-          <RadixSelect.Viewport className="p-1">
+          <RadixSelect.Viewport className="p-1 max-h-[min(18rem,var(--radix-select-content-available-height))] overflow-y-auto">
             {nullable && (
               <RadixSelect.Item
                 value={NONE}

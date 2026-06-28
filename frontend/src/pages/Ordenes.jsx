@@ -6,12 +6,11 @@ import OrdenEdicionesModal from '../components/OrdenEdicionesModal'
 import OrdenesResumenModal from '../components/OrdenesResumenModal'
 import ReporteVentaModal from '../components/ReporteVentaModal'
 import { HelpTooltip } from '../components/ui/Tooltip'
-import StatusBadge from '../components/ui/StatusBadge'
+import StatusBadge, { STATUS_CONFIG } from '../components/ui/StatusBadge'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Select from '../components/ui/Select'
 import EmptyState from '../components/ui/EmptyState'
-import PageHeader from '../components/PageHeader'
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -29,6 +28,30 @@ function groupByMonth(ordenes) {
     map[key].push(o)
   }
   return Object.entries(map).sort((a, b) => b[0].localeCompare(a[0]))
+}
+
+// Avisos del panel de detalle según el estado. Los colores NO se hardcodean:
+// se derivan de STATUS_CONFIG (la misma fuente de verdad que StatusBadge), así
+// el banner y la píldora de estado siempre concuerdan.
+const STATUS_NOTICE = {
+  anulada: 'Orden anulada. El stock fue revertido al almacén.',
+  pendiente: 'Reporte de venta registrado — pendiente de confirmación.',
+  parcial: 'Reportada y confirmada parcialmente. Aún queda stock en consignación por reportar.',
+  confirmado: 'Venta confirmada. Stock descontado.',
+}
+
+function StatusNotice({ status }) {
+  const msg = STATUS_NOTICE[status]
+  if (!msg) return null
+  const cfg = STATUS_CONFIG[status]
+  return (
+    <div
+      className="mb-2 text-xs rounded px-2 py-1 border"
+      style={{ backgroundColor: cfg.bg, color: cfg.text, borderColor: `${cfg.text}33` }}
+    >
+      {msg}
+    </div>
+  )
 }
 
 
@@ -90,11 +113,9 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
   if (!detail) return <div className="bg-gray-50 border-t border-gray-200 px-4 py-3 text-sm text-gray-400">Cargando...</div>
 
   const { status } = detail
-  const isAnulada = status === 'anulada'
   const isActiva = status === 'activa'
   const isPendiente = status === 'pendiente'
   const isParcial = status === 'parcial'
-  const isConfirmado = status === 'confirmado'
   const puedeEditar = Boolean(detail.puede_editar)
   const edicionesCount = detail.ediciones_count ?? 0
 
@@ -111,26 +132,7 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
           </button>
         </div>
       )}
-      {isAnulada && (
-        <div className="mb-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1">
-          Orden anulada. El stock fue revertido al almacén.
-        </div>
-      )}
-      {isPendiente && (
-        <div className="mb-2 text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded px-2 py-1">
-          Reporte de venta registrado — pendiente de confirmación.
-        </div>
-      )}
-      {isParcial && (
-        <div className="mb-2 text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-2 py-1">
-          Reportada y confirmada parcialmente. Aún queda stock en consignación por reportar.
-        </div>
-      )}
-      {isConfirmado && (
-        <div className="mb-2 text-xs text-brand-700 bg-brand-50 border border-brand-200 rounded px-2 py-1">
-          Venta confirmada. Stock descontado.
-        </div>
-      )}
+      <StatusNotice status={status} />
       <div className="overflow-x-auto mb-3">
         {(() => {
           const devueltoMap = {}
@@ -229,54 +231,38 @@ function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, on
       )}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={handlePDF}
-            className="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded"
-          >
+          <Button variant="primary" size="sm" onClick={handlePDF}>
             Descargar PDF
-          </button>
+          </Button>
           {puedeEditar && (
             <span className="inline-flex items-center gap-1">
-              <button
-                onClick={() => onEditar(detail)}
-                className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded"
-              >
+              <Button variant="purple" size="sm" onClick={() => onEditar(detail)}>
                 Editar Orden
-              </button>
+              </Button>
               <HelpTooltip text="Edita los productos, cantidades, precios, fecha o nota. Se registrará un historial de cambios visible para auditoría." side="top" />
             </span>
           )}
           {(isActiva || isParcial) && (
             <span className="inline-flex items-center gap-1">
-              <button
-                onClick={() => setReporteModalOpen(true)}
-                className="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded"
-              >
+              <Button variant="primary" size="sm" onClick={() => setReporteModalOpen(true)}>
                 Registrar Reporte de Venta
-              </button>
+              </Button>
               <HelpTooltip text="Registra cuántas unidades fueron vendidas y cobradas. Puedes registrar varios reportes por partes hasta cubrir todo lo despachado. Cada uno queda pendiente de confirmación hasta que el administrador lo apruebe." side="top" />
             </span>
           )}
           {isPendiente && (
             <span className="inline-flex items-center gap-1">
-              <button
-                onClick={handleConfirmar}
-                disabled={confirmando}
-                className="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded disabled:opacity-50"
-              >
+              <Button variant="primary" size="sm" onClick={handleConfirmar} disabled={confirmando}>
                 {confirmando ? 'Confirmando...' : 'Confirmar Venta'}
-              </button>
+              </Button>
               <HelpTooltip text="Confirma el reporte de venta pendiente. Esto descuenta permanentemente las unidades vendidas del stock en consignación del cliente." side="top" />
             </span>
           )}
           {isActiva && (
             <span className="inline-flex items-center gap-1">
-              <button
-                onClick={handleAnular}
-                className="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded"
-              >
+              <Button variant="danger" size="sm" onClick={handleAnular}>
                 Anular Orden
-              </button>
+              </Button>
               <HelpTooltip text="Cancela esta orden y devuelve todas las unidades despachadas al inventario central. Esta acción no se puede deshacer." side="top" />
             </span>
           )}
@@ -358,10 +344,6 @@ export default function Ordenes() {
 
   return (
     <div>
-      <PageHeader title="Órdenes de Despacho">
-        <Button onClick={() => setModalOpen(true)}>+ Nueva orden</Button>
-      </PageHeader>
-
       <div className="bg-white rounded-lg shadow p-4 mb-4 flex flex-wrap gap-3 items-end">
         <div>
           <label className="block text-xs text-gray-500 mb-1">Filtrar por</label>
@@ -416,6 +398,7 @@ export default function Ordenes() {
         >
           Limpiar
         </button>
+        <Button onClick={() => setModalOpen(true)} className="ml-auto">+ Nueva orden</Button>
       </div>
 
       {meses.length === 0 && (

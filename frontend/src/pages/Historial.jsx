@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getOrdenes, getClientes } from '../api'
-import PageHeader from '../components/PageHeader'
 import Alert from '../components/Alert'
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',

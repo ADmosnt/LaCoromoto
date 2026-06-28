@@ -3,6 +3,7 @@ const VARIANTS = {
   secondary: 'bg-gray-100 hover:bg-gray-200 text-gray-700',
   danger:    'bg-red-600 hover:bg-red-700 text-white',
   ghost:     'bg-transparent hover:bg-gray-50 text-gray-700 border border-gray-300',
+  purple:    'bg-purple-600 hover:bg-purple-700 text-white',
 }
 
 const SIZES = {

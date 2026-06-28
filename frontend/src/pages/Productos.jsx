@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { getProductos, deleteProducto, reactivarProducto, getGruposProductos } from '../api'
-import PageHeader from '../components/PageHeader'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Select from '../components/ui/Select'
@@ -64,18 +63,8 @@ export default function Productos() {
 
   return (
     <div>
-      <PageHeader title="Productos">
-        <button
-          onClick={() => setPreciosModalOpen(true)}
-          className="border border-brand-400 text-brand-600 hover:bg-brand-50 text-sm font-medium px-4 py-2 rounded-md"
-        >
-          Actualizar precios masivo
-        </button>
-        <Button onClick={openNew}>+ Nuevo producto</Button>
-      </PageHeader>
-
       <div className="bg-white rounded-lg shadow mb-4">
-        <div className="p-4 border-b flex flex-wrap gap-3">
+        <div className="p-4 border-b flex flex-wrap gap-3 items-center">
           <Input
             type="text"
             placeholder="Buscar por descripción o código..."
@@ -90,6 +79,15 @@ export default function Productos() {
             onChange={setGrupoId}
             options={grupos.map((g) => ({ value: String(g.id), label: g.nombre }))}
           />
+          <div className="flex gap-2 ml-auto">
+            <button
+              onClick={() => setPreciosModalOpen(true)}
+              className="border border-brand-400 text-brand-600 hover:bg-brand-50 text-sm font-medium px-4 py-2 rounded-md"
+            >
+              Actualizar precios masivo
+            </button>
+            <Button onClick={openNew}>+ Nuevo producto</Button>
+          </div>
         </div>
         {productos.length === 0 ? (
           <EmptyState message="No hay productos registrados" />

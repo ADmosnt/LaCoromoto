@@ -4,7 +4,6 @@ import { getClientes, getClienteStock, getGruposClientes, getGrupoStock, getOrde
 import { HelpTooltip } from '../components/ui/Tooltip'
 import ReporteVentaModal from '../components/ReporteVentaModal'
 import Select from '../components/ui/Select'
-import PageHeader from '../components/PageHeader'
 
 const statusBadge = {
   activa: 'bg-green-100 text-green-700',
@@ -107,7 +106,6 @@ export default function Stock() {
 
   return (
     <div>
-      <PageHeader title="Stock en Consignación" />
       <div className="bg-white rounded-lg shadow">
         <div className="p-4 border-b flex flex-wrap items-center gap-3">
           <div className="inline-flex rounded-md border border-gray-300 overflow-hidden text-sm">

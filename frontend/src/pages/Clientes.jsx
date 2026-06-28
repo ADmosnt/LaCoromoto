@@ -4,7 +4,6 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Users } from 'lucide-react'
 import { getClientes, deleteCliente, reactivarCliente, getGruposClientes } from '../api'
-import PageHeader from '../components/PageHeader'
 import ClienteModal from '../components/ClienteModal'
 import ConsolidadoGrupoModal from '../components/ConsolidadoGrupoModal'
 import Button from '../components/ui/Button'
@@ -68,10 +67,6 @@ export default function Clientes() {
 
   return (
     <div>
-      <PageHeader title="Clientes">
-        <Button onClick={openNew}>+ Nuevo cliente</Button>
-      </PageHeader>
-
       {/* Active clients */}
       <div className="bg-white rounded-lg shadow mb-4">
         <div className="p-4 border-b flex flex-wrap gap-3 items-center">
@@ -95,6 +90,7 @@ export default function Clientes() {
               Ver consolidado del grupo
             </Button>
           )}
+          <Button onClick={openNew} className="ml-auto">+ Nuevo cliente</Button>
         </div>
 
         {clientes.length === 0 ? (

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getReportesVenta, confirmarReporteVenta, getClientes } from '../api'
 import Alert from '../components/Alert'
-import PageHeader from '../components/PageHeader'
 import Select from '../components/ui/Select'
 import Table from '../components/ui/Table'
 import EmptyState from '../components/ui/EmptyState'
@@ -35,7 +34,6 @@ export default function ReportesVenta() {
 
   return (
     <div>
-      <PageHeader title="Reportes de Venta" />
       <Alert type="error" message={error} />
 
       <div className="bg-white rounded-lg shadow">

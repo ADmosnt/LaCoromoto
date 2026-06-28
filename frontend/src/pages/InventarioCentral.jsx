@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { getInventario, getEntradas, deleteEntrada } from '../api'
 import EntradaInventarioModal from '../components/EntradaInventarioModal'
+import Button from '../components/ui/Button'
 
 export default function InventarioCentral() {
   const [inventario, setInventario] = useState([])
@@ -42,16 +43,7 @@ export default function InventarioCentral() {
 
   return (
     <div>
-      <div className="flex items-center justify-end mb-6 flex-wrap gap-3">
-        <button
-          onClick={openNew}
-          className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-md"
-        >
-          + Registrar entrada
-        </button>
-      </div>
-
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-4 items-center">
         {['stock', 'entradas'].map((t) => (
           <button
             key={t}
@@ -63,6 +55,7 @@ export default function InventarioCentral() {
             {t === 'stock' ? 'Stock actual' : 'Historial de entradas'}
           </button>
         ))}
+        <Button onClick={openNew} className="ml-auto">+ Registrar entrada</Button>
       </div>
 
       {tab === 'stock' && (
