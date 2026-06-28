@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createDevolucion, getClientes, getClienteStock, getOrdenes } from '../api'
 import Alert from '../components/Alert'
-import { inputClass } from '../lib/styles'
+import Button from '../components/ui/Button'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import FormField from '../components/ui/FormField'
 
 export default function DevolucionForm() {
   const nav = useNavigate()
@@ -72,34 +75,37 @@ export default function DevolucionForm() {
 
       <form onSubmit={submit} className="space-y-4">
         <div className="bg-white rounded-lg shadow p-5 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
-            <select className={`w-full ${inputClass}`} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
-              <option value="">Seleccionar cliente...</option>
-              {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
-            </select>
-          </div>
+          <FormField id="cliente" label="Cliente *">
+            <Select
+              id="cliente"
+              value={clienteId}
+              onChange={setClienteId}
+              placeholder="Seleccionar cliente..."
+              options={clientes.map((c) => ({ value: String(c.id), label: c.razon_social }))}
+            />
+          </FormField>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-              <input type="date" className={`w-full ${inputClass}`} value={fecha} onChange={(e) => setFecha(e.target.value)} />
-            </div>
+            <FormField id="fecha" label="Fecha">
+              <Input id="fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+            </FormField>
             {ordenes.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Orden origen (opcional)</label>
-                <select className={`w-full ${inputClass}`} value={ordenOrigenId} onChange={(e) => setOrdenOrigenId(e.target.value)}>
-                  <option value="">Sin orden específica</option>
-                  {ordenes.map((o) => <option key={o.id} value={o.id}>#{o.numero_orden} — {o.fecha_emision}</option>)}
-                </select>
-              </div>
+              <FormField id="orden_origen" label="Orden origen (opcional)">
+                <Select
+                  id="orden_origen"
+                  nullable
+                  noneLabel="Sin orden específica"
+                  value={ordenOrigenId}
+                  onChange={setOrdenOrigenId}
+                  options={ordenes.map((o) => ({ value: String(o.id), label: `#${o.numero_orden} — ${o.fecha_emision}` }))}
+                />
+              </FormField>
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nota</label>
-            <input className={`w-full ${inputClass}`} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Motivo de la devolución..." />
-          </div>
+          <FormField id="nota" label="Nota">
+            <Input id="nota" value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Motivo de la devolución..." />
+          </FormField>
         </div>
 
         {clienteId && (
@@ -109,41 +115,41 @@ export default function DevolucionForm() {
               <p className="text-gray-400 text-sm">Este cliente no tiene stock en consignación.</p>
             ) : (
               <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
-                  <tr>
-                    <th className="px-3 py-2 text-left">Producto</th>
-                    <th className="px-3 py-2 text-center">Disponible</th>
-                    <th className="px-3 py-2 text-center">Cantidad a devolver</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {rows.map((row, i) => (
-                    <tr key={i}>
-                      <td className="px-3 py-2 font-medium">{row.descripcion}</td>
-                      <td className="px-3 py-2 text-center text-gray-500">{row.disponible}</td>
-                      <td className="px-3 py-2">
-                        <input
-                          type="number" min={0} max={row.disponible}
-                          className="w-24 text-center border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                          value={row.cantidad_unidades}
-                          onChange={(e) => setRow(i, e.target.value)}
-                        />
-                      </td>
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+                    <tr>
+                      <th className="px-3 py-2 text-left">Producto</th>
+                      <th className="px-3 py-2 text-center">Disponible</th>
+                      <th className="px-3 py-2 text-center">Cantidad a devolver</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {rows.map((row, i) => (
+                      <tr key={i}>
+                        <td className="px-3 py-2 font-medium">{row.descripcion}</td>
+                        <td className="px-3 py-2 text-center text-gray-500">{row.disponible}</td>
+                        <td className="px-3 py-2">
+                          <Input
+                            type="number"
+                            min={0}
+                            max={row.disponible}
+                            className="w-24 text-center"
+                            value={row.cantidad_unidades}
+                            onChange={(e) => setRow(i, e.target.value)}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
         )}
 
         <div className="flex justify-end gap-3">
-          <button type="button" onClick={() => nav('/devoluciones')} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
-          <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50">
-            {loading ? 'Registrando...' : 'Registrar Devolución'}
-          </button>
+          <Button variant="secondary" type="button" onClick={() => nav('/devoluciones')}>Cancelar</Button>
+          <Button type="submit" disabled={loading}>{loading ? 'Registrando...' : 'Registrar Devolución'}</Button>
         </div>
       </form>
     </div>
