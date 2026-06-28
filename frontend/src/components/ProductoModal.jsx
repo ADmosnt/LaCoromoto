@@ -7,7 +7,10 @@ import {
   getGruposProductos, getListasPrecios,
 } from '../api'
 import Alert from './Alert'
-import { inputClass, selectClass } from '../lib/styles'
+import Button from './ui/Button'
+import Input from './ui/Input'
+import Select from './ui/Select'
+import FormField from './ui/FormField'
 
 const emptyForm = { codigo: '', descripcion: '', unidades_por_bulto: 1, grupo_id: '', activo: true, precios: [] }
 
@@ -18,7 +21,7 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
   const [listas, setListas] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState('form') // 'form' | 'confirm'
+  const [step, setStep] = useState('form')
 
   useEffect(() => {
     if (!open) return
@@ -54,7 +57,6 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
   const getPrecio = (listaId) =>
     form.precios.find((p) => p.lista_id === listaId)?.precio_bulto_str ?? ''
 
-  // Construye los precios por unidad validados; devuelve null si hay error.
   const buildPreciosOut = () => {
     const upb = Number(form.unidades_por_bulto) || 1
     const out = []
@@ -65,9 +67,7 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
         setError('Precio inválido. Usa números con "." o "," como separador decimal.')
         return null
       }
-      if (parsed > 0) {
-        out.push({ lista_id: p.lista_id, precio_usd: parsed / upb })
-      }
+      if (parsed > 0) out.push({ lista_id: p.lista_id, precio_usd: parsed / upb })
     }
     return out
   }
@@ -87,7 +87,6 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
     setError('')
     const preciosOut = buildPreciosOut()
     if (preciosOut === null) { setStep('form'); return }
-
     setLoading(true)
     try {
       const payload = {
@@ -108,8 +107,6 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
       setLoading(false)
     }
   }
-
-  const lbl = 'block text-sm font-medium text-gray-700 mb-1'
 
   const upb = Number(form.unidades_por_bulto) || 1
   const nombreGrupo = grupos.find((g) => String(g.id) === String(form.grupo_id))?.nombre
@@ -161,45 +158,47 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
               />
             </div>
             <div className="flex justify-between gap-3 pt-2 border-t">
-              <button type="button" onClick={() => setStep('form')} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
+              <Button variant="secondary" type="button" onClick={() => setStep('form')}>
                 ← Volver a editar
-              </button>
-              <button type="button" onClick={doSave} disabled={loading} className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50">
+              </Button>
+              <Button type="button" onClick={doSave} disabled={loading}>
                 {loading ? 'Guardando...' : (isEdit ? 'Confirmar y guardar' : 'Confirmar y crear')}
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
           <form onSubmit={goConfirm} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className={lbl}>Código *</label>
-                <input className={inputClass} value={form.codigo} onChange={(e) => set('codigo', e.target.value)} required />
+                <FormField id="codigo" label="Código *">
+                  <Input id="codigo" value={form.codigo} onChange={(e) => set('codigo', e.target.value)} required />
+                </FormField>
                 {isEdit && <p className="text-xs text-gray-400 mt-1">Editable. Debe ser único.</p>}
               </div>
-              <div>
-                <label className={lbl}>Unidades por bulto *</label>
-                <input type="number" min={1} className={inputClass} value={form.unidades_por_bulto}
+              <FormField id="upb" label="Unidades por bulto *">
+                <Input id="upb" type="number" min={1} value={form.unidades_por_bulto}
                   onChange={(e) => set('unidades_por_bulto', parseInt(e.target.value) || 1)} required />
-              </div>
+              </FormField>
             </div>
 
-            <div>
-              <label className={lbl}>Descripción *</label>
-              <input className={inputClass} value={form.descripcion} onChange={(e) => set('descripcion', e.target.value)} required />
-            </div>
+            <FormField id="descripcion" label="Descripción *">
+              <Input id="descripcion" value={form.descripcion} onChange={(e) => set('descripcion', e.target.value)} required />
+            </FormField>
 
-            <div>
-              <label className={lbl}>Grupo</label>
-              <select className={`w-full ${selectClass}`} value={form.grupo_id} onChange={(e) => set('grupo_id', e.target.value)}>
-                <option value="">Sin grupo</option>
-                {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
-              </select>
-            </div>
+            <FormField id="grupo_id" label="Grupo">
+              <Select
+                id="grupo_id"
+                nullable
+                noneLabel="Sin grupo"
+                value={form.grupo_id}
+                onChange={(val) => set('grupo_id', val)}
+                options={grupos.map((g) => ({ value: String(g.id), label: g.nombre }))}
+              />
+            </FormField>
 
             {listas.length > 0 && (
               <div>
-                <label className={lbl}>Precios por bulto (USD)</label>
+                <p className="text-sm font-medium text-gray-700 mb-1">Precios por bulto (USD)</p>
                 <p className="text-xs text-gray-400 mb-2">Usa punto o coma como separador decimal (ej: 10.50 o 10,50)</p>
                 <div className="space-y-2">
                   {listas.map((l) => (
@@ -218,12 +217,8 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
             )}
 
             <div className="flex justify-end gap-3 pt-2 border-t">
-              <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
-                Cancelar
-              </button>
-              <button type="submit" className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700">
-                Revisar →
-              </button>
+              <Button variant="secondary" type="button" onClick={onClose}>Cancelar</Button>
+              <Button type="submit">Revisar →</Button>
             </div>
           </form>
         )}
