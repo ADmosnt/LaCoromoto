@@ -9,6 +9,9 @@ import {
   getClientes, getProductos, getTasaHoy, getGruposProductos, getInventario,
 } from '../api'
 import Alert from './Alert'
+import Button from './ui/Button'
+import Input from './ui/Input'
+import Select from './ui/Select'
 
 const emptyRow = () => ({
   grupo_filtro: '',
@@ -198,9 +201,6 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
-  const inpNum = 'border border-gray-300 rounded px-2 py-1.5 text-sm w-full text-center focus:outline-none focus:ring-1 focus:ring-blue-500'
-
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent
@@ -216,17 +216,20 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
               <div className="sm:col-span-2">
                 <label className="block text-xs font-medium text-gray-700 mb-1">Cliente *</label>
                 {isEdit ? (
-                  <div className={`${inp} bg-gray-100 text-gray-600`}>{clienteNombre}</div>
+                  <div className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-600">{clienteNombre}</div>
                 ) : (
-                  <select className={inp} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
-                    <option value="">Seleccionar cliente...</option>
-                    {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
-                  </select>
+                  <Select
+                    placeholder="Seleccionar cliente..."
+                    value={clienteId}
+                    onChange={setClienteId}
+                    options={clientes.map((c) => ({ value: String(c.id), label: c.razon_social }))}
+                    className="w-full"
+                  />
                 )}
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Fecha</label>
-                <input type="date" className={inp} value={fecha} onChange={(e) => setFecha(e.target.value)} />
+                <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
@@ -235,17 +238,16 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                   Tasa BCV {tasa && <span className="text-gray-400 ml-1">(BCV: {Number(tasa.valor).toFixed(4)})</span>}
                   <HelpTooltip text="Tipo de cambio del Banco Central de Venezuela al momento del despacho. Se usa para calcular el total en bolívares." />
                 </label>
-                <input
+                <Input
                   type="number" step="0.0001" min="0"
                   placeholder={tasa ? Number(tasa.valor).toFixed(4) : 'Ingrese tasa...'}
-                  className={inp}
                   value={tasaManual}
                   onChange={(e) => setTasaManual(e.target.value)}
                 />
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-xs font-medium text-gray-700 mb-1">Nota</label>
-                <input className={inp} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Observaciones opcionales" />
+                <Input value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Observaciones opcionales" />
               </div>
             </div>
           </div>
@@ -262,21 +264,21 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                     <th className="px-3 py-2 text-center w-20">
                       <span className="inline-flex items-center justify-center gap-0.5">
                         Stock
-                        <HelpTooltip text="Existencia actual en el almacén central, en bultos." side="top" />
+                        <HelpTooltip text="Existencia actual en el almacén central, en cajas." side="top" />
                       </span>
                     </th>
-                    <th className="px-3 py-2 text-center w-20">Bultos</th>
+                    <th className="px-3 py-2 text-center w-20">Cajas</th>
                     <th className="px-3 py-2 text-center w-20">
                       <span className="inline-flex items-center justify-center gap-0.5">
                         Sueltas
-                        <HelpTooltip text="Unidades sueltas que no completan un bulto entero. Máximo: (uds/bulto − 1)." side="top" />
+                        <HelpTooltip text="Unidades sueltas que no completan una caja entera. Máximo: (uds/caja − 1)." side="top" />
                       </span>
                     </th>
                     <th className="px-3 py-2 text-center w-20">Total uds</th>
                     <th className="px-3 py-2 text-right w-32">
                       <span className="inline-flex items-center justify-end gap-0.5">
-                        Precio/Bulto
-                        <HelpTooltip text="Precio de venta por bulto en USD. Puedes usar la lista de precios del cliente como referencia rápida." side="top" />
+                        Precio/Caja
+                        <HelpTooltip text="Precio de venta por caja en USD. Puedes usar la lista de precios del cliente como referencia rápida." side="top" />
                       </span>
                     </th>
                     <th className="px-3 py-2 text-right w-24">Total USD</th>
@@ -307,7 +309,7 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                         <td className="px-3 py-2">
                           {/* Grupo filter */}
                           <select
-                            className="border border-gray-200 rounded px-2 py-1 text-xs w-full mb-1 text-gray-500 bg-gray-50"
+                            className="w-full mb-1 text-xs text-gray-500 bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition"
                             value={row.grupo_filtro}
                             onChange={(e) => setRow(i, 'grupo_filtro', e.target.value)}
                           >
@@ -329,23 +331,23 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                             <span className="text-gray-300 text-xs">—</span>
                           ) : (
                             <span className={`text-xs font-semibold ${stockBajo ? 'text-red-600' : 'text-green-700'}`}>
-                              {stockBultos}b
+                              {stockBultos}c
                               {stockSueltas > 0 && <span className="text-gray-400 font-normal">+{stockSueltas}u</span>}
                             </span>
                           )}
                         </td>
                         <td className="px-3 py-2">
-                          <input
+                          <Input
                             type="text" inputMode="numeric"
-                            className={inpNum}
+                            className="w-full text-center py-1.5"
                             value={row.bultos}
                             onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRow(i, 'bultos', e.target.value) }}
                           />
                         </td>
                         <td className="px-3 py-2">
-                          <input
+                          <Input
                             type="text" inputMode="numeric"
-                            className={inpNum}
+                            className="w-full text-center py-1.5"
                             value={row.sueltas}
                             onChange={(e) => { if (/^\d*$/.test(e.target.value)) setRow(i, 'sueltas', e.target.value) }}
                           />
@@ -370,7 +372,7 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                                 <option value="" disabled>Lista de precios</option>
                                 {row.precios.map((p) => (
                                   <option key={p.lista_id} value={String(Number(p.precio_usd) * upb)}>
-                                    {p.lista}: ${(Number(p.precio_usd) * upb).toFixed(2)}/bulto
+                                    {p.lista}: ${(Number(p.precio_usd) * upb).toFixed(2)}/caja
                                   </option>
                                 ))}
                               </select>
@@ -391,7 +393,7 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                 </tbody>
               </table>
             </div>
-            <button type="button" onClick={addRow} className="mt-2 text-sm text-blue-600 hover:underline">
+            <button type="button" onClick={addRow} className="mt-2 text-sm text-brand-600 hover:underline">
               + Agregar producto
             </button>
 
@@ -406,8 +408,8 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
           {isEdit && (
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Motivo del cambio (opcional)</label>
-              <input
-                className={inp} value={motivo}
+              <Input
+                value={motivo}
                 onChange={(e) => setMotivo(e.target.value)}
                 placeholder="Ej: el cliente solicitó cambiar el precio de Mini Velón"
               />
@@ -415,12 +417,10 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
           )}
 
           <div className="flex justify-end gap-3 pt-2 border-t">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
-              Cancelar
-            </button>
-            <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+            <Button variant="secondary" type="button" onClick={onClose}>Cancelar</Button>
+            <Button type="submit" disabled={loading}>
               {loading ? (isEdit ? 'Guardando...' : 'Creando...') : (isEdit ? 'Guardar cambios' : 'Crear Orden')}
-            </button>
+            </Button>
           </div>
         </form>
       </DialogContent>

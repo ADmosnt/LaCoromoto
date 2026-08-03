@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createEntrada, getProductos } from '../api'
 import Alert from '../components/Alert'
+import { inputClass } from '../lib/styles'
 
 export default function EntradaInventarioForm() {
   const nav = useNavigate()
@@ -40,8 +41,6 @@ export default function EntradaInventarioForm() {
     }
   }
 
-  const inp = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
-
   const upb = producto?.unidades_por_bulto || 1
   const cant = Number(cantidad) || 0
   const bultos = Math.floor(cant / upb)
@@ -51,7 +50,7 @@ export default function EntradaInventarioForm() {
     <div className="max-w-lg">
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => nav('/inventario')} className="text-gray-500 hover:text-gray-700 text-sm">← Volver</button>
-        <h2 className="text-xl font-bold text-gray-800">Registrar Entrada al Almacén</h2>
+        <h2 className="font-display text-2xl font-bold text-ink tracking-tight">Registrar Entrada al Almacén</h2>
       </div>
 
       <Alert type="error" message={error} />
@@ -60,7 +59,7 @@ export default function EntradaInventarioForm() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Producto *</label>
           <select
-            className={`w-full ${inp}`}
+            className={`w-full ${inputClass}`}
             value={productoId}
             onChange={(e) => setProductoId(e.target.value)}
             required
@@ -72,7 +71,7 @@ export default function EntradaInventarioForm() {
           </select>
           {producto && (
             <p className="text-xs text-gray-400 mt-1">
-              {producto.unidades_por_bulto} uds/bulto — Grupo: {producto.grupo ?? '—'}
+              {producto.unidades_por_bulto} uds/caja — Grupo: {producto.grupo ?? '—'}
             </p>
           )}
         </div>
@@ -83,20 +82,20 @@ export default function EntradaInventarioForm() {
             <input
               type="number"
               min={1}
-              className={`w-full ${inp}`}
+              className={`w-full ${inputClass}`}
               value={cantidad}
               onChange={(e) => setCantidad(e.target.value)}
               required
             />
             {cant > 0 && producto && (
-              <p className="text-xs text-gray-400 mt-1">{bultos} bulto{bultos !== 1 ? 's' : ''} + {sueltas} suelta{sueltas !== 1 ? 's' : ''}</p>
+              <p className="text-xs text-gray-400 mt-1">{bultos} caja{bultos !== 1 ? 's' : ''} + {sueltas} suelta{sueltas !== 1 ? 's' : ''}</p>
             )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
             <input
               type="date"
-              className={`w-full ${inp}`}
+              className={`w-full ${inputClass}`}
               value={fecha}
               onChange={(e) => setFecha(e.target.value)}
             />
@@ -107,7 +106,7 @@ export default function EntradaInventarioForm() {
           <label className="block text-sm font-medium text-gray-700 mb-1">Nota (opcional)</label>
           <input
             type="text"
-            className={`w-full ${inp}`}
+            className={`w-full ${inputClass}`}
             value={nota}
             onChange={(e) => setNota(e.target.value)}
             placeholder="Ej: Factura #123, proveedor XYZ..."
@@ -125,7 +124,7 @@ export default function EntradaInventarioForm() {
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="px-4 py-2 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700 disabled:opacity-50"
           >
             {loading ? 'Guardando...' : 'Registrar entrada'}
           </button>

@@ -6,6 +6,9 @@ import PrecioInput, { parsePrecio } from './ui/PrecioInput'
 import { createReporteVenta, getTasaHoy } from '../api'
 import { useAuth } from '../context/AuthContext'
 import Alert from './Alert'
+import Button from './ui/Button'
+import Input from './ui/Input'
+import FormField from './ui/FormField'
 
 export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
   const { user } = useAuth()
@@ -119,9 +122,6 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
     }
   }
 
-  const inp = 'border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500'
-  const lbl = 'block text-sm font-medium text-gray-700 mb-1'
-
   if (!orden) return null
 
   return (
@@ -136,19 +136,17 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
         <form onSubmit={submit} className="space-y-4">
 
           <div className={`grid grid-cols-1 gap-4 ${isCliente ? '' : 'sm:grid-cols-2'}`}>
-            <div>
-              <label className={lbl}>Fecha de cobro</label>
-              <input type="date" className={`${inp} w-full`} value={fecha} onChange={(e) => setFecha(e.target.value)} required />
-            </div>
+            <FormField id="fecha" label="Fecha de cobro">
+              <Input id="fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required />
+            </FormField>
             {!isCliente && (
               <div>
-                <label className={`${lbl} flex items-center`}>
-                Tasa BCV al cobro (Bs/$)
-                <HelpTooltip text="Tipo de cambio del BCV al momento en que el cliente realizó el pago. Puede diferir de la tasa del despacho original." />
-              </label>
-                <input
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                  Tasa BCV al cobro (Bs/$)
+                  <HelpTooltip text="Tipo de cambio del BCV al momento en que el cliente realizó el pago. Puede diferir de la tasa del despacho original." />
+                </label>
+                <Input
                   type="number" min="0" step="0.0001"
-                  className={`${inp} w-full`}
                   value={tasaManual}
                   onChange={(e) => setTasaManual(e.target.value)}
                   placeholder="Ej: 45.50"
@@ -162,18 +160,18 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
             <p className="text-sm text-gray-400 py-2">Ya se ha reportado la totalidad de las unidades despachadas en esta orden.</p>
           ) : (
           <div>
-            <label className={lbl}>Unidades vendidas</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Unidades vendidas</label>
             <div className="overflow-x-auto rounded-lg border border-gray-200">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
                   <tr>
                     <th className="px-3 py-2 text-left">Producto</th>
-                    <th className="px-3 py-2 text-center">Uds/Bulto</th>
+                    <th className="px-3 py-2 text-center">Uds/Caja</th>
                     <th className="px-3 py-2 text-center">Pendiente por reportar</th>
-                    <th className="px-3 py-2 text-center">Bultos</th>
+                    <th className="px-3 py-2 text-center">Cajas</th>
                     <th className="px-3 py-2 text-center">Uds. sueltas</th>
                     <th className="px-3 py-2 text-center">Total uds</th>
-                    {!isCliente && <th className="px-3 py-2 text-right">Precio/Bulto $</th>}
+                    {!isCliente && <th className="px-3 py-2 text-right">Precio/Caja $</th>}
                     {!isCliente && <th className="px-3 py-2 text-right">Total $</th>}
                   </tr>
                 </thead>
@@ -198,7 +196,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                         <td className="px-3 py-2 text-center">
                           <input
                             type="number" min={0} max={Math.floor(row.restante / upb)}
-                            className={`${inp} w-16 text-center`}
+                            className="w-16 text-center border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                             value={row.bultos}
                             onChange={(e) => setRowField(i, 'bultos', e.target.value)}
                           />
@@ -206,7 +204,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                         <td className="px-3 py-2 text-center">
                           <input
                             type="number" min={0} max={upb - 1}
-                            className={`${inp} w-16 text-center`}
+                            className="w-16 text-center border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                             value={row.sueltas}
                             onChange={(e) => setRowField(i, 'sueltas', e.target.value)}
                           />
@@ -217,7 +215,7 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                         {!isCliente && (
                           <td className="px-3 py-2 text-right">
                             <PrecioInput
-                              className={`${inp} w-24 text-right`}
+                              className="w-24 text-right border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                               value={row.precio_bulto}
                               onChange={(v) => setRowField(i, 'precio_bulto', v)}
                             />
@@ -238,12 +236,10 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
           )}
 
           <div className="flex justify-end gap-3 pt-2 border-t">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
-              Cancelar
-            </button>
-            <button type="submit" disabled={loading || rows.length === 0} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+            <Button variant="secondary" type="button" onClick={onClose}>Cancelar</Button>
+            <Button type="submit" disabled={loading || rows.length === 0}>
               {loading ? 'Registrando...' : 'Registrar Reporte'}
-            </button>
+            </Button>
           </div>
         </form>
       </DialogContent>

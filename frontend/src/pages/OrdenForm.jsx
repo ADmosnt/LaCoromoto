@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createOrden, getClientes, getProductos, getTasaHoy, getListasPrecios } from '../api'
 import Alert from '../components/Alert'
+import Button from '../components/ui/Button'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import FormField from '../components/ui/FormField'
 
 const emptyRow = () => ({ producto_id: '', descripcion: '', codigo: '', unidades_por_bulto: 1, precio_usd_momento: '', cantidad_unidades: '', precios: [] })
 
@@ -89,13 +93,11 @@ export default function OrdenForm() {
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
-
   return (
     <div className="max-w-4xl">
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => nav('/ordenes')} className="text-gray-500 hover:text-gray-700 text-sm">← Volver</button>
-        <h2 className="text-xl font-bold text-gray-800">Nueva Orden de Despacho</h2>
+        <h2 className="font-display text-2xl font-bold text-ink tracking-tight">Nueva Orden de Despacho</h2>
       </div>
 
       <Alert type="error" message={error} />
@@ -104,37 +106,34 @@ export default function OrdenForm() {
         <div className="bg-white rounded-lg shadow p-5">
           <h3 className="font-semibold text-gray-700 mb-3">Datos generales</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
-              <select className={inp} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
-                <option value="">Seleccionar cliente...</option>
-                {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-              <input type="date" className={inp} value={fecha} onChange={(e) => setFecha(e.target.value)} />
-            </div>
+            <FormField id="cliente" label="Cliente *" className="sm:col-span-2">
+              <Select
+                id="cliente"
+                value={clienteId}
+                onChange={setClienteId}
+                placeholder="Seleccionar cliente..."
+                options={clientes.map((c) => ({ value: String(c.id), label: c.razon_social }))}
+              />
+            </FormField>
+            <FormField id="fecha" label="Fecha">
+              <Input id="fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+            </FormField>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tasa BCV (Bs.) {tasa && <span className="text-xs text-gray-400 ml-1">BCV: {Number(tasa.valor).toFixed(4)}</span>}
-              </label>
-              <input
+            <FormField id="tasa" label={<>Tasa BCV (Bs.) {tasa && <span className="text-xs text-gray-400 ml-1">BCV: {Number(tasa.valor).toFixed(4)}</span>}</>}>
+              <Input
+                id="tasa"
                 type="number"
                 step="0.0001"
                 min="0"
                 placeholder={tasa ? Number(tasa.valor).toFixed(4) : 'Ingrese tasa...'}
-                className={inp}
                 value={tasaManual}
                 onChange={(e) => setTasaManual(e.target.value)}
               />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nota</label>
-              <input className={inp} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Observaciones opcionales" />
-            </div>
+            </FormField>
+            <FormField id="nota" label="Nota" className="sm:col-span-2">
+              <Input id="nota" value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Observaciones opcionales" />
+            </FormField>
           </div>
         </div>
 
@@ -145,10 +144,10 @@ export default function OrdenForm() {
               <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
                 <tr>
                   <th className="px-3 py-2 text-left">Producto</th>
-                  <th className="px-3 py-2 text-center">Uds/Bulto</th>
+                  <th className="px-3 py-2 text-center">Uds/Caja</th>
                   <th className="px-3 py-2 text-center">Cantidad (uds)</th>
-                  <th className="px-3 py-2 text-center">Bultos</th>
-                  <th className="px-3 py-2 text-right">Precio/Bulto USD</th>
+                  <th className="px-3 py-2 text-center">Cajas</th>
+                  <th className="px-3 py-2 text-right">Precio/Caja USD</th>
                   <th className="px-3 py-2 text-right">Total USD</th>
                   <th className="px-3 py-2"></th>
                 </tr>
@@ -162,7 +161,7 @@ export default function OrdenForm() {
                     <tr key={i}>
                       <td className="px-3 py-2">
                         <select
-                          className="border border-gray-300 rounded px-2 py-1.5 text-sm w-64"
+                          className="w-64 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                           value={row.producto_id}
                           onChange={(e) => setRow(i, 'producto_id', e.target.value)}
                         >
@@ -172,10 +171,10 @@ export default function OrdenForm() {
                       </td>
                       <td className="px-3 py-2 text-center text-gray-500">{row.unidades_por_bulto}</td>
                       <td className="px-3 py-2">
-                        <input
+                        <Input
                           type="number"
                           min={1}
-                          className="border border-gray-300 rounded px-2 py-1.5 text-sm w-24 text-center"
+                          className="w-24 text-center py-1.5"
                           value={row.cantidad_unidades}
                           onChange={(e) => setRow(i, 'cantidad_unidades', e.target.value)}
                         />
@@ -185,11 +184,11 @@ export default function OrdenForm() {
                       </td>
                       <td className="px-3 py-2">
                         <div className="flex flex-col items-end gap-1">
-                          <input
+                          <Input
                             type="number"
                             step="0.01"
                             min={0}
-                            className="border border-gray-300 rounded px-2 py-1.5 text-sm w-28 text-right"
+                            className="w-28 text-right py-1.5"
                             value={row.precio_usd_momento === '' ? '' : (Number(row.precio_usd_momento) * upb).toFixed(2)}
                             onChange={(e) => {
                               const val = e.target.value
@@ -205,7 +204,7 @@ export default function OrdenForm() {
                               <option value="" disabled>Lista de precios</option>
                               {row.precios.map((p) => (
                                 <option key={p.lista_id} value={p.precio_usd}>
-                                  {p.lista}: ${(Number(p.precio_usd) * (row.unidades_por_bulto || 1)).toFixed(2)}/bulto
+                                  {p.lista}: ${(Number(p.precio_usd) * (row.unidades_por_bulto || 1)).toFixed(2)}/caja
                                 </option>
                               ))}
                             </select>
@@ -226,7 +225,7 @@ export default function OrdenForm() {
               </tbody>
             </table>
           </div>
-          <button type="button" onClick={addRow} className="mt-3 text-sm text-blue-600 hover:underline">+ Agregar producto</button>
+          <button type="button" onClick={addRow} className="mt-3 text-sm text-brand-600 hover:underline">+ Agregar producto</button>
 
           <div className="mt-4 flex flex-col items-end border-t pt-4 gap-1">
             <p className="text-sm font-bold">Total USD: <span className="text-lg">${totalUsd.toFixed(2)}</span></p>
@@ -237,12 +236,8 @@ export default function OrdenForm() {
         </div>
 
         <div className="flex justify-end gap-3">
-          <button type="button" onClick={() => nav('/ordenes')} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
-            Cancelar
-          </button>
-          <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
-            {loading ? 'Creando...' : 'Crear Orden'}
-          </button>
+          <Button variant="secondary" type="button" onClick={() => nav('/ordenes')}>Cancelar</Button>
+          <Button type="submit" disabled={loading}>{loading ? 'Creando...' : 'Crear Orden'}</Button>
         </div>
       </form>
     </div>

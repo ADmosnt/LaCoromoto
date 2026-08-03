@@ -7,6 +7,8 @@ import {
   getProductos, getGruposProductos, getInventario,
 } from '../api'
 import Alert from './Alert'
+import Button from './ui/Button'
+import Input from './ui/Input'
 
 const emptyRow = () => ({
   grupo_filtro: '',
@@ -160,9 +162,6 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
-  const inpNum = 'border border-gray-300 rounded px-2 py-1.5 text-sm w-full text-center focus:outline-none focus:ring-1 focus:ring-blue-500'
-
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent
@@ -181,14 +180,11 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
             <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Fecha</label>
-                <input type="date" className={inp} value={fecha} onChange={(e) => setFecha(e.target.value)} />
+                <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-xs font-medium text-gray-700 mb-1">Nota (opcional)</label>
-                <input
-                  className={inp} value={nota} onChange={(e) => setNota(e.target.value)}
-                  placeholder="Ej: Factura #123, proveedor XYZ..."
-                />
+                <Input value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Ej: Factura #123, proveedor XYZ..." />
               </div>
             </div>
 
@@ -202,7 +198,7 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                       <th className="px-3 py-2 text-left">Grupo / Producto</th>
                       <th className="px-3 py-2 text-center w-14">Uds/B</th>
                       <th className="px-3 py-2 text-center w-20">Stock actual</th>
-                      <th className="px-3 py-2 text-center w-20">Bultos</th>
+                      <th className="px-3 py-2 text-center w-20">Cajas</th>
                       <th className="px-3 py-2 text-center w-20">Sueltas</th>
                       <th className="px-3 py-2 text-center w-24">Total uds</th>
                       <th className="px-3 py-2 w-6"></th>
@@ -223,7 +219,7 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                         <tr key={i}>
                           <td className="px-3 py-2">
                             <select
-                              className="border border-gray-200 rounded px-2 py-1 text-xs w-full mb-1 text-gray-500 bg-gray-50"
+                              className="w-full mb-1 text-xs text-gray-500 bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition"
                               value={row.grupo_filtro}
                               onChange={(e) => setRow(i, 'grupo_filtro', e.target.value)}
                             >
@@ -250,15 +246,17 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                             )}
                           </td>
                           <td className="px-3 py-2">
-                            <input
-                              type="number" min={0} className={inpNum}
+                            <Input
+                              type="number" min={0}
+                              className="w-full text-center py-1.5"
                               value={row.bultos}
                               onChange={(e) => setRow(i, 'bultos', e.target.value)}
                             />
                           </td>
                           <td className="px-3 py-2">
-                            <input
-                              type="number" min={0} max={upb - 1} className={inpNum}
+                            <Input
+                              type="number" min={0} max={upb - 1}
+                              className="w-full text-center py-1.5"
                               value={row.sueltas}
                               onChange={(e) => setRow(i, 'sueltas', e.target.value)}
                             />
@@ -278,12 +276,12 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                   </tbody>
                 </table>
               </div>
-              <button type="button" onClick={addRow} className="mt-2 text-sm text-blue-600 hover:underline">
+              <button type="button" onClick={addRow} className="mt-2 text-sm text-brand-600 hover:underline">
                 + Agregar producto
               </button>
               {totalUds > 0 && (
                 <p className="mt-2 text-right text-sm font-semibold text-gray-700">
-                  Total a ingresar: <span className="text-blue-700">{totalUds} unidades</span>
+                  Total a ingresar: <span className="text-brand-700">{totalUds} unidades</span>
                   {' · '}
                   <span className="text-gray-500">{validRows.length} producto{validRows.length !== 1 ? 's' : ''}</span>
                 </p>
@@ -291,14 +289,8 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
             </div>
 
             <div className="flex justify-end gap-3 pt-2 border-t">
-              <button type="button" onClick={onClose}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
-                Cancelar
-              </button>
-              <button type="submit"
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                Revisar y confirmar →
-              </button>
+              <Button variant="secondary" type="button" onClick={onClose}>Cancelar</Button>
+              <Button type="submit">Revisar y confirmar →</Button>
             </div>
           </form>
         )}
@@ -317,7 +309,7 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                 </div>
                 <div>
                   <span className="text-gray-500">Total: </span>
-                  <span className="font-bold text-blue-700">{totalUds} uds</span>
+                  <span className="font-bold text-brand-700">{totalUds} uds</span>
                   <span className="text-gray-500 ml-1">en {validRows.length} producto{validRows.length !== 1 ? 's' : ''}</span>
                 </div>
               </div>
@@ -356,7 +348,7 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                           </div>
                         </td>
                         <td className="px-3 py-2 text-center text-gray-500">{stockActual} uds</td>
-                        <td className="px-3 py-2 text-center font-bold text-blue-700">{resultante} uds</td>
+                        <td className="px-3 py-2 text-center font-bold text-brand-700">{resultante} uds</td>
                       </tr>
                     )
                   })}
@@ -365,14 +357,12 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
             </div>
 
             <div className="flex justify-end gap-3 pt-2 border-t">
-              <button type="button" onClick={() => setStep('form')} disabled={loading}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50">
+              <Button variant="secondary" type="button" onClick={() => setStep('form')} disabled={loading}>
                 ← Volver y corregir
-              </button>
-              <button type="button" onClick={submit} disabled={loading}
-                className="px-5 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 font-medium">
+              </Button>
+              <Button type="button" onClick={submit} disabled={loading}>
                 {loading ? 'Guardando...' : (isEdit ? 'Confirmar cambios' : 'Confirmar ingreso')}
-              </button>
+              </Button>
             </div>
           </div>
         )}

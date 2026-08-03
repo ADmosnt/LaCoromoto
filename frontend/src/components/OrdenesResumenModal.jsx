@@ -7,7 +7,7 @@ import Alert from './Alert'
 const statusBadge = {
   activa: 'bg-green-100 text-green-700',
   pendiente: 'bg-yellow-100 text-yellow-700',
-  confirmado: 'bg-blue-100 text-blue-700',
+  confirmado: 'bg-brand-100 text-brand-700',
   anulada: 'bg-red-100 text-red-700',
 }
 
@@ -61,12 +61,12 @@ export default function OrdenesResumenModal({ open, onClose, ordenIds }) {
               {[
                 { label: 'Total de productos', value: t.total_productos },
                 { label: 'Total de unidades', value: t.total_unidades },
-                { label: 'Total de bultos', value: t.total_bultos },
+                { label: 'Total de cajas', value: t.total_bultos },
                 { label: 'Total de facturas', value: t.total_facturas },
               ].map((s) => (
-                <div key={s.label} className="bg-blue-50 rounded-lg px-4 py-3 text-center">
+                <div key={s.label} className="bg-brand-50 rounded-lg px-4 py-3 text-center">
                   <p className="text-xs text-gray-500">{s.label}</p>
-                  <p className="text-2xl font-bold text-blue-700">{s.value}</p>
+                  <p className="text-2xl font-bold text-brand-700">{s.value}</p>
                 </div>
               ))}
             </div>
@@ -81,7 +81,7 @@ export default function OrdenesResumenModal({ open, onClose, ordenIds }) {
                     className="inline-flex items-center gap-1.5 text-xs bg-gray-100 border border-gray-200 rounded px-2 py-1"
                     title={o.cliente}
                   >
-                    <span className="font-mono font-medium text-blue-700">{o.numero_orden}</span>
+                    <span className="font-mono font-medium text-brand-700">{o.numero_orden}</span>
                     <span className="text-gray-500 truncate max-w-[10rem]">{o.cliente}</span>
                     <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${statusBadge[o.status] ?? 'bg-gray-100 text-gray-600'}`}>
                       {o.status}
@@ -100,7 +100,7 @@ export default function OrdenesResumenModal({ open, onClose, ordenIds }) {
                     <th className="px-3 py-2 text-left">Descripción</th>
                     <th className="px-3 py-2 text-center">Facturas</th>
                     <th className="px-3 py-2 text-center">Unidades</th>
-                    <th className="px-3 py-2 text-center">Bultos</th>
+                    <th className="px-3 py-2 text-center">Cajas</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -111,7 +111,7 @@ export default function OrdenesResumenModal({ open, onClose, ordenIds }) {
                       <td className="px-3 py-2 text-center">{p.facturas}</td>
                       <td className="px-3 py-2 text-center font-semibold">{p.cantidad_unidades}</td>
                       <td className="px-3 py-2 text-center text-gray-600">
-                        {p.bultos}b{p.sueltas > 0 && <span className="text-gray-400">+{p.sueltas}u</span>}
+                        {p.bultos}c{p.sueltas > 0 && <span className="text-gray-400">+{p.sueltas}u</span>}
                       </td>
                     </tr>
                   ))}
@@ -123,7 +123,7 @@ export default function OrdenesResumenModal({ open, onClose, ordenIds }) {
               <button
                 onClick={handlePDF}
                 disabled={downloading}
-                className="text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md disabled:opacity-50"
+                className="text-sm bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-md disabled:opacity-50"
               >
                 {downloading ? 'Generando PDF...' : 'Descargar PDF del resumen general'}
               </button>

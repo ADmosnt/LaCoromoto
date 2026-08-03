@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { HelpTooltip } from '../components/ui/Tooltip'
+import { inputClass } from '../lib/styles'
 import {
   getConfig, updateConfig,
   getTasas, saveTasa, scrapeTasa,
@@ -39,13 +40,13 @@ function CatalogSection({ title, items, onCreate, onUpdate, onDelete }) {
               <>
                 <input value={editVal} onChange={(e) => setEditVal(e.target.value)}
                   className="flex-1 border rounded px-2 py-1 text-sm" />
-                <button onClick={() => handleUpdate(item.id)} className="text-xs text-green-600 hover:underline">Guardar</button>
+                <button onClick={() => handleUpdate(item.id)} className="text-xs text-brand-600 hover:underline">Guardar</button>
                 <button onClick={() => setEditId(null)} className="text-xs text-gray-400 hover:underline">Cancelar</button>
               </>
             ) : (
               <>
                 <span className="flex-1 text-sm">{item.nombre}</span>
-                <button onClick={() => { setEditId(item.id); setEditVal(item.nombre) }} className="text-xs text-blue-600 hover:underline">Editar</button>
+                <button onClick={() => { setEditId(item.id); setEditVal(item.nombre) }} className="text-xs text-brand-600 hover:underline">Editar</button>
                 <button onClick={() => onDelete(item.id)} className="text-xs text-red-500 hover:underline">Eliminar</button>
               </>
             )}
@@ -61,7 +62,7 @@ function CatalogSection({ title, items, onCreate, onUpdate, onDelete }) {
           placeholder="Nombre..."
           className="flex-1 border rounded px-2 py-1.5 text-sm"
         />
-        <button onClick={handleCreate} className="bg-blue-600 text-white text-sm px-3 py-1.5 rounded hover:bg-blue-700">+</button>
+        <button onClick={handleCreate} className="bg-brand-600 text-white text-sm px-3 py-1.5 rounded hover:bg-brand-700">+</button>
       </div>
     </div>
   )
@@ -169,7 +170,7 @@ export default function Configuracion() {
     try {
       const text = await file.text()
       const backup = JSON.parse(text)
-      if (backup?.version !== '1' || !backup?.data) {
+      if (!['1', '2'].includes(backup?.version) || !backup?.data) {
         toast.error('El archivo no parece ser un backup válido de LaCoromoto')
         return
       }
@@ -226,12 +227,8 @@ export default function Configuracion() {
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
-
   return (
     <div>
-      <h2 className="text-xl font-bold text-gray-800 mb-6">Configuración</h2>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Empresa */}
         <div className="bg-white rounded-lg shadow p-5">
@@ -239,21 +236,21 @@ export default function Configuracion() {
           <form onSubmit={saveConfig} className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nombre / Razón Social</label>
-              <input className={inp} value={config.nombre} onChange={(e) => setConfig({ ...config, nombre: e.target.value })} required />
+              <input className={inputClass} value={config.nombre} onChange={(e) => setConfig({ ...config, nombre: e.target.value })} required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">RIF</label>
-              <input className={inp} value={config.rif} onChange={(e) => setConfig({ ...config, rif: e.target.value })} required />
+              <input className={inputClass} value={config.rif} onChange={(e) => setConfig({ ...config, rif: e.target.value })} required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-              <textarea className={inp} rows={2} value={config.direccion} onChange={(e) => setConfig({ ...config, direccion: e.target.value })} required />
+              <textarea className={inputClass} rows={2} value={config.direccion} onChange={(e) => setConfig({ ...config, direccion: e.target.value })} required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
-              <input className={inp} value={config.ciudad} onChange={(e) => setConfig({ ...config, ciudad: e.target.value })} required />
+              <input className={inputClass} value={config.ciudad} onChange={(e) => setConfig({ ...config, ciudad: e.target.value })} required />
             </div>
-            <button type="submit" className="w-full bg-blue-600 text-white text-sm py-2 rounded-md hover:bg-blue-700">Guardar</button>
+            <button type="submit" className="w-full bg-brand-600 text-white text-sm py-2 rounded-md hover:bg-brand-700">Guardar</button>
           </form>
         </div>
 
@@ -270,12 +267,12 @@ export default function Configuracion() {
               <input type="number" step="0.0001" min={0} placeholder="Bs. por USD"
                 className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full sm:flex-1"
                 value={tasaValor} onChange={(e) => setTasaValor(e.target.value)} />
-              <button onClick={saveTasaHandler} className="bg-blue-600 text-white text-sm px-4 py-1.5 rounded hover:bg-blue-700 w-full sm:w-auto shrink-0">
+              <button onClick={saveTasaHandler} className="bg-brand-600 text-white text-sm px-4 py-1.5 rounded hover:bg-brand-700 w-full sm:w-auto shrink-0">
                 Guardar
               </button>
             </div>
             <button onClick={handleScrape} disabled={scraping}
-              className="w-full border border-blue-300 text-blue-600 text-sm py-2 rounded hover:bg-blue-50 disabled:opacity-50">
+              className="w-full border border-brand-300 text-brand-600 text-sm py-2 rounded hover:bg-brand-50 disabled:opacity-50">
               {scraping ? 'Consultando BCV...' : '↻ Obtener tasa del BCV automáticamente'}
             </button>
           </div>
@@ -334,32 +331,32 @@ export default function Configuracion() {
           <form onSubmit={handleChangePassword} className="space-y-3">
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Contraseña actual *</label>
-              <input type="password" className={inp} required
+              <input type="password" className={inputClass} required
                 value={pwForm.current_password}
                 onChange={(e) => setPwForm({ ...pwForm, current_password: e.target.value })} />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Nuevo usuario (dejar en blanco para no cambiar)</label>
-              <input className={inp} placeholder={user?.username}
+              <input className={inputClass} placeholder={user?.username}
                 value={pwForm.new_username}
                 onChange={(e) => setPwForm({ ...pwForm, new_username: e.target.value })} />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Nueva contraseña (dejar en blanco para no cambiar)</label>
-              <input type="password" className={inp}
+              <input type="password" className={inputClass}
                 value={pwForm.new_password}
                 onChange={(e) => setPwForm({ ...pwForm, new_password: e.target.value })} />
             </div>
             {pwForm.new_password && (
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Confirmar nueva contraseña</label>
-                <input type="password" className={inp}
+                <input type="password" className={inputClass}
                   value={pwForm.confirm_password}
                   onChange={(e) => setPwForm({ ...pwForm, confirm_password: e.target.value })} />
               </div>
             )}
             <button type="submit" disabled={pwLoading}
-              className="w-full bg-blue-600 text-white text-sm py-2 rounded-md hover:bg-blue-700 disabled:opacity-50">
+              className="w-full bg-brand-600 text-white text-sm py-2 rounded-md hover:bg-brand-700 disabled:opacity-50">
               {pwLoading ? 'Guardando...' : 'Guardar cambios'}
             </button>
           </form>
@@ -402,7 +399,7 @@ export default function Configuracion() {
         </p>
         <div className="flex flex-wrap gap-3">
           <button onClick={handleExport} disabled={exporting}
-            className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-md disabled:opacity-50">
+            className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-md disabled:opacity-50">
             {exporting ? 'Preparando...' : '↓ Descargar backup JSON'}
           </button>
           <label className="border border-amber-400 text-amber-700 hover:bg-amber-50 text-sm font-medium px-4 py-2 rounded-md cursor-pointer">

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { getInventario, getEntradas, deleteEntrada } from '../api'
 import EntradaInventarioModal from '../components/EntradaInventarioModal'
+import Button from '../components/ui/Button'
 
 export default function InventarioCentral() {
   const [inventario, setInventario] = useState([])
@@ -42,28 +43,19 @@ export default function InventarioCentral() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h2 className="text-xl font-bold text-gray-800">Inventario Central (Almacén)</h2>
-        <button
-          onClick={openNew}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
-        >
-          + Registrar entrada
-        </button>
-      </div>
-
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-4 items-center">
         {['stock', 'entradas'].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={`px-4 py-2 text-sm rounded-md font-medium ${
-              tab === t ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+              tab === t ? 'bg-brand-600 text-white' : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
             }`}
           >
             {t === 'stock' ? 'Stock actual' : 'Historial de entradas'}
           </button>
         ))}
+        <Button onClick={openNew} className="ml-auto">+ Registrar entrada</Button>
       </div>
 
       {tab === 'stock' && (
@@ -74,8 +66,8 @@ export default function InventarioCentral() {
                 <th className="px-4 py-3 text-left">Código</th>
                 <th className="px-4 py-3 text-left">Descripción</th>
                 <th className="px-4 py-3 text-left">Grupo</th>
-                <th className="px-4 py-3 text-center">Uds/Bulto</th>
-                <th className="px-4 py-3 text-center">Bultos</th>
+                <th className="px-4 py-3 text-center">Uds/Caja</th>
+                <th className="px-4 py-3 text-center">Cajas</th>
                 <th className="px-4 py-3 text-center">Uds. sueltas</th>
                 <th className="px-4 py-3 text-center">Total uds.</th>
               </tr>
@@ -98,7 +90,7 @@ export default function InventarioCentral() {
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
                     No hay productos en inventario.{' '}
-                    <button onClick={openNew} className="text-blue-600 hover:underline">
+                    <button onClick={openNew} className="text-brand-600 hover:underline">
                       Registrar primera entrada.
                     </button>
                   </td>
@@ -109,7 +101,7 @@ export default function InventarioCentral() {
               <tfoot className="bg-gray-50 border-t-2 border-gray-300">
                 <tr>
                   <td colSpan={6} className="px-4 py-3 text-right font-semibold text-sm">Total unidades en almacén:</td>
-                  <td className="px-4 py-3 text-center font-bold text-blue-700">{totalUds}</td>
+                  <td className="px-4 py-3 text-center font-bold text-brand-700">{totalUds}</td>
                 </tr>
               </tfoot>
             )}
@@ -132,7 +124,7 @@ export default function InventarioCentral() {
                   <span className="text-gray-400 text-xs w-3 flex-shrink-0">
                     {expanded === e.id ? '▼' : '▶'}
                   </span>
-                  <span className="font-mono text-xs text-blue-600 w-28 flex-shrink-0">
+                  <span className="font-mono text-xs text-brand-600 w-28 flex-shrink-0">
                     {e.numero_entrada || `#${e.id}`}
                   </span>
                   <span className="text-sm text-gray-500 w-24 flex-shrink-0 hidden sm:block">{e.fecha}</span>
@@ -140,7 +132,7 @@ export default function InventarioCentral() {
                     {e.total_productos} producto{e.total_productos !== 1 ? 's' : ''}
                     {e.nota && <span className="ml-2 italic text-gray-400">"{e.nota}"</span>}
                   </span>
-                  <span className="text-sm font-bold text-blue-700 flex-shrink-0">
+                  <span className="text-sm font-bold text-brand-700 flex-shrink-0">
                     {e.total_unidades} uds
                   </span>
                 </div>
@@ -152,8 +144,8 @@ export default function InventarioCentral() {
                           <tr>
                             <th className="px-3 py-2 text-left">Código</th>
                             <th className="px-3 py-2 text-left">Descripción</th>
-                            <th className="px-3 py-2 text-center">Uds/Bulto</th>
-                            <th className="px-3 py-2 text-center">Bultos</th>
+                            <th className="px-3 py-2 text-center">Uds/Caja</th>
+                            <th className="px-3 py-2 text-center">Cajas</th>
                             <th className="px-3 py-2 text-center">Sueltas</th>
                             <th className="px-3 py-2 text-center">Total uds</th>
                           </tr>
@@ -175,7 +167,7 @@ export default function InventarioCentral() {
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => openEdit(e.id)}
-                        className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded"
+                        className="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded"
                       >
                         Editar
                       </button>

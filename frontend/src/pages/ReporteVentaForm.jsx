@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createReporteVenta, getClientes, getClienteStock, getTasaHoy } from '../api'
 import Alert from '../components/Alert'
+import Button from '../components/ui/Button'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import FormField from '../components/ui/FormField'
 
 export default function ReporteVentaForm() {
   const nav = useNavigate()
@@ -93,13 +97,12 @@ export default function ReporteVentaForm() {
     }
   }
 
-  const inp = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
 
   return (
     <div className="max-w-3xl">
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => nav('/reportes-venta')} className="text-gray-500 hover:text-gray-700 text-sm">← Volver</button>
-        <h2 className="text-xl font-bold text-gray-800">Nuevo Reporte de Venta</h2>
+        <h2 className="font-display text-2xl font-bold text-ink tracking-tight">Nuevo Reporte de Venta</h2>
       </div>
 
       <Alert type="error" message={error} />
@@ -107,29 +110,32 @@ export default function ReporteVentaForm() {
       <form onSubmit={submit} className="space-y-4">
         <div className="bg-white rounded-lg shadow p-5">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
-              <select className={`w-full ${inp}`} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
-                <option value="">Seleccionar cliente...</option>
-                {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-              <input type="date" className={`w-full ${inp}`} value={fecha} onChange={(e) => setFecha(e.target.value)} />
-            </div>
+            <FormField id="cliente" label="Cliente *" className="sm:col-span-2">
+              <Select
+                id="cliente"
+                value={clienteId}
+                onChange={setClienteId}
+                placeholder="Seleccionar cliente..."
+                options={clientes.map((c) => ({ value: String(c.id), label: c.razon_social }))}
+              />
+            </FormField>
+            <FormField id="fecha" label="Fecha">
+              <Input id="fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+            </FormField>
           </div>
           <div className="mt-3">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tasa BCV {tasa && <span className="text-xs text-gray-400 ml-1">Registrada: {Number(tasa.valor).toFixed(4)}</span>}
-            </label>
-            <input
-              type="number" step="0.0001" min="0"
-              className={`w-48 ${inp}`}
-              placeholder={tasa ? Number(tasa.valor).toFixed(4) : 'Ingrese tasa...'}
-              value={tasaManual}
-              onChange={(e) => setTasaManual(e.target.value)}
-            />
+            <FormField id="tasa" label={<>Tasa BCV {tasa && <span className="text-xs text-gray-400 ml-1">Registrada: {Number(tasa.valor).toFixed(4)}</span>}</>}>
+              <Input
+                id="tasa"
+                type="number"
+                step="0.0001"
+                min="0"
+                className="w-48"
+                placeholder={tasa ? Number(tasa.valor).toFixed(4) : 'Ingrese tasa...'}
+                value={tasaManual}
+                onChange={(e) => setTasaManual(e.target.value)}
+              />
+            </FormField>
           </div>
         </div>
 
@@ -159,17 +165,21 @@ export default function ReporteVentaForm() {
                           <td className="px-3 py-2 font-medium">{row.descripcion}</td>
                           <td className="px-3 py-2 text-center text-gray-500">{row.disponible}</td>
                           <td className="px-3 py-2">
-                            <input
-                              type="number" min={1} max={row.disponible}
-                              className={`w-24 text-center ${inp}`}
+                            <Input
+                              type="number"
+                              min={1}
+                              max={row.disponible}
+                              className="w-24 text-center"
                               value={row.cantidad_unidades}
                               onChange={(e) => setRow(i, 'cantidad_unidades', e.target.value)}
                             />
                           </td>
                           <td className="px-3 py-2">
-                            <input
-                              type="number" step="0.01" min={0}
-                              className={`w-28 text-right ${inp}`}
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min={0}
+                              className="w-28 text-right"
                               value={row.precio_usd_momento}
                               onChange={(e) => setRow(i, 'precio_usd_momento', e.target.value)}
                             />
@@ -188,26 +198,20 @@ export default function ReporteVentaForm() {
 
                 {stockDisponible.length > 0 && (
                   <div className="flex gap-2 items-center">
-                    <select
-                      className={`flex-1 ${inp}`}
+                    <Select
+                      nullable
+                      noneLabel="Agregar producto..."
                       value={productoAdd}
-                      onChange={(e) => setProductoAdd(e.target.value)}
-                    >
-                      <option value="">Agregar producto...</option>
-                      {stockDisponible.map((s) => (
-                        <option key={s.producto_id} value={s.producto_id}>
-                          {s.descripcion} — {s.cantidad_unidades} uds disponibles
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={addProducto}
-                      disabled={!productoAdd}
-                      className="px-3 py-2 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 disabled:opacity-40"
-                    >
+                      onChange={setProductoAdd}
+                      options={stockDisponible.map((s) => ({
+                        value: String(s.producto_id),
+                        label: `${s.descripcion} — ${s.cantidad_unidades} uds disponibles`,
+                      }))}
+                      className="flex-1"
+                    />
+                    <Button type="button" variant="secondary" onClick={addProducto} disabled={!productoAdd}>
                       Agregar
-                    </button>
+                    </Button>
                   </div>
                 )}
 
@@ -231,10 +235,8 @@ export default function ReporteVentaForm() {
         )}
 
         <div className="flex justify-end gap-3">
-          <button type="button" onClick={() => nav('/reportes-venta')} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
-          <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
-            {loading ? 'Guardando...' : 'Crear Reporte'}
-          </button>
+          <Button variant="secondary" type="button" onClick={() => nav('/reportes-venta')}>Cancelar</Button>
+          <Button type="submit" disabled={loading}>{loading ? 'Guardando...' : 'Crear Reporte'}</Button>
         </div>
       </form>
     </div>

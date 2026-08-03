@@ -6,6 +6,10 @@ import {
   getZonas, getGruposClientes, getListasPrecios,
 } from '../api'
 import Alert from './Alert'
+import Button from './ui/Button'
+import Input from './ui/Input'
+import Select from './ui/Select'
+import FormField from './ui/FormField'
 
 const emptyForm = {
   codigo: '', razon_social: '', rif: '', direccion: '',
@@ -22,7 +26,7 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
   const [listas, setListas] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState('form') // 'form' | 'confirm'
+  const [step, setStep] = useState('form')
 
   useEffect(() => {
     if (!open) return
@@ -34,7 +38,7 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
     if (isEdit) {
       getCliente(clienteId).then((r) => {
         const c = r.data
-        setForm({ ...c, telefonos: c.telefonos?.length ? c.telefonos : [''], zona_id: c.zona_id ?? '', grupo_id: c.grupo_id ?? '' })
+        setForm({ ...c, telefonos: c.telefonos?.length ? c.telefonos : [''], zona_id: c.zona_id != null ? String(c.zona_id) : '', grupo_id: c.grupo_id != null ? String(c.grupo_id) : '' })
       })
     } else {
       setForm(emptyForm)
@@ -75,9 +79,6 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
     }
   }
 
-  const inp = 'w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
-  const lbl = 'block text-sm font-medium text-gray-700 mb-1'
-
   const nombreZona = zonas.find((z) => String(z.id) === String(form.zona_id))?.nombre
   const nombreGrupo = grupos.find((g) => String(g.id) === String(form.grupo_id))?.nombre
   const nombresListas = listas.filter((l) => form.listas_precios.includes(l.id)).map((l) => l.nombre)
@@ -89,6 +90,8 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
       <span className="col-span-2 text-sm text-gray-800">{value || <span className="text-gray-300">—</span>}</span>
     </div>
   )
+
+  const tareaClass = 'w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition'
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -120,86 +123,87 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
               <SummaryRow label="Estado" value={form.activo ? 'Activo' : 'Inactivo'} />
             </div>
             <div className="flex justify-between gap-3 pt-2 border-t">
-              <button type="button" onClick={() => setStep('form')} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
+              <Button variant="secondary" type="button" onClick={() => setStep('form')}>
                 ← Volver a editar
-              </button>
-              <button type="button" onClick={doSave} disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+              </Button>
+              <Button type="button" onClick={doSave} disabled={loading}>
                 {loading ? 'Guardando...' : (isEdit ? 'Confirmar y guardar' : 'Confirmar y crear')}
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
           <form onSubmit={goConfirm} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className={lbl}>Código *</label>
-                <input className={inp} value={form.codigo} onChange={(e) => set('codigo', e.target.value)} required />
+                <FormField id="codigo" label="Código *">
+                  <Input id="codigo" value={form.codigo} onChange={(e) => set('codigo', e.target.value)} required />
+                </FormField>
                 {isEdit && <p className="text-xs text-gray-400 mt-1">Editable. Debe ser único.</p>}
               </div>
-              <div>
-                <label className={lbl}>RIF</label>
-                <input className={inp} value={form.rif ?? ''} onChange={(e) => set('rif', e.target.value)} />
-              </div>
+              <FormField id="rif" label="RIF">
+                <Input id="rif" value={form.rif ?? ''} onChange={(e) => set('rif', e.target.value)} />
+              </FormField>
             </div>
 
-            <div>
-              <label className={lbl}>Razón Social *</label>
-              <input className={inp} value={form.razon_social} onChange={(e) => set('razon_social', e.target.value)} required />
-            </div>
+            <FormField id="razon_social" label="Razón Social *">
+              <Input id="razon_social" value={form.razon_social} onChange={(e) => set('razon_social', e.target.value)} required />
+            </FormField>
 
-            <div>
-              <label className={lbl}>Dirección</label>
-              <textarea className={inp} rows={2} value={form.direccion ?? ''} onChange={(e) => set('direccion', e.target.value)} />
-            </div>
+            <FormField id="direccion" label="Dirección">
+              <textarea id="direccion" className={tareaClass} rows={2} value={form.direccion ?? ''} onChange={(e) => set('direccion', e.target.value)} />
+            </FormField>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className={lbl}>Zona</label>
-                <select className={inp} value={form.zona_id} onChange={(e) => set('zona_id', e.target.value)}>
-                  <option value="">Sin zona</option>
-                  {zonas.map((z) => <option key={z.id} value={z.id}>{z.nombre}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className={lbl}>Grupo</label>
-                <select className={inp} value={form.grupo_id} onChange={(e) => set('grupo_id', e.target.value)}>
-                  <option value="">Sin grupo</option>
-                  {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
-                </select>
-              </div>
+              <FormField id="zona_id" label="Zona">
+                <Select
+                  id="zona_id"
+                  nullable
+                  noneLabel="Sin zona"
+                  value={form.zona_id}
+                  onChange={(val) => set('zona_id', val)}
+                  options={zonas.map((z) => ({ value: String(z.id), label: z.nombre }))}
+                />
+              </FormField>
+              <FormField id="grupo_id" label="Grupo">
+                <Select
+                  id="grupo_id"
+                  nullable
+                  noneLabel="Sin grupo"
+                  value={form.grupo_id}
+                  onChange={(val) => set('grupo_id', val)}
+                  options={grupos.map((g) => ({ value: String(g.id), label: g.nombre }))}
+                />
+              </FormField>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className={lbl}>Contacto</label>
-                <input className={inp} value={form.contacto ?? ''} onChange={(e) => set('contacto', e.target.value)} />
-              </div>
-              <div>
-                <label className={lbl}>Cobrador</label>
-                <input className={inp} value={form.cobrador ?? ''} onChange={(e) => set('cobrador', e.target.value)} />
-              </div>
-              <div>
-                <label className={lbl}>Vendedor</label>
-                <input className={inp} value={form.vendedor ?? ''} onChange={(e) => set('vendedor', e.target.value)} />
-              </div>
+              <FormField id="contacto" label="Contacto">
+                <Input id="contacto" value={form.contacto ?? ''} onChange={(e) => set('contacto', e.target.value)} />
+              </FormField>
+              <FormField id="cobrador" label="Cobrador">
+                <Input id="cobrador" value={form.cobrador ?? ''} onChange={(e) => set('cobrador', e.target.value)} />
+              </FormField>
+              <FormField id="vendedor" label="Vendedor">
+                <Input id="vendedor" value={form.vendedor ?? ''} onChange={(e) => set('vendedor', e.target.value)} />
+              </FormField>
             </div>
 
             <div>
-              <label className={lbl}>Teléfonos</label>
+              <p className="text-sm font-medium text-gray-700 mb-1">Teléfonos</p>
               {form.telefonos.map((tel, i) => (
                 <div key={i} className="flex gap-2 mb-2">
-                  <input className={inp} value={tel} onChange={(e) => setTel(i, e.target.value)} placeholder="04XX-XXXXXXX" />
+                  <Input value={tel} onChange={(e) => setTel(i, e.target.value)} placeholder="04XX-XXXXXXX" />
                   {form.telefonos.length > 1 && (
                     <button type="button" onClick={() => removeTel(i)} className="text-red-500 hover:text-red-700 px-2">✕</button>
                   )}
                 </div>
               ))}
-              <button type="button" onClick={addTel} className="text-sm text-blue-600 hover:underline">+ Agregar teléfono</button>
+              <button type="button" onClick={addTel} className="text-sm text-brand-600 hover:underline">+ Agregar teléfono</button>
             </div>
 
             {listas.length > 0 && (
               <div>
-                <label className={lbl}>Listas de precios</label>
+                <p className="text-sm font-medium text-gray-700 mb-1">Listas de precios</p>
                 <div className="flex flex-wrap gap-3">
                   {listas.map((l) => (
                     <label key={l.id} className="flex items-center gap-2 text-sm cursor-pointer">
@@ -211,18 +215,13 @@ export default function ClienteModal({ open, onClose, clienteId, onSaved }) {
               </div>
             )}
 
-            <div>
-              <label className={lbl}>Observaciones</label>
-              <textarea className={inp} rows={2} value={form.observaciones ?? ''} onChange={(e) => set('observaciones', e.target.value)} />
-            </div>
+            <FormField id="observaciones" label="Observaciones">
+              <textarea id="observaciones" className={tareaClass} rows={2} value={form.observaciones ?? ''} onChange={(e) => set('observaciones', e.target.value)} />
+            </FormField>
 
             <div className="flex justify-end gap-3 pt-2 border-t">
-              <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
-                Cancelar
-              </button>
-              <button type="submit" className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                Revisar →
-              </button>
+              <Button variant="secondary" type="button" onClick={onClose}>Cancelar</Button>
+              <Button type="submit">Revisar →</Button>
             </div>
           </form>
         )}

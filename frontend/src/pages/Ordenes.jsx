@@ -1,313 +1,23 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState, Fragment } from 'react'
 import { toast } from 'sonner'
-import { getOrdenes, getOrden, getClientes, getGruposClientes, downloadOrdenPDF, anularOrden, confirmarReporteVenta } from '../api'
+import { getOrdenes, getClientes, getGruposClientes } from '../api'
 import OrdenModal from '../components/OrdenModal'
 import OrdenEdicionesModal from '../components/OrdenEdicionesModal'
 import OrdenesResumenModal from '../components/OrdenesResumenModal'
-import ReporteVentaModal from '../components/ReporteVentaModal'
-import { HelpTooltip } from '../components/ui/Tooltip'
+import OrdenDetailPanel from '../components/OrdenDetailPanel'
+import StatusBadge, { STATUS_CONFIG } from '../components/ui/StatusBadge'
+import Button from '../components/ui/Button'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import Table from '../components/ui/Table'
+import EmptyState from '../components/ui/EmptyState'
+import { labelMes, groupByMonth } from '../lib/fechas'
 
-const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-               'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
-
-function labelMes(key) {
-  const [year, month] = key.split('-')
-  return `${MESES[parseInt(month, 10) - 1]} ${year}`
-}
-
-function groupByMonth(ordenes) {
-  const map = {}
-  for (const o of ordenes) {
-    const key = o.fecha_emision.slice(0, 7)
-    if (!map[key]) map[key] = []
-    map[key].push(o)
-  }
-  return Object.entries(map).sort((a, b) => b[0].localeCompare(a[0]))
-}
-
-const statusBadge = {
-  activa: 'bg-green-100 text-green-700',
-  pendiente: 'bg-yellow-100 text-yellow-700',
-  parcial: 'bg-indigo-100 text-indigo-700',
-  confirmado: 'bg-blue-100 text-blue-700',
-  anulada: 'bg-red-100 text-red-700',
-}
-
-const statusLabel = {
-  activa: 'Activa',
-  pendiente: 'Pendiente',
-  parcial: 'Parcialmente reportada',
-  confirmado: 'Confirmado',
-  anulada: 'Anulada',
-}
-
-function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onReporteCreated, onEditar, onVerEdiciones }) {
-  const [detail, setDetail] = useState(null)
-  const [loadError, setLoadError] = useState(false)
-  const [reporteModalOpen, setReporteModalOpen] = useState(false)
-  const [confirmando, setConfirmando] = useState(false)
-
-  const fetchDetail = () => {
-    setDetail(null)
-    setLoadError(false)
-    getOrden(ordenId).then((r) => setDetail(r.data)).catch(() => setLoadError(true))
-  }
-
-  useEffect(() => { fetchDetail() }, [ordenId, refreshKey])
-
-  const handlePDF = async () => {
-    try {
-      const r = await downloadOrdenPDF(ordenId)
-      const url = URL.createObjectURL(new Blob([r.data], { type: 'application/pdf' }))
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `orden_${detail.numero_orden}.pdf`
-      a.click()
-      URL.revokeObjectURL(url)
-    } catch {
-      toast.error('Error al generar el PDF')
-    }
-  }
-
-  const handleAnular = async () => {
-    if (!confirm(`¿Anular la orden #${detail.numero_orden}? Esta acción revertirá el stock en consignación.`)) return
-    try {
-      await anularOrden(ordenId)
-      toast.success(`Orden #${detail.numero_orden} anulada`)
-      onAnulada()
-    } catch (err) {
-      toast.error(err.response?.data?.error ?? 'Error al anular la orden')
-    }
-  }
-
-  const handleConfirmar = async () => {
-    if (!confirm('¿Confirmar la venta? Esto descontará el stock en consignación.')) return
-    setConfirmando(true)
-    try {
-      await confirmarReporteVenta(detail.reporte_id)
-      toast.success('Venta confirmada. Stock descontado.')
-      fetchDetail()
-      onReporteCreated()
-    } catch (err) {
-      toast.error(err.response?.data?.error ?? 'Error al confirmar la venta')
-    } finally {
-      setConfirmando(false)
-    }
-  }
-
-  if (loadError) return <div className="bg-gray-50 border-t border-gray-200 px-4 py-3 text-sm text-red-500">Error al cargar el detalle</div>
-  if (!detail) return <div className="bg-gray-50 border-t border-gray-200 px-4 py-3 text-sm text-gray-400">Cargando...</div>
-
-  const { status } = detail
-  const isAnulada = status === 'anulada'
-  const isActiva = status === 'activa'
-  const isPendiente = status === 'pendiente'
-  const isParcial = status === 'parcial'
-  const isConfirmado = status === 'confirmado'
-  const puedeEditar = Boolean(detail.puede_editar)
-  const edicionesCount = detail.ediciones_count ?? 0
-
-  return (
-    <div className="bg-gray-50 border-t border-gray-200 px-4 py-3">
-      {edicionesCount > 0 && (
-        <div className="mb-2 flex items-center">
-          <button
-            onClick={() => onVerEdiciones(detail)}
-            className="text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200 rounded px-2 py-1 font-medium inline-flex items-center gap-1"
-          >
-            <span>✎</span>
-            <span>Editada {edicionesCount > 1 ? `(${edicionesCount} cambios)` : '(1 cambio)'} — ver historial</span>
-          </button>
-        </div>
-      )}
-      {isAnulada && (
-        <div className="mb-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1">
-          Orden anulada. El stock fue revertido al almacén.
-        </div>
-      )}
-      {isPendiente && (
-        <div className="mb-2 text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded px-2 py-1">
-          Reporte de venta registrado — pendiente de confirmación.
-        </div>
-      )}
-      {isParcial && (
-        <div className="mb-2 text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-2 py-1">
-          Reportada y confirmada parcialmente. Aún queda stock en consignación por reportar.
-        </div>
-      )}
-      {isConfirmado && (
-        <div className="mb-2 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1">
-          Venta confirmada. Stock descontado.
-        </div>
-      )}
-      <div className="overflow-x-auto mb-3">
-        {(() => {
-          const devueltoMap = {}
-          for (const dev of detail.devoluciones ?? []) {
-            for (const det of dev.detalles ?? []) {
-              devueltoMap[det.producto_id] = (devueltoMap[det.producto_id] || 0) + det.cantidad_unidades
-            }
-          }
-          const hayDevolucion = Object.keys(devueltoMap).length > 0
-
-          const reportadoMap = {}
-          for (const rep of detail.reportes ?? []) {
-            if (rep.status === 'pendiente' || rep.status === 'confirmado') {
-              for (const det of rep.detalles ?? []) {
-                reportadoMap[det.producto_id] = (reportadoMap[det.producto_id] || 0) + det.cantidad_unidades
-              }
-            }
-          }
-          const hayReporte = Object.keys(reportadoMap).length > 0
-
-          return (
-            <table className="w-full text-xs">
-              <thead className="bg-gray-200 text-gray-600 uppercase">
-                <tr>
-                  <th className="px-3 py-2 text-left">Código</th>
-                  <th className="px-3 py-2 text-left">Descripción</th>
-                  <th className="px-3 py-2 text-center">Despachado</th>
-                  {hayDevolucion && <th className="px-3 py-2 text-center text-orange-700">Devuelto</th>}
-                  {hayDevolucion && <th className="px-3 py-2 text-center">Neto</th>}
-                  {hayReporte && <th className="px-3 py-2 text-center text-blue-700">Reportado</th>}
-                  {hayReporte && <th className="px-3 py-2 text-center">Pendiente</th>}
-                  <th className="px-3 py-2 text-right">Precio/Bulto</th>
-                  <th className="px-3 py-2 text-right">Total USD</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {detail.detalles?.map((d) => {
-                  const upb = d.unidades_por_bulto || 1
-                  const precioBulto = Number(d.precio_usd_momento) * upb
-                  const devuelto = devueltoMap[d.producto_id] || 0
-                  const neto = d.cantidad_unidades - devuelto
-                  const reportado = reportadoMap[d.producto_id] || 0
-                  const pendienteReporte = d.cantidad_unidades - reportado
-                  return (
-                    <tr key={d.id} className="hover:bg-gray-100">
-                      <td className="px-3 py-2 font-mono">{d.codigo}</td>
-                      <td className="px-3 py-2">{d.descripcion}</td>
-                      <td className="px-3 py-2 text-center text-gray-500">
-                        {Math.floor(d.cantidad_unidades / upb)}B+{d.cantidad_unidades % upb}u
-                      </td>
-                      {hayDevolucion && (
-                        <td className="px-3 py-2 text-center text-orange-600">
-                          {devuelto > 0 ? `-${devuelto} uds` : '—'}
-                        </td>
-                      )}
-                      {hayDevolucion && (
-                        <td className="px-3 py-2 text-center font-medium">
-                          {Math.floor(neto / upb)}B+{neto % upb}u
-                        </td>
-                      )}
-                      {hayReporte && (
-                        <td className="px-3 py-2 text-center text-blue-600">
-                          {reportado > 0 ? `${reportado} uds` : '—'}
-                        </td>
-                      )}
-                      {hayReporte && (
-                        <td className="px-3 py-2 text-center font-medium">
-                          {pendienteReporte > 0 ? `${pendienteReporte} uds` : '—'}
-                        </td>
-                      )}
-                      <td className="px-3 py-2 text-right">${precioBulto.toFixed(2)}</td>
-                      <td className="px-3 py-2 text-right font-medium">${Number(d.total_usd).toFixed(2)}</td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          )
-        })()}
-      </div>
-      {detail.devoluciones?.length > 0 && (
-        <div className="mb-3">
-          <p className="text-xs font-semibold text-gray-600 mb-1">Devoluciones vinculadas</p>
-          {detail.devoluciones.map((dev) => (
-            <div key={dev.id} className="text-xs bg-orange-50 border border-orange-200 rounded px-3 py-2 mb-1">
-              <span className="font-medium">{dev.fecha}</span>
-              {dev.nota && <span className="ml-2 italic text-gray-600">"{dev.nota}"</span>}
-              <ul className="mt-1 ml-2 text-gray-700 space-y-0.5">
-                {dev.detalles?.map((det) => (
-                  <li key={det.id}>{det.descripcion}: <strong>{det.cantidad_unidades} uds</strong> devueltas</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      )}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={handlePDF}
-            className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded"
-          >
-            Descargar PDF
-          </button>
-          {puedeEditar && (
-            <span className="inline-flex items-center gap-1">
-              <button
-                onClick={() => onEditar(detail)}
-                className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded"
-              >
-                Editar Orden
-              </button>
-              <HelpTooltip text="Edita los productos, cantidades, precios, fecha o nota. Se registrará un historial de cambios visible para auditoría." side="top" />
-            </span>
-          )}
-          {(isActiva || isParcial) && (
-            <span className="inline-flex items-center gap-1">
-              <button
-                onClick={() => setReporteModalOpen(true)}
-                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded"
-              >
-                Registrar Reporte de Venta
-              </button>
-              <HelpTooltip text="Registra cuántas unidades fueron vendidas y cobradas. Puedes registrar varios reportes por partes hasta cubrir todo lo despachado. Cada uno queda pendiente de confirmación hasta que el administrador lo apruebe." side="top" />
-            </span>
-          )}
-          {isPendiente && (
-            <span className="inline-flex items-center gap-1">
-              <button
-                onClick={handleConfirmar}
-                disabled={confirmando}
-                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded disabled:opacity-50"
-              >
-                {confirmando ? 'Confirmando...' : 'Confirmar Venta'}
-              </button>
-              <HelpTooltip text="Confirma el reporte de venta pendiente. Esto descuenta permanentemente las unidades vendidas del stock en consignación del cliente." side="top" />
-            </span>
-          )}
-          {isActiva && (
-            <span className="inline-flex items-center gap-1">
-              <button
-                onClick={handleAnular}
-                className="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded"
-              >
-                Anular Orden
-              </button>
-              <HelpTooltip text="Cancela esta orden y devuelve todas las unidades despachadas al inventario central. Esta acción no se puede deshacer." side="top" />
-            </span>
-          )}
-        </div>
-        <div className="text-xs text-gray-500 text-right">
-          <span>Tasa: Bs. {Number(detail.tasa_valor).toFixed(4)}</span>
-          <span className="ml-3 font-semibold text-gray-700">Total Bs. {Number(detail.total_bs).toFixed(2)}</span>
-          {detail.nota && <span className="ml-3 italic">"{detail.nota}"</span>}
-        </div>
-      </div>
-
-      <ReporteVentaModal
-        open={reporteModalOpen}
-        onClose={() => setReporteModalOpen(false)}
-        onSaved={() => { fetchDetail(); onReporteCreated() }}
-        orden={detail}
-      />
-    </div>
-  )
-}
-
-const sel = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+// Etiqueta de estado más larga. Se usa como "sizer" invisible para que la
+// columna de estado reserve siempre el mismo ancho en todas las tablas de mes,
+// haya o no órdenes "Parcialmente reportada" en ese mes.
+const STATUS_SIZER = Object.values(STATUS_CONFIG)
+  .reduce((a, c) => (c.label.length > a.length ? c.label : a), '')
 
 export default function Ordenes() {
   const [ordenes, setOrdenes] = useState([])
@@ -362,23 +72,16 @@ export default function Ordenes() {
 
   const clearSelection = () => setSelectedIds(new Set())
 
-  const meses = groupByMonth(ordenes)
-  const grandTotal = ordenes
-    .filter((o) => o.status !== 'anulada')
-    .reduce((s, o) => s + Number(o.total_usd), 0)
+  // Datos derivados memoizados: solo se recalculan cuando cambia `ordenes`,
+  // no en cada clic de checkbox / expand de fila.
+  const meses = useMemo(() => groupByMonth(ordenes), [ordenes])
+  const grandTotal = useMemo(
+    () => ordenes.filter((o) => o.status !== 'anulada').reduce((s, o) => s + Number(o.total_usd), 0),
+    [ordenes],
+  )
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h2 className="text-xl font-bold text-gray-800">Órdenes de Despacho</h2>
-        <button
-          onClick={() => setModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
-        >
-          + Nueva orden
-        </button>
-      </div>
-
       <div className="bg-white rounded-lg shadow p-4 mb-4 flex flex-wrap gap-3 items-end">
         <div>
           <label className="block text-xs text-gray-500 mb-1">Filtrar por</label>
@@ -386,14 +89,14 @@ export default function Ordenes() {
             <button
               type="button"
               onClick={() => cambiarModo('cliente')}
-              className={`px-3 py-2 font-medium ${modo === 'cliente' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+              className={`px-3 py-2 font-medium ${modo === 'cliente' ? 'bg-brand-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
             >
               Cliente
             </button>
             <button
               type="button"
               onClick={() => cambiarModo('grupo')}
-              className={`px-3 py-2 font-medium border-l border-gray-300 ${modo === 'grupo' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+              className={`px-3 py-2 font-medium border-l border-gray-300 ${modo === 'grupo' ? 'bg-brand-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
             >
               Grupo
             </button>
@@ -402,24 +105,30 @@ export default function Ordenes() {
         <div>
           <label className="block text-xs text-gray-500 mb-1">{modo === 'cliente' ? 'Cliente' : 'Grupo'}</label>
           {modo === 'cliente' ? (
-            <select value={clienteId} onChange={(e) => setClienteId(e.target.value)} className={sel}>
-              <option value="">Todos</option>
-              {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
-            </select>
+            <Select
+              nullable
+              noneLabel="Todos"
+              value={clienteId}
+              onChange={setClienteId}
+              options={clientes.map((c) => ({ value: String(c.id), label: c.razon_social }))}
+            />
           ) : (
-            <select value={grupoId} onChange={(e) => setGrupoId(e.target.value)} className={sel}>
-              <option value="">Todos</option>
-              {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
-            </select>
+            <Select
+              nullable
+              noneLabel="Todos"
+              value={grupoId}
+              onChange={setGrupoId}
+              options={grupos.map((g) => ({ value: String(g.id), label: g.nombre }))}
+            />
           )}
         </div>
         <div>
           <label className="block text-xs text-gray-500 mb-1">Desde</label>
-          <input type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} className={sel} />
+          <Input type="date" value={fechaDesde} onChange={(e) => setFechaDesde(e.target.value)} />
         </div>
         <div>
           <label className="block text-xs text-gray-500 mb-1">Hasta</label>
-          <input type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} className={sel} />
+          <Input type="date" value={fechaHasta} onChange={(e) => setFechaHasta(e.target.value)} />
         </div>
         <button
           onClick={() => { setClienteId(''); setGrupoId(''); setFechaDesde(''); setFechaHasta('') }}
@@ -427,10 +136,11 @@ export default function Ordenes() {
         >
           Limpiar
         </button>
+        <Button onClick={() => setModalOpen(true)} className="ml-auto">+ Nueva orden</Button>
       </div>
 
       {meses.length === 0 && (
-        <div className="bg-white rounded-lg shadow p-8 text-center text-gray-400">No hay órdenes registradas</div>
+        <EmptyState message="No hay órdenes registradas" />
       )}
 
       {meses.map(([key, items]) => {
@@ -447,64 +157,94 @@ export default function Ordenes() {
               </span>
             </div>
             <div className="bg-white rounded-lg shadow overflow-hidden">
-              {items.map((o) => (
-                <div key={o.id} className="border-b border-gray-100 last:border-b-0">
-                  <div
-                    className={`flex items-center gap-2 sm:gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 select-none ${o.status === 'anulada' ? 'opacity-60' : ''}`}
-                    onClick={() => toggle(o.id)}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.has(o.id)}
-                      disabled={o.status === 'anulada'}
-                      onClick={(e) => e.stopPropagation()}
-                      onChange={() => toggleSelect(o.id)}
-                      className="flex-shrink-0 w-4 h-4 accent-blue-600 disabled:opacity-30"
-                      title={o.status === 'anulada' ? 'No se pueden incluir órdenes anuladas' : 'Seleccionar para resumen general'}
-                    />
-                    <span className="text-gray-400 text-xs w-3 flex-shrink-0">
-                      {expanded === o.id ? '▼' : '▶'}
-                    </span>
-                    <span className="font-mono text-xs text-blue-600 w-24 flex-shrink-0">{o.numero_orden}</span>
-                    <span className="flex-1 font-medium text-sm truncate min-w-0">{o.cliente}</span>
-                    <span className="text-xs text-gray-500 flex-shrink-0 hidden sm:block">{o.fecha_emision}</span>
-                    {o.ediciones_count > 0 && (
-                      <span
-                        className="text-xs px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 flex-shrink-0"
-                        title={`${o.ediciones_count} edición${o.ediciones_count !== 1 ? 'es' : ''}`}
+              <Table borderless>
+                <Table.Body>
+                  {items.map((o) => (
+                    <Fragment key={o.id}>
+                      <Table.Row
+                        onClick={() => toggle(o.id)}
+                        className={`hover:bg-brand-50 ${o.status === 'anulada' ? 'opacity-60' : ''}`}
                       >
-                        ✎
-                      </span>
-                    )}
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${statusBadge[o.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                      {statusLabel[o.status] ?? o.status}
-                    </span>
-                    <span className={`text-sm font-medium flex-shrink-0 ${o.status === 'anulada' ? 'line-through text-gray-400' : ''}`}>
-                      ${Number(o.total_usd).toFixed(2)}
-                    </span>
-                  </div>
-                  {expanded === o.id && (
-                    <OrdenDetailPanel
-                      ordenId={o.id}
-                      refreshKey={panelRefreshKey}
-                      onAnulada={() => { setExpanded(null); load() }}
-                      onReporteCreated={() => load()}
-                      onEditar={(d) => setEditOrdenId(d.id)}
-                      onVerEdiciones={(d) => setEdicionesTarget({ id: d.id, numero: d.numero_orden })}
-                    />
-                  )}
-                </div>
-              ))}
+                        <Table.Td className="w-px pr-0">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(o.id)}
+                            disabled={o.status === 'anulada'}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={() => toggleSelect(o.id)}
+                            className="w-4 h-4 accent-brand-600 align-middle disabled:opacity-30"
+                            title={o.status === 'anulada' ? 'No se pueden incluir órdenes anuladas' : 'Seleccionar para resumen general'}
+                          />
+                        </Table.Td>
+                        <Table.Td className="w-px px-1 text-gray-400 text-xs">
+                          {expanded === o.id ? '▼' : '▶'}
+                        </Table.Td>
+                        <Table.Td className="w-px whitespace-nowrap font-mono text-xs text-brand-600">
+                          {o.numero_orden}
+                        </Table.Td>
+                        <Table.Td className="w-full max-w-0">
+                          <span className="block truncate font-medium text-sm">{o.cliente}</span>
+                        </Table.Td>
+                        <Table.Td className="w-px whitespace-nowrap text-xs text-gray-500 hidden sm:table-cell">
+                          {o.fecha_emision}
+                        </Table.Td>
+                        <Table.Td className="w-px px-1 text-center">
+                          {o.ediciones_count > 0 && (
+                            <span
+                              className="text-xs px-1.5 py-0.5 rounded bg-purple-100 text-purple-700"
+                              title={`${o.ediciones_count} edición${o.ediciones_count !== 1 ? 'es' : ''}`}
+                            >
+                              ✎
+                            </span>
+                          )}
+                        </Table.Td>
+                        <Table.Td className="w-px">
+                          {/* Sizer invisible: fija el ancho de la columna al del badge más
+                              largo, para que todas las tablas de mes lo alineen igual. */}
+                          <span className="grid justify-items-start">
+                            <span aria-hidden className="invisible col-start-1 row-start-1 text-xs font-medium px-2.5 py-0.5 rounded-full whitespace-nowrap">
+                              {STATUS_SIZER}
+                            </span>
+                            <span className="col-start-1 row-start-1">
+                              <StatusBadge status={o.status} />
+                            </span>
+                          </span>
+                        </Table.Td>
+                        <Table.Td
+                          align="right"
+                          className={`w-px whitespace-nowrap font-medium text-sm ${o.status === 'anulada' ? 'line-through text-gray-400' : ''}`}
+                        >
+                          ${Number(o.total_usd).toFixed(2)}
+                        </Table.Td>
+                      </Table.Row>
+                      {expanded === o.id && (
+                        <tr>
+                          <td colSpan={8} className="p-0">
+                            <OrdenDetailPanel
+                              ordenId={o.id}
+                              refreshKey={panelRefreshKey}
+                              onAnulada={() => { setExpanded(null); load() }}
+                              onReporteCreated={() => load()}
+                              onEditar={(d) => setEditOrdenId(d.id)}
+                              onVerEdiciones={(d) => setEdicionesTarget({ id: d.id, numero: d.numero_orden })}
+                            />
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  ))}
+                </Table.Body>
+              </Table>
             </div>
           </div>
         )
       })}
 
       {grandTotal > 0 && (
-        <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-4 flex justify-end">
+        <div className="mt-2 bg-brand-50 border border-brand-200 rounded-lg p-4 flex justify-end">
           <div className="text-right">
-            <p className="text-xs text-blue-600 uppercase font-medium">Total acumulado (órdenes activas)</p>
-            <p className="text-2xl font-bold text-blue-800">${grandTotal.toFixed(2)}</p>
+            <p className="text-xs text-brand-600 uppercase font-medium">Total acumulado (órdenes activas)</p>
+            <p className="text-2xl font-bold text-brand-800">${grandTotal.toFixed(2)}</p>
           </div>
         </div>
       )}
@@ -516,7 +256,7 @@ export default function Ordenes() {
           </span>
           <button
             onClick={() => setResumenOpen(true)}
-            className="text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-full font-medium"
+            className="text-sm bg-brand-600 hover:bg-brand-700 px-3 py-1.5 rounded-full font-medium"
           >
             Generar resumen general
           </button>

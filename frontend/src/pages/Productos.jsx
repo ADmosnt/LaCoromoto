@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { getProductos, deleteProducto, reactivarProducto, getGruposProductos } from '../api'
-import PageHeader from '../components/PageHeader'
+import Button from '../components/ui/Button'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import Table from '../components/ui/Table'
+import EmptyState from '../components/ui/EmptyState'
 import ProductoModal from '../components/ProductoModal'
 import ActualizacionPreciosModal from '../components/ActualizacionPreciosModal'
 
@@ -59,86 +63,71 @@ export default function Productos() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h2 className="text-xl font-bold text-gray-800">Productos</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setPreciosModalOpen(true)}
-            className="border border-blue-400 text-blue-600 hover:bg-blue-50 text-sm font-medium px-4 py-2 rounded-md"
-          >
-            Actualizar precios masivo
-          </button>
-          <button
-            onClick={openNew}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
-          >
-            + Nuevo producto
-          </button>
-        </div>
-      </div>
-
-      {/* Active products */}
       <div className="bg-white rounded-lg shadow mb-4">
-        <div className="p-4 border-b flex flex-wrap gap-3">
-          <input
+        <div className="p-4 border-b flex flex-wrap gap-3 items-center">
+          <Input
             type="text"
             placeholder="Buscar por descripción o código..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full sm:w-72"
           />
-          <select
+          <Select
+            nullable
+            noneLabel="Todos los grupos"
             value={grupoId}
-            onChange={(e) => setGrupoId(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Todos los grupos</option>
-            {grupos.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
-          </select>
+            onChange={setGrupoId}
+            options={grupos.map((g) => ({ value: String(g.id), label: g.nombre }))}
+          />
+          <div className="flex gap-2 ml-auto">
+            <button
+              onClick={() => setPreciosModalOpen(true)}
+              className="border border-brand-400 text-brand-600 hover:bg-brand-50 text-sm font-medium px-4 py-2 rounded-md"
+            >
+              Actualizar precios masivo
+            </button>
+            <Button onClick={openNew}>+ Nuevo producto</Button>
+          </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
-              <tr>
-                <th className="px-4 py-3 text-left">Código</th>
-                <th className="px-4 py-3 text-left">Descripción</th>
-                <th className="px-4 py-3 text-left">Grupo</th>
-                <th className="px-4 py-3 text-center">Uds/Bulto</th>
-                <th className="px-4 py-3 text-left">Precios (USD)</th>
-                <th className="px-4 py-3 text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
+        {productos.length === 0 ? (
+          <EmptyState message="No hay productos registrados" />
+        ) : (
+          <Table borderless className="overflow-x-auto">
+            <Table.Head>
+              <Table.Row>
+                <Table.Th>Código</Table.Th>
+                <Table.Th>Descripción</Table.Th>
+                <Table.Th>Grupo</Table.Th>
+                <Table.Th align="center">Uds/Caja</Table.Th>
+                <Table.Th>Precios (USD)</Table.Th>
+                <Table.Th align="center">Acciones</Table.Th>
+              </Table.Row>
+            </Table.Head>
+            <Table.Body>
               {productos.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-mono text-xs">{p.codigo}</td>
-                  <td className="px-4 py-3 font-medium">{p.descripcion}</td>
-                  <td className="px-4 py-3 text-gray-600">{p.grupo}</td>
-                  <td className="px-4 py-3 text-center">{p.unidades_por_bulto}</td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">
+                <Table.Row key={p.id} className="hover:bg-gray-50">
+                  <Table.Td className="font-mono text-xs">{p.codigo}</Table.Td>
+                  <Table.Td className="font-medium">{p.descripcion}</Table.Td>
+                  <Table.Td className="text-gray-600">{p.grupo}</Table.Td>
+                  <Table.Td align="center">{p.unidades_por_bulto}</Table.Td>
+                  <Table.Td className="text-gray-600 text-xs">
                     {p.precios?.map((pr) => (
                       <span key={pr.lista_id} className="inline-block mr-2">
                         {pr.lista}: ${(Number(pr.precio_usd) * (p.unidades_por_bulto || 1)).toFixed(2)}
                       </span>
                     ))}
-                  </td>
-                  <td className="px-4 py-3 text-center space-x-2">
-                    <button onClick={() => openEdit(p.id)} className="text-blue-600 hover:underline text-xs">Editar</button>
+                  </Table.Td>
+                  <Table.Td align="center" className="space-x-2">
+                    <button onClick={() => openEdit(p.id)} className="text-brand-600 hover:underline text-xs">Editar</button>
                     <button onClick={() => handleDelete(p.id, p.descripcion)} className="text-red-500 hover:underline text-xs">Desactivar</button>
-                  </td>
-                </tr>
+                  </Table.Td>
+                </Table.Row>
               ))}
-              {productos.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">No hay productos registrados</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            </Table.Body>
+          </Table>
+        )}
       </div>
 
-      {/* Deactivated products toggle */}
       {desactivados.length > 0 && (
         <div className="bg-white rounded-lg shadow">
           <button
@@ -151,37 +140,35 @@ export default function Productos() {
             <span>{showDesactivados ? '▲' : '▼'}</span>
           </button>
           {showDesactivados && (
-            <div className="overflow-x-auto border-t">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
-                  <tr>
-                    <th className="px-4 py-3 text-left">Código</th>
-                    <th className="px-4 py-3 text-left">Descripción</th>
-                    <th className="px-4 py-3 text-left">Grupo</th>
-                    <th className="px-4 py-3 text-center">Uds/Bulto</th>
-                    <th className="px-4 py-3 text-center">Acción</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {desactivados.map((p) => (
-                    <tr key={p.id} className="bg-gray-50 opacity-75">
-                      <td className="px-4 py-3 font-mono text-xs text-gray-400">{p.codigo}</td>
-                      <td className="px-4 py-3 text-gray-500 line-through">{p.descripcion}</td>
-                      <td className="px-4 py-3 text-gray-400">{p.grupo}</td>
-                      <td className="px-4 py-3 text-center text-gray-400">{p.unidades_por_bulto}</td>
-                      <td className="px-4 py-3 text-center">
-                        <button
-                          onClick={() => handleReactivar(p.id, p.descripcion)}
-                          className="text-green-600 hover:underline text-xs font-medium"
-                        >
-                          Reactivar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Table borderless className="overflow-x-auto border-t">
+              <Table.Head>
+                <Table.Row>
+                  <Table.Th>Código</Table.Th>
+                  <Table.Th>Descripción</Table.Th>
+                  <Table.Th>Grupo</Table.Th>
+                  <Table.Th align="center">Uds/Caja</Table.Th>
+                  <Table.Th align="center">Acción</Table.Th>
+                </Table.Row>
+              </Table.Head>
+              <Table.Body>
+                {desactivados.map((p) => (
+                  <Table.Row key={p.id} className="bg-gray-50 opacity-75">
+                    <Table.Td className="font-mono text-xs text-gray-400">{p.codigo}</Table.Td>
+                    <Table.Td className="text-gray-500 line-through">{p.descripcion}</Table.Td>
+                    <Table.Td className="text-gray-400">{p.grupo}</Table.Td>
+                    <Table.Td align="center" className="text-gray-400">{p.unidades_por_bulto}</Table.Td>
+                    <Table.Td align="center">
+                      <button
+                        onClick={() => handleReactivar(p.id, p.descripcion)}
+                        className="text-brand-600 hover:underline text-xs font-medium"
+                      >
+                        Reactivar
+                      </button>
+                    </Table.Td>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table>
           )}
         </div>
       )}

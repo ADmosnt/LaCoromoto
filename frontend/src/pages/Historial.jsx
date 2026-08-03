@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getOrdenes, getClientes } from '../api'
-import PageHeader from '../components/PageHeader'
 import Alert from '../components/Alert'
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -57,7 +56,6 @@ export default function Historial() {
 
   return (
     <div>
-      <PageHeader title="Historial de Órdenes" />
       <Alert type="error" message={error} />
 
       <div className="bg-white rounded-lg shadow p-4 mb-4 flex flex-wrap gap-3 items-end">
@@ -66,7 +64,7 @@ export default function Historial() {
           <select
             value={clienteId}
             onChange={(e) => setClienteId(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
             <option value="">Todos</option>
             {clientes.map((c) => <option key={c.id} value={c.id}>{c.razon_social}</option>)}
@@ -78,7 +76,7 @@ export default function Historial() {
             type="date"
             value={fechaDesde}
             onChange={(e) => setFechaDesde(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
         <div>
@@ -87,7 +85,7 @@ export default function Historial() {
             type="date"
             value={fechaHasta}
             onChange={(e) => setFechaHasta(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
         <button
@@ -133,7 +131,7 @@ export default function Historial() {
                   {items.map((o) => (
                     <tr key={o.id} className={`hover:bg-gray-50 ${o.status === 'anulada' ? 'opacity-50' : ''}`}>
                       <td className="px-4 py-2">
-                        <Link to={`/ordenes/${o.id}`} className="text-blue-600 hover:underline font-mono text-xs">
+                        <Link to={`/ordenes/${o.id}`} className="text-brand-600 hover:underline font-mono text-xs">
                           {o.numero_orden}
                         </Link>
                       </td>
@@ -162,10 +160,10 @@ export default function Historial() {
       })}
 
       {grandTotal > 0 && (
-        <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-4 flex justify-end">
+        <div className="mt-2 bg-brand-50 border border-brand-200 rounded-lg p-4 flex justify-end">
           <div className="text-right">
-            <p className="text-xs text-blue-600 uppercase font-medium">Total acumulado (órdenes activas)</p>
-            <p className="text-2xl font-bold text-blue-800">${grandTotal.toFixed(2)}</p>
+            <p className="text-xs text-brand-600 uppercase font-medium">Total acumulado (órdenes activas)</p>
+            <p className="text-2xl font-bold text-brand-800">${grandTotal.toFixed(2)}</p>
           </div>
         </div>
       )}
