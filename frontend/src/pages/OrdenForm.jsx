@@ -144,10 +144,10 @@ export default function OrdenForm() {
               <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
                 <tr>
                   <th className="px-3 py-2 text-left">Producto</th>
-                  <th className="px-3 py-2 text-center">Uds/Bulto</th>
+                  <th className="px-3 py-2 text-center">Uds/Caja</th>
                   <th className="px-3 py-2 text-center">Cantidad (uds)</th>
-                  <th className="px-3 py-2 text-center">Bultos</th>
-                  <th className="px-3 py-2 text-right">Precio/Bulto USD</th>
+                  <th className="px-3 py-2 text-center">Cajas</th>
+                  <th className="px-3 py-2 text-right">Precio/Caja USD</th>
                   <th className="px-3 py-2 text-right">Total USD</th>
                   <th className="px-3 py-2"></th>
                 </tr>
@@ -204,7 +204,7 @@ export default function OrdenForm() {
                               <option value="" disabled>Lista de precios</option>
                               {row.precios.map((p) => (
                                 <option key={p.lista_id} value={p.precio_usd}>
-                                  {p.lista}: ${(Number(p.precio_usd) * (row.unidades_por_bulto || 1)).toFixed(2)}/bulto
+                                  {p.lista}: ${(Number(p.precio_usd) * (row.unidades_por_bulto || 1)).toFixed(2)}/caja
                                 </option>
                               ))}
                             </select>

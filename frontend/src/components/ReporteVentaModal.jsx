@@ -166,12 +166,12 @@ export default function ReporteVentaModal({ open, onClose, onSaved, orden }) {
                 <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
                   <tr>
                     <th className="px-3 py-2 text-left">Producto</th>
-                    <th className="px-3 py-2 text-center">Uds/Bulto</th>
+                    <th className="px-3 py-2 text-center">Uds/Caja</th>
                     <th className="px-3 py-2 text-center">Pendiente por reportar</th>
-                    <th className="px-3 py-2 text-center">Bultos</th>
+                    <th className="px-3 py-2 text-center">Cajas</th>
                     <th className="px-3 py-2 text-center">Uds. sueltas</th>
                     <th className="px-3 py-2 text-center">Total uds</th>
-                    {!isCliente && <th className="px-3 py-2 text-right">Precio/Bulto $</th>}
+                    {!isCliente && <th className="px-3 py-2 text-right">Precio/Caja $</th>}
                     {!isCliente && <th className="px-3 py-2 text-right">Total $</th>}
                   </tr>
                 </thead>

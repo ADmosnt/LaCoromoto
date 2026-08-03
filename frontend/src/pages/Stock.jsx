@@ -168,8 +168,8 @@ export default function Stock() {
                 <th className="px-4 py-3 w-6"></th>
                 <th className="px-4 py-3 text-left">Código</th>
                 <th className="px-4 py-3 text-left">Descripción</th>
-                <th className="px-4 py-3 text-center">Uds/Bulto</th>
-                <th className="px-4 py-3 text-center">Bultos</th>
+                <th className="px-4 py-3 text-center">Uds/Caja</th>
+                <th className="px-4 py-3 text-center">Cajas</th>
                 <th className="px-4 py-3 text-center">Uds. sueltas</th>
                 <th className="px-4 py-3 text-center">Total unidades</th>
                 <th className="px-4 py-3 text-center">

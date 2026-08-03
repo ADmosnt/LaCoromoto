@@ -89,7 +89,7 @@ export default function ProductoForm() {
           <FormField id="codigo" label="Código *">
             <Input id="codigo" value={form.codigo} onChange={(e) => set('codigo', e.target.value)} required disabled={isEdit} />
           </FormField>
-          <FormField id="unidades_por_bulto" label="Unidades por bulto *">
+          <FormField id="unidades_por_bulto" label="Unidades por caja *">
             <Input id="unidades_por_bulto" type="number" min={1} value={form.unidades_por_bulto}
               onChange={(e) => set('unidades_por_bulto', parseInt(e.target.value) || 1)} required />
           </FormField>

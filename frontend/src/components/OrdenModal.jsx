@@ -264,21 +264,21 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                     <th className="px-3 py-2 text-center w-20">
                       <span className="inline-flex items-center justify-center gap-0.5">
                         Stock
-                        <HelpTooltip text="Existencia actual en el almacén central, en bultos." side="top" />
+                        <HelpTooltip text="Existencia actual en el almacén central, en cajas." side="top" />
                       </span>
                     </th>
-                    <th className="px-3 py-2 text-center w-20">Bultos</th>
+                    <th className="px-3 py-2 text-center w-20">Cajas</th>
                     <th className="px-3 py-2 text-center w-20">
                       <span className="inline-flex items-center justify-center gap-0.5">
                         Sueltas
-                        <HelpTooltip text="Unidades sueltas que no completan un bulto entero. Máximo: (uds/bulto − 1)." side="top" />
+                        <HelpTooltip text="Unidades sueltas que no completan una caja entera. Máximo: (uds/caja − 1)." side="top" />
                       </span>
                     </th>
                     <th className="px-3 py-2 text-center w-20">Total uds</th>
                     <th className="px-3 py-2 text-right w-32">
                       <span className="inline-flex items-center justify-end gap-0.5">
-                        Precio/Bulto
-                        <HelpTooltip text="Precio de venta por bulto en USD. Puedes usar la lista de precios del cliente como referencia rápida." side="top" />
+                        Precio/Caja
+                        <HelpTooltip text="Precio de venta por caja en USD. Puedes usar la lista de precios del cliente como referencia rápida." side="top" />
                       </span>
                     </th>
                     <th className="px-3 py-2 text-right w-24">Total USD</th>
@@ -331,7 +331,7 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                             <span className="text-gray-300 text-xs">—</span>
                           ) : (
                             <span className={`text-xs font-semibold ${stockBajo ? 'text-red-600' : 'text-green-700'}`}>
-                              {stockBultos}b
+                              {stockBultos}c
                               {stockSueltas > 0 && <span className="text-gray-400 font-normal">+{stockSueltas}u</span>}
                             </span>
                           )}
@@ -372,7 +372,7 @@ export default function OrdenModal({ open, onClose, onSaved, ordenId }) {
                                 <option value="" disabled>Lista de precios</option>
                                 {row.precios.map((p) => (
                                   <option key={p.lista_id} value={String(Number(p.precio_usd) * upb)}>
-                                    {p.lista}: ${(Number(p.precio_usd) * upb).toFixed(2)}/bulto
+                                    {p.lista}: ${(Number(p.precio_usd) * upb).toFixed(2)}/caja
                                   </option>
                                 ))}
                               </select>

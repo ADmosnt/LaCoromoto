@@ -98,7 +98,7 @@ export default function Productos() {
                 <Table.Th>Código</Table.Th>
                 <Table.Th>Descripción</Table.Th>
                 <Table.Th>Grupo</Table.Th>
-                <Table.Th align="center">Uds/Bulto</Table.Th>
+                <Table.Th align="center">Uds/Caja</Table.Th>
                 <Table.Th>Precios (USD)</Table.Th>
                 <Table.Th align="center">Acciones</Table.Th>
               </Table.Row>
@@ -146,7 +146,7 @@ export default function Productos() {
                   <Table.Th>Código</Table.Th>
                   <Table.Th>Descripción</Table.Th>
                   <Table.Th>Grupo</Table.Th>
-                  <Table.Th align="center">Uds/Bulto</Table.Th>
+                  <Table.Th align="center">Uds/Caja</Table.Th>
                   <Table.Th align="center">Acción</Table.Th>
                 </Table.Row>
               </Table.Head>

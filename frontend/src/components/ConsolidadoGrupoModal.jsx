@@ -52,8 +52,8 @@ export default function ConsolidadoGrupoModal({ open, onClose, grupoId, grupoNom
                     <tr>
                       <th className="px-3 py-2 w-6"></th>
                       <th className="px-3 py-2 text-left">Producto</th>
-                      <th className="px-3 py-2 text-center">Uds/Bulto</th>
-                      <th className="px-3 py-2 text-center">Bultos</th>
+                      <th className="px-3 py-2 text-center">Uds/Caja</th>
+                      <th className="px-3 py-2 text-center">Cajas</th>
                       <th className="px-3 py-2 text-center">Sueltas</th>
                       <th className="px-3 py-2 text-center">Total uds</th>
                       <th className="px-3 py-2 text-center"># Clientes</th>
@@ -88,7 +88,7 @@ export default function ConsolidadoGrupoModal({ open, onClose, grupoId, grupoNom
                                   <tr>
                                     <th className="py-1 text-left pr-4">Cliente</th>
                                     <th className="py-1 text-left pr-4">Código</th>
-                                    <th className="py-1 text-center pr-4">Bultos</th>
+                                    <th className="py-1 text-center pr-4">Cajas</th>
                                     <th className="py-1 text-center pr-4">Sueltas</th>
                                     <th className="py-1 text-center">Total uds</th>
                                   </tr>

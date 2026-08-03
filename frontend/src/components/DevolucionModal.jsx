@@ -217,9 +217,9 @@ export default function DevolucionModal({ open, onClose, onSaved, devolucionId }
                   <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
                     <tr>
                       <th className="px-3 py-2 text-left">Producto</th>
-                      <th className="px-3 py-2 text-center">Uds/Bulto</th>
+                      <th className="px-3 py-2 text-center">Uds/Caja</th>
                       <th className="px-3 py-2 text-center">Despachado</th>
-                      <th className="px-3 py-2 text-center">Bultos</th>
+                      <th className="px-3 py-2 text-center">Cajas</th>
                       <th className="px-3 py-2 text-center">Uds. sueltas</th>
                       <th className="px-3 py-2 text-center">Total</th>
                     </tr>

@@ -198,7 +198,7 @@ export default function EntradaInventarioModal({ open, onClose, onSaved, entrada
                       <th className="px-3 py-2 text-left">Grupo / Producto</th>
                       <th className="px-3 py-2 text-center w-14">Uds/B</th>
                       <th className="px-3 py-2 text-center w-20">Stock actual</th>
-                      <th className="px-3 py-2 text-center w-20">Bultos</th>
+                      <th className="px-3 py-2 text-center w-20">Cajas</th>
                       <th className="px-3 py-2 text-center w-20">Sueltas</th>
                       <th className="px-3 py-2 text-center w-24">Total uds</th>
                       <th className="px-3 py-2 w-6"></th>

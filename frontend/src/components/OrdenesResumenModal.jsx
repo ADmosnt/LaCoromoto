@@ -61,7 +61,7 @@ export default function OrdenesResumenModal({ open, onClose, ordenIds }) {
               {[
                 { label: 'Total de productos', value: t.total_productos },
                 { label: 'Total de unidades', value: t.total_unidades },
-                { label: 'Total de bultos', value: t.total_bultos },
+                { label: 'Total de cajas', value: t.total_bultos },
                 { label: 'Total de facturas', value: t.total_facturas },
               ].map((s) => (
                 <div key={s.label} className="bg-brand-50 rounded-lg px-4 py-3 text-center">
@@ -100,7 +100,7 @@ export default function OrdenesResumenModal({ open, onClose, ordenIds }) {
                     <th className="px-3 py-2 text-left">Descripción</th>
                     <th className="px-3 py-2 text-center">Facturas</th>
                     <th className="px-3 py-2 text-center">Unidades</th>
-                    <th className="px-3 py-2 text-center">Bultos</th>
+                    <th className="px-3 py-2 text-center">Cajas</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -111,7 +111,7 @@ export default function OrdenesResumenModal({ open, onClose, ordenIds }) {
                       <td className="px-3 py-2 text-center">{p.facturas}</td>
                       <td className="px-3 py-2 text-center font-semibold">{p.cantidad_unidades}</td>
                       <td className="px-3 py-2 text-center text-gray-600">
-                        {p.bultos}b{p.sueltas > 0 && <span className="text-gray-400">+{p.sueltas}u</span>}
+                        {p.bultos}c{p.sueltas > 0 && <span className="text-gray-400">+{p.sueltas}u</span>}
                       </td>
                     </tr>
                   ))}

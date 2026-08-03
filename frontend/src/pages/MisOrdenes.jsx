@@ -71,9 +71,9 @@ function PanelDetalle({ ordenId, onRefresh }) {
           <thead className="bg-gray-200 text-gray-600 uppercase">
             <tr>
               <th className="px-3 py-2 text-left">Descripción</th>
-              <th className="px-3 py-2 text-center">Uds/Bulto</th>
+              <th className="px-3 py-2 text-center">Uds/Caja</th>
               <th className="px-3 py-2 text-center">Cant.</th>
-              <th className="px-3 py-2 text-right">Precio/Bulto</th>
+              <th className="px-3 py-2 text-right">Precio/Caja</th>
               <th className="px-3 py-2 text-right">Total USD</th>
             </tr>
           </thead>

@@ -145,7 +145,7 @@ export default function OrdenDetailPanel({ ordenId, refreshKey, onAnulada, onRep
               {hayDevolucion && <th className="px-3 py-2 text-center">Neto</th>}
               {hayReporte && <th className="px-3 py-2 text-center text-brand-700">Reportado</th>}
               {hayReporte && <th className="px-3 py-2 text-center">Pendiente</th>}
-              <th className="px-3 py-2 text-right">Precio/Bulto</th>
+              <th className="px-3 py-2 text-right">Precio/Caja</th>
               <th className="px-3 py-2 text-right">Total USD</th>
             </tr>
           </thead>

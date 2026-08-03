@@ -138,18 +138,18 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
             <div className="rounded-lg border border-gray-200 p-4 bg-gray-50">
               <SummaryRow label="Código" value={<span className="font-mono font-medium">{form.codigo.trim()}</span>} />
               <SummaryRow label="Descripción" value={<span className="font-medium">{form.descripcion}</span>} />
-              <SummaryRow label="Unidades por bulto" value={String(upb)} />
+              <SummaryRow label="Unidades por caja" value={String(upb)} />
               <SummaryRow label="Grupo" value={nombreGrupo} />
               <SummaryRow label="Estado" value={form.activo ? 'Activo' : 'Inactivo'} />
               <SummaryRow
-                label="Precios por bulto"
+                label="Precios por caja"
                 value={
                   preciosResumen.length ? (
                     <ul className="space-y-0.5">
                       {preciosResumen.map((p) => (
                         <li key={p.nombre}>
                           <span className="text-gray-500">{p.nombre}:</span>{' '}
-                          <span className="font-medium">${parsePrecio(p.str)?.toFixed(2)}/bulto</span>
+                          <span className="font-medium">${parsePrecio(p.str)?.toFixed(2)}/caja</span>
                         </li>
                       ))}
                     </ul>
@@ -175,7 +175,7 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
                 </FormField>
                 {isEdit && <p className="text-xs text-gray-400 mt-1">Editable. Debe ser único.</p>}
               </div>
-              <FormField id="upb" label="Unidades por bulto *">
+              <FormField id="upb" label="Unidades por caja *">
                 <Input id="upb" type="number" min={1} value={form.unidades_por_bulto}
                   onChange={(e) => set('unidades_por_bulto', parseInt(e.target.value) || 1)} required />
               </FormField>
@@ -198,7 +198,7 @@ export default function ProductoModal({ open, onClose, productoId, onSaved }) {
 
             {listas.length > 0 && (
               <div>
-                <p className="text-sm font-medium text-gray-700 mb-1">Precios por bulto (USD)</p>
+                <p className="text-sm font-medium text-gray-700 mb-1">Precios por caja (USD)</p>
                 <p className="text-xs text-gray-400 mb-2">Usa punto o coma como separador decimal (ej: 10.50 o 10,50)</p>
                 <div className="space-y-2">
                   {listas.map((l) => (

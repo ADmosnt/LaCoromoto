@@ -88,8 +88,8 @@ export default function OrdenDetalle() {
               <th className="px-4 py-3 text-left">Código</th>
               <th className="px-4 py-3 text-left">Descripción</th>
               <th className="px-4 py-3 text-center">Cantidad</th>
-              <th className="px-4 py-3 text-center">Bultos</th>
-              <th className="px-4 py-3 text-right">Precio/Bulto</th>
+              <th className="px-4 py-3 text-center">Cajas</th>
+              <th className="px-4 py-3 text-right">Precio/Caja</th>
               <th className="px-4 py-3 text-right">Total USD</th>
             </tr>
           </thead>

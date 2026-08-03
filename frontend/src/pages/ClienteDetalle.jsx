@@ -172,8 +172,8 @@ export default function ClienteDetalle() {
                 <tr>
                   <th className="px-4 py-3 text-left">Código</th>
                   <th className="px-4 py-3 text-left">Descripción</th>
-                  <th className="px-4 py-3 text-center">Uds/Bulto</th>
-                  <th className="px-4 py-3 text-center">Bultos</th>
+                  <th className="px-4 py-3 text-center">Uds/Caja</th>
+                  <th className="px-4 py-3 text-center">Cajas</th>
                   <th className="px-4 py-3 text-center">Sueltas</th>
                   <th className="px-4 py-3 text-center">Total uds</th>
                   <th className="px-4 py-3 text-center">Antigüedad</th>

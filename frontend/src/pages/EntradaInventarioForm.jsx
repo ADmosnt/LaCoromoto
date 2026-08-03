@@ -71,7 +71,7 @@ export default function EntradaInventarioForm() {
           </select>
           {producto && (
             <p className="text-xs text-gray-400 mt-1">
-              {producto.unidades_por_bulto} uds/bulto — Grupo: {producto.grupo ?? '—'}
+              {producto.unidades_por_bulto} uds/caja — Grupo: {producto.grupo ?? '—'}
             </p>
           )}
         </div>
@@ -88,7 +88,7 @@ export default function EntradaInventarioForm() {
               required
             />
             {cant > 0 && producto && (
-              <p className="text-xs text-gray-400 mt-1">{bultos} bulto{bultos !== 1 ? 's' : ''} + {sueltas} suelta{sueltas !== 1 ? 's' : ''}</p>
+              <p className="text-xs text-gray-400 mt-1">{bultos} caja{bultos !== 1 ? 's' : ''} + {sueltas} suelta{sueltas !== 1 ? 's' : ''}</p>
             )}
           </div>
           <div>
